@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BatteryLow,
@@ -7,6 +7,8 @@ import {
   Music,
   Calendar,
   Timer,
+  X,
+  ArrowUpRight,
   type LucideIcon,
 } from "lucide-react";
 import type { CompanionEvent } from "../../events/eventTypes";
@@ -18,20 +20,50 @@ type IslandProps = {
   actionLabel?: string;
 };
 
-const LOOK: Record<string, { icon: LucideIcon; tint: string }> = {
-  battery: { icon: BatteryLow, tint: "#FFB454" },
-  notification: { icon: Bell, tint: "#8FA8FF" },
-  download: { icon: Download, tint: "#6FE3B0" },
-  music: { icon: Music, tint: "#FF8FC4" },
-  meeting: { icon: Calendar, tint: "#C9A2FF" },
-  focus: { icon: Timer, tint: "#7FDCFF" },
+type EventLook = {
+  icon: LucideIcon;
+  accent: string;
+  label: string;
 };
 
-const SURFACE = {
+const EVENT_LOOK: Record<string, EventLook> = {
+  battery: {
+    icon: BatteryLow,
+    accent: "#F2B866",
+    label: "Battery",
+  },
+  notification: {
+    icon: Bell,
+    accent: "#A99BFF",
+    label: "Notification",
+  },
+  download: {
+    icon: Download,
+    accent: "#73D8B0",
+    label: "Download",
+  },
+  music: {
+    icon: Music,
+    accent: "#E99BC2",
+    label: "Music",
+  },
+  meeting: {
+    icon: Calendar,
+    accent: "#BFA4EA",
+    label: "Meeting",
+  },
+  focus: {
+    icon: Timer,
+    accent: "#79C8E8",
+    label: "Focus",
+  },
+};
+
+const surfaceTransition = {
   type: "spring" as const,
-  stiffness: 340,
-  damping: 34,
-  mass: 0.9,
+  stiffness: 420,
+  damping: 32,
+  mass: 0.8,
 };
 
 export default function Island({
@@ -40,109 +72,333 @@ export default function Island({
   onAction,
   actionLabel,
 }: IslandProps) {
+  const [time, setTime] = useState(() =>
+    new Intl.DateTimeFormat([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date())
+  );
+
   useEffect(() => {
-    const key = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
+    const interval = window.setInterval(() => {
+      setTime(
+        new Intl.DateTimeFormat([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date())
+      );
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [onClose]);
 
-  const look = LOOK[event.type] ?? { icon: Bell, tint: "#B9A8FF" };
+  const look =
+    EVENT_LOOK[event.type] ?? EVENT_LOOK.notification;
+
   const Icon = look.icon;
 
   return (
-    <div className="fixed inset-0 z-40">
+    <div className="pointer-events-none fixed inset-0 z-60">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.14 }}
+        className="pointer-events-auto absolute inset-0"
         onClick={onClose}
-        className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
       />
+
       <motion.div
         role="dialog"
-        aria-label={event.title}
-        initial={{ y: -28, scaleY: 0.82, scaleX: 0.9, opacity: 0 }}
-        animate={{ y: 0, scaleY: 1, scaleX: 1, opacity: 1 }}
-        exit={{
-          y: -22,
-          scaleY: 0.86,
-          scaleX: 0.92,
+        aria-label="MyBuddy"
+        initial={{
           opacity: 0,
-          transition: { duration: 0.22, ease: [0.4, 0, 1, 1] },
+          y: -14,
+          scaleX: 0.82,
+          scaleY: 0.72,
         }}
-        transition={SURFACE}
-        style={{ transformOrigin: "50% 0%" }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          scaleX: 1,
+          scaleY: 1,
+        }}
+        exit={{
+          opacity: 0,
+          y: -10,
+          scaleX: 0.82,
+          scaleY: 0.72,
+        }}
+        transition={surfaceTransition}
+        style={{
+          transformOrigin: "50% 0%",
+        }}
         className="
+          pointer-events-auto
           absolute
           left-1/2
           top-3
-          w-[456px]
+          flex
+          h-[78px]
+          w-[720px]
           -translate-x-1/2
+          items-center
           overflow-hidden
-          rounded-[30px]
-          bg-[#08080B]
-          shadow-[0_2px_4px_rgba(0,0,0,0.4),0_18px_40px_-8px_rgba(0,0,0,0.6),0_48px_90px_-24px_rgba(0,0,0,0.85)]
-          ring-1
-          ring-white/[0.07]
+          rounded-[24px]
+          border
+          border-white/[0.085]
+          bg-[#090a0c]/[0.97]
+          shadow-[0_14px_34px_rgba(0,0,0,0.32),0_32px_80px_rgba(0,0,0,0.26)]
+          backdrop-blur-2xl
         "
       >
-        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-white/[0.13]" />
 
         <motion.div
-          initial={{ opacity: 0, filter: "blur(7px)", y: 6 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ delay: 0.09, duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
-          className="px-6 pb-6 pt-[22px]"
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            delay: 0.04,
+            duration: 0.22,
+            ease: "easeOut",
+          }}
+          className="
+            flex
+            h-full
+            w-[184px]
+            shrink-0
+            items-center
+            gap-3.5
+            px-5
+          "
         >
-          <div className="flex items-start gap-4">
-            <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] bg-white/[0.06] ring-1 ring-inset ring-white/[0.08]"
-              aria-hidden="true"
-            >
-              <Icon size={19} strokeWidth={1.9} color={look.tint} />
-            </div>
+          <div
+            className="
+              relative
+              flex
+              h-10
+              w-10
+              shrink-0
+              items-center
+              justify-center
+              rounded-[12px]
+              bg-white/[0.045]
+              ring-1
+              ring-inset
+              ring-white/[0.075]
+            "
+          >
+            <span className="text-[17px] leading-none">
+              🕷️
+            </span>
 
-            <div className="min-w-0 flex-1">
-              <h1 className="text-[19px] font-semibold leading-[1.25] tracking-[-0.021em] text-white">
-                {event.title}
-              </h1>
-              <p className="mt-1.5 max-w-[42ch] text-[14px] leading-[1.5] tracking-[-0.005em] text-white/50">
-                {event.message}
-              </p>
-            </div>
+            <span
+              className="
+                absolute
+                bottom-[7px]
+                right-[7px]
+                h-[5px]
+                w-[5px]
+                rounded-full
+                bg-[#9B86FF]
+                shadow-[0_0_7px_rgba(155,134,255,0.7)]
+              "
+            />
           </div>
 
-          <div className="mt-6 flex items-center gap-2.5">
-            {onAction && actionLabel && (
-              <button
-                onClick={onAction}
-                className="
-                  rounded-full bg-white px-[18px] py-[9px]
-                  text-[13.5px] font-medium tracking-[-0.01em] text-[#08080B]
-                  outline-none transition-colors duration-150
-                  hover:bg-white/90
-                  focus-visible:ring-2 focus-visible:ring-white/40
-                "
-              >
-                {actionLabel}
-              </button>
-            )}
+          <div className="min-w-0">
+            <div className="text-[13px] font-semibold tracking-[-0.015em] text-white">
+              MyBuddy
+            </div>
 
-            <button
-              onClick={onClose}
-              className="
-                rounded-full bg-white/[0.07] px-[18px] py-[9px]
-                text-[13.5px] font-medium tracking-[-0.01em] text-white/70
-                outline-none transition-colors duration-150
-                hover:bg-white/[0.12] hover:text-white
-                focus-visible:ring-2 focus-visible:ring-white/30
-              "
-            >
-              Dismiss
-            </button>
+            <div className="mt-[3px] text-[10px] tracking-[0.01em] text-white/35">
+              Desktop companion
+            </div>
           </div>
         </motion.div>
+
+        <div className="h-9 w-px bg-white/[0.065]" />
+
+        <motion.div
+          initial={{ opacity: 0, x: -7 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            delay: 0.07,
+            duration: 0.23,
+            ease: "easeOut",
+          }}
+          className="
+            flex
+            min-w-0
+            flex-1
+            items-center
+            gap-3.5
+            px-5
+          "
+        >
+          <div
+            className="
+              flex
+              h-9
+              w-9
+              shrink-0
+              items-center
+              justify-center
+              rounded-[10px]
+              bg-white/[0.045]
+              ring-1
+              ring-inset
+              ring-white/[0.065]
+            "
+          >
+            <Icon
+              size={16}
+              strokeWidth={1.8}
+              color={look.accent}
+            />
+          </div>
+
+          <div className="min-w-0">
+            <div className="text-[10px] font-medium uppercase tracking-[0.11em] text-white/30">
+              {look.label}
+            </div>
+
+            <div className="mt-[3px] truncate text-[14px] font-medium tracking-[-0.012em] text-white/90">
+              {event.title}
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="h-9 w-px bg-white/[0.065]" />
+
+        <motion.div
+          initial={{ opacity: 0, x: 7 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            delay: 0.1,
+            duration: 0.23,
+            ease: "easeOut",
+          }}
+          className="
+            flex
+            h-full
+            w-[142px]
+            shrink-0
+            items-center
+            justify-between
+            px-5
+          "
+        >
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.11em] text-white/25">
+              Now
+            </div>
+
+            <div className="mt-[3px] font-mono text-[13px] tracking-[-0.02em] text-white/70">
+              {time}
+            </div>
+          </div>
+
+          <motion.span
+            animate={{
+              opacity: [0.45, 1, 0.45],
+            }}
+            transition={{
+              duration: 2.4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="h-[5px] w-[5px] rounded-full"
+            style={{
+              backgroundColor: look.accent,
+              boxShadow: `0 0 8px ${look.accent}`,
+            }}
+          />
+        </motion.div>
+
+        {onAction && actionLabel && (
+          <motion.button
+            initial={{
+              opacity: 0,
+              scale: 0.9,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+            }}
+            transition={{
+              delay: 0.12,
+              duration: 0.18,
+            }}
+            type="button"
+            onClick={onAction}
+            className="
+              mr-2
+              flex
+              h-9
+              shrink-0
+              items-center
+              gap-1.5
+              rounded-full
+              bg-white
+              px-3.5
+              text-[11px]
+              font-semibold
+              text-[#090a0c]
+              transition-transform
+              duration-150
+              hover:scale-[1.025]
+              active:scale-95
+            "
+          >
+            {actionLabel}
+
+            <ArrowUpRight
+              size={12}
+              strokeWidth={2}
+            />
+          </motion.button>
+        )}
+
+        <button
+          type="button"
+          aria-label="Close MyBuddy"
+          onClick={onClose}
+          className="
+            mr-3
+            flex
+            h-8
+            w-8
+            shrink-0
+            items-center
+            justify-center
+            rounded-full
+            text-white/25
+            transition
+            duration-150
+            hover:bg-white/[0.06]
+            hover:text-white/70
+          "
+        >
+          <X
+            size={14}
+            strokeWidth={1.7}
+          />
+        </button>
       </motion.div>
     </div>
   );
