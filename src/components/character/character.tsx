@@ -36,7 +36,7 @@ const TUNING = {
   descendEase: 0.11,
   climbEase: 0.042,
   islandEase: 0.12,
-  islandLength: 34,
+  islandLength: 22,
   grabEase: 0.32,
   maxFling: 40,
   cursorPull: 900,
@@ -75,6 +75,11 @@ export default function Character({
   const mouthSmileRef = useRef<SVGPathElement>(null);
   const mouthOhRef = useRef<SVGEllipseElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
+  const settleRef = useRef({
+    active: false,
+    start: 0,
+    energy: 0,
+  });
 
   const ropeRef = useRef<Rope | null>(null);
   const pointer = useRef({ x: -9999, y: -9999 });
@@ -124,17 +129,23 @@ export default function Character({
 
     go("waking");
 
-    const a = setTimeout(() => {
-      go("stretching");
-    }, 380);
-
-    const b = setTimeout(() => {
-      go("dropping");
-    }, 900);
-
+    const a = setTimeout(() => go("stretching"), 300);
+    const b = setTimeout(() => go("dropping"), 720);
     const c = setTimeout(() => {
+      const rope = ropeRef.current;
+
+      if (rope) {
+        const vy = rope.tip.y - rope.tip.py;
+
+        settleRef.current = {
+          active: true,
+          start: performance.now(),
+          energy: clamp(Math.abs(vy) / 18, 0, 1),
+        };
+      }
+
       go("alert");
-    }, 1750);
+    }, 1800);
 
     return () => {
       clearTimeout(a);
@@ -239,6 +250,21 @@ export default function Character({
       last = now;
 
       const phase = phaseRef.current;
+
+      const settle = settleRef.current;
+
+      const settleTime = (now - settle.start) / 1000;
+
+      const settlePulse =
+        settle.active && settleTime < 0.72
+          ? Math.sin(Math.min(settleTime / 0.72, 1) * Math.PI * 2.4) *
+            settle.energy *
+            Math.exp(-settleTime * 4.8)
+          : 0;
+
+      if (settle.active && settleTime >= 0.72) {
+        settle.active = false;
+      }
       const drag = dragRef.current;
       const cursor = pointer.current;
       const island = islandOpenRef.current;
@@ -308,19 +334,16 @@ export default function Character({
 
       const angle = Math.atan2(-sx, sy);
 
+      const idleTilt = phase === "idle" ? Math.sin(t * 0.7) * 1.8 : 0;
+
       const vx = tip.x - tip.px;
       const vy = tip.y - tip.py;
 
       const speed = Math.hypot(vx, vy);
 
-      const characterScale = island ? 0.82 : phase === "idle" ? 0.82 : 0.9;
+      const characterScale = island ? 0.72 : phase === "idle" ? 0.82 : 0.9;
 
-      rigRef.current?.setAttribute(
-        "transform",
-        `translate(${tip.x.toFixed(2)} ${tip.y.toFixed(2)}) rotate(${(
-          angle / RAD
-        ).toFixed(2)}) scale(${characterScale.toFixed(3)})`,
-      );
+      const islandLift = island ? -18 : 0;
 
       const pose = poseRef.current;
 
@@ -337,7 +360,28 @@ export default function Character({
         0.045 *
         pose.islandPulse;
 
-      const breathe = Math.sin(t * 1.15) * 0.012;
+      const breatheX = Math.sin(t * 1.15) * 0.006;
+
+      const breatheY = Math.sin(t * 1.15) * 0.014;
+
+      const wakePulse =
+        phase === "waking"
+          ? Math.sin(clamp((now - phaseStart.current) / 380, 0, 1) * Math.PI)
+          : 0;
+
+      const wakeLift = wakePulse * -7;
+
+      rigRef.current?.setAttribute(
+        "transform",
+        `translate(${tip.x.toFixed(2)} ${(
+          tip.y +
+          islandLift +
+          wakeLift +
+          settlePulse * 5
+        ).toFixed(2)}) rotate(${(angle / RAD + idleTilt).toFixed(
+          2,
+        )}) scale(${characterScale.toFixed(3)})`,
+      );
 
       const stretchPulse =
         phase === "stretching"
@@ -345,10 +389,10 @@ export default function Character({
             0.09
           : 0;
 
-      const scaleX = 1 - pose.squash + breathe + stretchPulse + islandPulse;
+      const scaleX = 1 - pose.squash + breatheX + stretchPulse + islandPulse;
 
       const scaleY =
-        1 + pose.squash + breathe + stretchPulse - islandPulse * 0.55;
+        1 + pose.squash + breatheY + stretchPulse - islandPulse * 0.55;
 
       bodyRef.current?.setAttribute(
         "transform",
@@ -366,7 +410,7 @@ export default function Character({
         (awake ? 0.02 : 0) +
         islandPulse * 0.7;
 
-      const idleAmp = awake ? 1.15 : 0.65;
+      const idleAmp = awake ? 1.05 : 0.42;
 
       const trailX = clamp(-vx * 1.5, -16, 16);
 

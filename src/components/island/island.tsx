@@ -127,7 +127,7 @@ export default function Island({
         aria-label="MyBuddy"
         initial={{
           opacity: 0,
-          y: -14,
+          y: -16,
           scaleX: 0.82,
           scaleY: 0.72,
         }}
@@ -140,10 +140,15 @@ export default function Island({
         exit={{
           opacity: 0,
           y: -10,
-          scaleX: 0.82,
-          scaleY: 0.72,
+          scaleX: 0.88,
+          scaleY: 0.76,
         }}
-        transition={surfaceTransition}
+        transition={{
+          type: "spring",
+          stiffness: 390,
+          damping: 30,
+          mass: 0.72,
+        }}
         style={{
           transformOrigin: "50% 0%",
         }}
