@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import Character from "./components/character/character";
 import Island from "./components/island/island";
@@ -22,17 +22,26 @@ const triggerMultipleEvents = () => {
 function App() {
   const [activeEvent, setActiveEvent] = useState<CompanionEvent | null>(null);
   const [islandOpen, setIslandOpen] = useState(false);
+  const activeEventRef = useRef<CompanionEvent | null>(null);
+  const transitioningRef = useRef(false);
 
   useEffect(() => {
     return eventManager.subscribe(() => {
+      if (
+        activeEventRef.current !== null ||
+        transitioningRef.current
+      ) {
+        return;
+      }
+  
       const nextEvent = eventQueue.getNext();
-
+  
       if (nextEvent) {
+        activeEventRef.current = nextEvent;
         setActiveEvent(nextEvent);
       }
     });
   }, []);
-
 
   const handleCharacterClick = () => {
     setIslandOpen(true);
@@ -43,15 +52,20 @@ function App() {
   };
 
   const dismissEvent = () => {
+    transitioningRef.current = true;
+    activeEventRef.current = null;
     setActiveEvent(null);
-
+  
     window.setTimeout(() => {
       const nextEvent = eventQueue.getNext();
-
+  
       if (nextEvent) {
+        activeEventRef.current = nextEvent;
         setActiveEvent(nextEvent);
       }
-    }, 10000);
+  
+      transitioningRef.current = false;
+    }, 300);
   };
 
   return (

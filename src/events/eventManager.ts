@@ -1,5 +1,6 @@
 import type { CompanionEvent } from "./eventTypes";
 import { eventQueue } from "./eventQueue";
+import { cooldownManager } from "./cooldownManager";
 
 type EventListener = (event: CompanionEvent) => void;
 
@@ -15,8 +16,12 @@ class EventManager {
   }
 
   emit(event: CompanionEvent) {
+    if (!cooldownManager.shouldAllow(event)) {
+      return;
+    }
+
     eventQueue.add(event);
-    
+
     this.listeners.forEach((listener) => {
       listener(event);
     });

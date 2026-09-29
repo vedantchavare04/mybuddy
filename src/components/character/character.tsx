@@ -116,43 +116,23 @@ export default function Character({
     if (!eventActive) {
       if (phaseRef.current !== "idle") {
         go("returning");
-
-        const home = setTimeout(() => {
-          go("idle");
-        }, 1400);
-
+        const home = setTimeout(() => go("idle"), 1400);
         return () => clearTimeout(home);
       }
-
       return;
     }
 
     go("waking");
-
-    const a = setTimeout(() => go("stretching"), 300);
-    const b = setTimeout(() => go("dropping"), 720);
-    const c = setTimeout(() => {
-      const rope = ropeRef.current;
-
-      if (rope) {
-        const vy = rope.tip.y - rope.tip.py;
-
-        settleRef.current = {
-          active: true,
-          start: performance.now(),
-          energy: clamp(Math.abs(vy) / 18, 0, 1),
-        };
-      }
-
-      go("alert");
-    }, 1800);
+    const a = setTimeout(() => go("stretching"), 380);
+    const b = setTimeout(() => go("dropping"), 900);
+    const c = setTimeout(() => go("alert"), 1750);
 
     return () => {
       clearTimeout(a);
       clearTimeout(b);
       clearTimeout(c);
     };
-  }, [eventActive]);
+  }, [eventActive, event?.id]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => {
