@@ -1,16 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import Character from "./components/character/character";
 import Island from "./components/island/island";
-import { lowBatteryEvent } from "./events/mockEvents";
+import {
+  lowBatteryEvent,
+  downloadEvent,
+  meetingEvent,
+  musicEvent,
+} from "./events/mockEvents";
+import type { CompanionEvent } from "./events/eventTypes";
+import { eventManager } from "./events/eventManager";
+import { eventQueue } from "./events/eventQueue";
+
+const triggerMultipleEvents = () => {
+  eventManager.emit(lowBatteryEvent);
+  eventManager.emit(downloadEvent);
+  eventManager.emit(meetingEvent);
+  eventManager.emit(musicEvent);
+};
 
 function App() {
-  const [eventActive, setEventActive] = useState(false);
+  const [activeEvent, setActiveEvent] = useState<CompanionEvent | null>(null);
   const [islandOpen, setIslandOpen] = useState(false);
 
-  const triggerBatteryEvent = () => {
-    setEventActive(true);
-  };
+  useEffect(() => {
+    return eventManager.subscribe(() => {
+      const nextEvent = eventQueue.getNext();
+
+      if (nextEvent) {
+        setActiveEvent(nextEvent);
+      }
+    });
+  }, []);
+
 
   const handleCharacterClick = () => {
     setIslandOpen(true);
@@ -21,14 +43,22 @@ function App() {
   };
 
   const dismissEvent = () => {
-    setEventActive(false);
+    setActiveEvent(null);
+
+    window.setTimeout(() => {
+      const nextEvent = eventQueue.getNext();
+
+      if (nextEvent) {
+        setActiveEvent(nextEvent);
+      }
+    }, 10000);
   };
 
   return (
     <main className="relative min-h-screen overflow-visible bg-zinc-950 text-white">
       <Character
-        eventActive={eventActive}
-        event={eventActive ? lowBatteryEvent : null}
+        eventActive={activeEvent !== null}
+        event={activeEvent}
         onClick={handleCharacterClick}
         islandOpen={islandOpen}
       />
@@ -37,30 +67,27 @@ function App() {
         {islandOpen && (
           <Island
             event={
-              eventActive
-                ? lowBatteryEvent
-                : {
-                    id: "mybuddy-home",
-                    type: "notification",
-                    title: "Hey, I'm MyBuddy",
-                    message:
-                      "Everything is quiet. I'm here if you need me.",
-                    priority: 1,
-                  }
+              activeEvent ?? {
+                id: "mybuddy-home",
+                type: "notification",
+                title: "Hey, I'm MyBuddy",
+                message: "Everything is quiet. I'm here if you need me.",
+                priority: 1,
+              }
             }
             onClose={closeIsland}
-            onAction={eventActive ? dismissEvent : undefined}
-            actionLabel={eventActive ? "Done" : undefined}
+            onAction={activeEvent ? dismissEvent : undefined}
+            actionLabel={activeEvent ? "Done" : undefined}
           />
         )}
       </AnimatePresence>
 
       <button
         type="button"
-        onClick={triggerBatteryEvent}
-        className="fixed bottom-6 left-6 rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-zinc-200 active:scale-95"
+        onClick={triggerMultipleEvents}
+        className="fixed bottom-6 left-32 rounded-full bg-white px-4 py-2 text-sm font-medium text-black"
       >
-        Test Event
+        Test Queue
       </button>
     </main>
   );
