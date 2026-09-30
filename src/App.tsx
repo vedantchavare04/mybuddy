@@ -11,6 +11,7 @@ import {
 import type { CompanionEvent } from "./events/eventTypes";
 import { eventManager } from "./events/eventManager";
 import { eventQueue } from "./events/eventQueue";
+import { eventLifecycle } from "./events/eventLifecycle";
 
 const triggerMultipleEvents = () => {
   eventManager.emit(lowBatteryEvent);
@@ -27,16 +28,14 @@ function App() {
 
   useEffect(() => {
     return eventManager.subscribe(() => {
-      if (
-        activeEventRef.current !== null ||
-        transitioningRef.current
-      ) {
+      if (activeEventRef.current !== null || transitioningRef.current) {
         return;
       }
-  
+
       const nextEvent = eventQueue.getNext();
-  
+
       if (nextEvent) {
+        eventLifecycle.setActive(nextEvent);
         activeEventRef.current = nextEvent;
         setActiveEvent(nextEvent);
       }
@@ -52,18 +51,26 @@ function App() {
   };
 
   const dismissEvent = () => {
+    const currentEvent = activeEventRef.current;
+
     transitioningRef.current = true;
+
+    if (currentEvent) {
+      eventLifecycle.setDismissed(currentEvent);
+    }
+
     activeEventRef.current = null;
     setActiveEvent(null);
-  
+
     window.setTimeout(() => {
       const nextEvent = eventQueue.getNext();
-  
+
       if (nextEvent) {
+        eventLifecycle.setActive(nextEvent);
         activeEventRef.current = nextEvent;
         setActiveEvent(nextEvent);
       }
-  
+
       transitioningRef.current = false;
     }, 300);
   };
