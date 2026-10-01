@@ -16,8 +16,8 @@ class EventManager {
     };
   }
 
-  emit(event: CompanionEvent) {
-    if (!cooldownManager.shouldAllow(event)) {
+  emit(event: CompanionEvent, bypassCooldown = false) {
+    if (!cooldownManager.shouldAllow(event, bypassCooldown)) {
       return;
     }
 
@@ -27,6 +27,10 @@ class EventManager {
     this.listeners.forEach((listener) => {
       listener(event);
     });
+  }
+
+  cancel(eventId: string) {
+    eventQueue.remove(eventId);
   }
 }
 

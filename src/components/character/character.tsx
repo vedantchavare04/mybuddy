@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Rope, ropePath } from "../../physics/rope.ts";
 import type { CompanionEvent } from "../../events/eventTypes";
+import { cursorPosition, getCurrentWindow } from "@tauri-apps/api/window";
 
 type CharacterProps = {
   eventActive: boolean;
@@ -102,9 +103,81 @@ export default function Character({
   });
   const clickRef = useRef(onClick);
   const islandOpenRef = useRef(islandOpen);
+  const cursorCaptureRef = useRef(false);
 
   clickRef.current = onClick;
   islandOpenRef.current = islandOpen;
+
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let mounted = true;
+
+    const updateCursorCapture = async () => {
+      if (!mounted) {
+        return;
+      }
+
+      try {
+        const [cursor, position, scale] = await Promise.all([
+          cursorPosition(),
+          appWindow.outerPosition(),
+          appWindow.scaleFactor(),
+        ]);
+
+        const localX = (cursor.x - position.x) / scale;
+        const localY = (cursor.y - position.y) / scale;
+
+        const rope = ropeRef.current;
+
+        if (!rope) {
+          return;
+        }
+
+        const tip = rope.tip;
+        const neck = rope.neck;
+
+        const spiderDistance = Math.hypot(localX - tip.x, localY - tip.y);
+
+        const dx = tip.x - neck.x;
+        const dy = tip.y - neck.y;
+        const ropeLength = Math.hypot(dx, dy) || 1;
+
+        const projection =
+          ((localX - neck.x) * dx + (localY - neck.y) * dy) /
+          (ropeLength * ropeLength);
+
+        const clampedProjection = Math.max(0, Math.min(1, projection));
+
+        const closestX = neck.x + dx * clampedProjection;
+        const closestY = neck.y + dy * clampedProjection;
+
+        const ropeDistance = Math.hypot(localX - closestX, localY - closestY);
+
+        const insideSpider = spiderDistance <= 58;
+        const insideWeb = ropeDistance <= 12;
+
+        const shouldCapture =
+          insideSpider || insideWeb || islandOpenRef.current;
+
+        if (shouldCapture !== cursorCaptureRef.current) {
+          cursorCaptureRef.current = shouldCapture;
+
+          await appWindow.setIgnoreCursorEvents(!shouldCapture);
+        }
+      } catch {
+        return;
+      }
+    };
+
+    const interval = globalThis.setInterval(updateCursorCapture, 30);
+
+    updateCursorCapture();
+
+    return () => {
+      mounted = false;
+      globalThis.clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     const go = (p: Phase) => {

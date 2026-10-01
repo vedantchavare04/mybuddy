@@ -12,7 +12,12 @@ class CooldownManager {
     focus: 3 * 1000,
   };
 
-  shouldAllow(event: CompanionEvent): boolean {
+  shouldAllow(event: CompanionEvent, bypassCooldown = false): boolean {
+    if (bypassCooldown) {
+      this.lastShown.set(event.type, Date.now());
+      return true;
+    }
+
     const now = Date.now();
     const lastTime = this.lastShown.get(event.type);
     const cooldown = this.cooldowns[event.type] ?? 3 * 1000;

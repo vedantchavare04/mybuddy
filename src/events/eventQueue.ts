@@ -7,6 +7,10 @@ class EventQueue {
     this.events.push(event);
   }
 
+  remove(eventId: string) {
+    this.events = this.events.filter((event) => event.id !== eventId);
+  }
+
   getNext(): CompanionEvent | null {
     if (this.events.length === 0) {
       return null;

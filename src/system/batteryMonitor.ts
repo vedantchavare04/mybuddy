@@ -12,12 +12,14 @@ let batteryEventId: string | null = null;
 
 export async function checkBattery(
   onCharging: (eventId: string | null) => void,
+  bypassCooldown = false,
 ) {
   try {
     const battery = await invoke<BatteryStatus>("get_battery_status");
 
     if (battery.charging) {
       if (batteryEventId !== null) {
+        eventManager.cancel(batteryEventId);
         onCharging(batteryEventId);
       }
 
@@ -27,7 +29,7 @@ export async function checkBattery(
       return;
     }
 
-    if (battery.percentage <= 80 && !batteryAlertSent) {
+    if (battery.percentage <= 100 && !batteryAlertSent) {
       const event: CompanionEvent = {
         id: `battery-${Date.now()}`,
         type: "notification",
@@ -39,7 +41,7 @@ export async function checkBattery(
       batteryEventId = event.id;
       batteryAlertSent = true;
 
-      eventManager.emit(event);
+      eventManager.emit(event, bypassCooldown);
     }
   } catch (error) {
     console.error("Failed to read battery status:", error);

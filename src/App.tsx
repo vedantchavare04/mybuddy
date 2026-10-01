@@ -7,6 +7,7 @@ import { eventManager } from "./events/eventManager";
 import { eventQueue } from "./events/eventQueue";
 import { eventLifecycle } from "./events/eventLifecycle";
 import { startBatteryMonitor } from "./system/batteryMonitor";
+import { positionMyBuddy } from "./system/windowPosition";
 
 type BatteryStatus = {
   percentage: number;
@@ -20,8 +21,10 @@ function App() {
   const activeEventRef = useRef<CompanionEvent | null>(null);
   const transitioningRef = useRef(false);
   const batteryAlertSentRef = useRef(false);
+  
 
   useEffect(() => {
+    positionMyBuddy();
     return eventManager.subscribe(() => {
       if (activeEventRef.current !== null || transitioningRef.current) {
         return;
@@ -84,7 +87,7 @@ function App() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-visible bg-zinc-950 text-white">
+    <main className="relative min-h-screen overflow-visible text-white">
       <Character
         eventActive={activeEvent !== null}
         event={activeEvent}
