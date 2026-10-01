@@ -2,29 +2,24 @@ import { useState, useEffect, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import Character from "./components/character/character";
 import Island from "./components/island/island";
-import {
-  lowBatteryEvent,
-  downloadEvent,
-  meetingEvent,
-  musicEvent,
-} from "./events/mockEvents";
 import type { CompanionEvent } from "./events/eventTypes";
 import { eventManager } from "./events/eventManager";
 import { eventQueue } from "./events/eventQueue";
 import { eventLifecycle } from "./events/eventLifecycle";
+import { startBatteryMonitor } from "./system/batteryMonitor";
 
-const triggerMultipleEvents = () => {
-  eventManager.emit(lowBatteryEvent);
-  eventManager.emit(downloadEvent);
-  eventManager.emit(meetingEvent);
-  eventManager.emit(musicEvent);
+type BatteryStatus = {
+  percentage: number;
+  charging: boolean;
 };
+
 
 function App() {
   const [activeEvent, setActiveEvent] = useState<CompanionEvent | null>(null);
   const [islandOpen, setIslandOpen] = useState(false);
   const activeEventRef = useRef<CompanionEvent | null>(null);
   const transitioningRef = useRef(false);
+  const batteryAlertSentRef = useRef(false);
 
   useEffect(() => {
     return eventManager.subscribe(() => {
@@ -38,6 +33,19 @@ function App() {
         eventLifecycle.setActive(nextEvent);
         activeEventRef.current = nextEvent;
         setActiveEvent(nextEvent);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    return startBatteryMonitor((eventId) => {
+      if (
+        eventId !== null &&
+        activeEventRef.current?.id === eventId
+      ) {
+        eventLifecycle.setDismissed(activeEventRef.current);
+        activeEventRef.current = null;
+        setActiveEvent(null);
       }
     });
   }, []);
@@ -102,14 +110,6 @@ function App() {
           />
         )}
       </AnimatePresence>
-
-      <button
-        type="button"
-        onClick={triggerMultipleEvents}
-        className="fixed bottom-6 left-32 rounded-full bg-white px-4 py-2 text-sm font-medium text-black"
-      >
-        Test Queue
-      </button>
     </main>
   );
 }
