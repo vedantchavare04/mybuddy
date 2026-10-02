@@ -111,11 +111,14 @@ export default function Character({
   useEffect(() => {
     const appWindow = getCurrentWindow();
     let mounted = true;
+    let updating = false;
 
     const updateCursorCapture = async () => {
-      if (!mounted) {
+      if (!mounted || updating) {
         return;
       }
+
+      updating = true;
 
       try {
         const [cursor, position, scale] = await Promise.all([
@@ -149,15 +152,16 @@ export default function Character({
         const clampedProjection = Math.max(0, Math.min(1, projection));
 
         const closestX = neck.x + dx * clampedProjection;
+
         const closestY = neck.y + dy * clampedProjection;
 
         const ropeDistance = Math.hypot(localX - closestX, localY - closestY);
 
         const insideSpider = spiderDistance <= 58;
-        const insideWeb = ropeDistance <= 12;
+        const insideWeb = ropeDistance <= 10;
 
         const shouldCapture =
-          insideSpider || insideWeb || islandOpenRef.current;
+          islandOpenRef.current || insideSpider || insideWeb;
 
         if (shouldCapture !== cursorCaptureRef.current) {
           cursorCaptureRef.current = shouldCapture;
@@ -166,10 +170,12 @@ export default function Character({
         }
       } catch {
         return;
+      } finally {
+        updating = false;
       }
     };
 
-    const interval = globalThis.setInterval(updateCursorCapture, 30);
+    const interval = globalThis.setInterval(updateCursorCapture, 50);
 
     updateCursorCapture();
 
@@ -324,7 +330,15 @@ export default function Character({
 
       rope.setAnchor(window.innerWidth / 2, ANCHOR_Y);
 
-      const phaseTarget = TUNING.length[phase];
+      const screenDropLength = Math.min(
+        420,
+        Math.max(280, window.innerHeight * 0.42),
+      );
+
+      const phaseTarget =
+        phase === "dropping" || phase === "alert"
+          ? screenDropLength
+          : TUNING.length[phase];
 
       const target = island ? TUNING.islandLength : phaseTarget;
 
@@ -583,7 +597,7 @@ export default function Character({
   }, []);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50">
+    <div className="pointer-events-none fixed inset-0 z-50 cursor-default">
       <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <radialGradient id="mb-body" cx="38%" cy="28%" r="78%">

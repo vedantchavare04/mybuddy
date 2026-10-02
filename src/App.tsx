@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { AnimatePresence } from "framer-motion";
 import Character from "./components/character/character";
-import Island from "./components/island/island";
+import Notch from "./components/notch/notch";
 import type { CompanionEvent } from "./events/eventTypes";
 import { eventManager } from "./events/eventManager";
 import { eventQueue } from "./events/eventQueue";
@@ -9,19 +8,11 @@ import { eventLifecycle } from "./events/eventLifecycle";
 import { startBatteryMonitor } from "./system/batteryMonitor";
 import { positionMyBuddy } from "./system/windowPosition";
 
-type BatteryStatus = {
-  percentage: number;
-  charging: boolean;
-};
-
-
 function App() {
   const [activeEvent, setActiveEvent] = useState<CompanionEvent | null>(null);
   const [islandOpen, setIslandOpen] = useState(false);
   const activeEventRef = useRef<CompanionEvent | null>(null);
   const transitioningRef = useRef(false);
-  const batteryAlertSentRef = useRef(false);
-  
 
   useEffect(() => {
     positionMyBuddy();
@@ -54,7 +45,7 @@ function App() {
   }, []);
 
   const handleCharacterClick = () => {
-    setIslandOpen(true);
+    setIslandOpen((open) => !open);
   };
 
   const closeIsland = () => {
@@ -86,6 +77,12 @@ function App() {
     }, 300);
   };
 
+  // "Done" finishes the event AND tucks the notch away.
+  const handleDone = () => {
+    dismissEvent();
+    closeIsland();
+  };
+
   return (
     <main className="relative min-h-screen overflow-visible text-white">
       <Character
@@ -95,24 +92,14 @@ function App() {
         islandOpen={islandOpen}
       />
 
-      <AnimatePresence>
-        {islandOpen && (
-          <Island
-            event={
-              activeEvent ?? {
-                id: "mybuddy-home",
-                type: "notification",
-                title: "Hey, I'm MyBuddy",
-                message: "Everything is quiet. I'm here if you need me.",
-                priority: 1,
-              }
-            }
-            onClose={closeIsland}
-            onAction={activeEvent ? dismissEvent : undefined}
-            actionLabel={activeEvent ? "Done" : undefined}
-          />
-        )}
-      </AnimatePresence>
+      <Notch
+        event={activeEvent}
+        expanded={islandOpen}
+        onExpand={() => setIslandOpen(true)}
+        onCollapse={closeIsland}
+        onAction={activeEvent ? handleDone : undefined}
+        actionLabel={activeEvent ? "Done" : undefined}
+      />
     </main>
   );
 }
