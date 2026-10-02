@@ -1,10 +1,38 @@
-import { useRef, useState } from "react";
+/*
+ * src/components/notch/notch.tsx
+ *
+ * Composes the notch:
+ *   1. mode (compact / active / expanded) is derived from props, as before
+ *   2. inside expanded, useNotchNav picks the screen (route)
+ *   3. the route resolves to a NotchView { key, size, radius, node }
+ *   4. the shell animates to that size and cross-fades the content
+ *
+ * The shell is never remounted when you navigate.
+ */
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CompanionEvent } from "../../events/eventTypes";
+import { calendarService } from "../../services/calendar/calendarService";
+import { mediaService } from "../../services/media/mediaService";
+import { notificationService } from "../../services/notifications/notificationStore";
+import { selectionService, useSelection } from "../../services/selection/selectionService";
+import { speechService } from "../../services/speech/speechService";
 import NotchShell from "./notchShell";
 import { useNotchDismiss } from "./useNotchDismiss";
+import { useNotchNav } from "./useNotchNav";
 import { RADIUS, SIZES, type NotchMode, type NotchView } from "./notchTokens";
-import { IdleCompact, IdleExpanded } from "./views/idleViews";
+import type { Route } from "./notchRoutes";
+import { IdleCompact } from "./views/idleViews";
 import { EventActive, EventExpanded } from "./views/eventViews";
+import { HomeView } from "./views/homeView";
+import { ToolsView } from "./views/toolsView";
+import { MusicView } from "./views/musicView";
+import { CalendarView } from "./views/calendarView";
+import { CalendarCreateView } from "./views/calendarCreateView";
+import { NotificationsView } from "./views/notificationsView";
+import { TranslateView } from "./views/translateView";
+import { SpeechView } from "./views/speechView";
+
 
 type NotchProps = {
   /** pass null when there is nothing to show */
@@ -26,21 +54,120 @@ export default function Notch({
 }: NotchProps) {
   const [hover, setHover] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
+  const nav = useNotchNav(expanded, event !== null);
+  const { pending } = useSelection();
 
   useNotchDismiss(shellRef, expanded, onCollapse);
 
+  // start every service exactly once for the app's lifetime
+  useEffect(() => {
+    mediaService.start();
+    speechService.start();
+    selectionService.start();
+    notificationService.start();
+    calendarService.start();
+  }, []);
+
+  // text captured by a global shortcut opens the matching tool
+  useEffect(() => {
+    if (!pending) return;
+    onExpand();
+    nav.go(pending.intent === "translate" ? "translate" : "speech");
+    // react to a new capture only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending?.nonce]);
+
   const mode: NotchMode = expanded ? "expanded" : event ? "active" : "compact";
 
-  const view: NotchView = resolveView({
-    mode,
-    event,
-    onCollapse,
-    onAction,
-    actionLabel,
-  });
-
-  // hover only nudges the idle notch; active and expanded already have presence
+  const view = resolveView();
   const size = mode === "compact" && hover ? SIZES.compactHover : view.size;
+
+  function resolveView(): NotchView {
+    const expandedView = (key: string, size: NotchView["size"], node: ReactNode): NotchView => ({
+      key,
+      size,
+      radius: RADIUS.expanded,
+      node,
+    });
+
+    if (mode === "expanded") {
+      const route: Route = nav.route === "event" && !event ? "home" : nav.route;
+      const back = nav.back;
+
+      switch (route) {
+        case "event":
+          return expandedView(
+            "event",
+            SIZES.eventExpanded,
+            <EventExpanded
+              event={event!}
+              onCollapse={onCollapse}
+              onMenu={() => nav.go("home")}
+              onAction={onAction}
+              actionLabel={actionLabel}
+            />
+          );
+        case "music":
+          return expandedView("music", SIZES.music, <MusicView onBack={back} onCollapse={onCollapse} />);
+        case "calendar":
+          return expandedView(
+            "calendar",
+            SIZES.calendar,
+            <CalendarView onBack={back} onCollapse={onCollapse} onSchedule={() => nav.go("calendar/new")} />
+          );
+        case "calendar/new":
+          return expandedView(
+            "calendar/new",
+            SIZES.calendarCreate,
+            <CalendarCreateView onBack={back} onCollapse={onCollapse} onDone={back} />
+          );
+        case "notifications":
+          return expandedView(
+            "notifications",
+            SIZES.notifications,
+            <NotificationsView onBack={back} onCollapse={onCollapse} />
+          );
+        case "tools":
+          return expandedView(
+            "tools",
+            SIZES.tools,
+            <ToolsView onBack={back} onCollapse={onCollapse} onOpen={nav.go} />
+          );
+        case "translate":
+          return expandedView("translate", SIZES.translate, <TranslateView onBack={back} onCollapse={onCollapse} />);
+        case "speech":
+          return expandedView("speech", SIZES.speech, <SpeechView onBack={back} onCollapse={onCollapse} />);
+        case "home":
+        default:
+          return expandedView(
+            "home",
+            SIZES.home,
+            <HomeView
+              event={event}
+              onOpen={nav.go}
+              onBack={event ? back : undefined}
+              onCollapse={onCollapse}
+            />
+          );
+      }
+    }
+
+    if (mode === "active" && event) {
+      return {
+        key: "event-active",
+        size: SIZES.active,
+        radius: RADIUS.active,
+        node: <EventActive event={event} />,
+      };
+    }
+
+    return {
+      key: "idle-compact",
+      size: SIZES.compact,
+      radius: RADIUS.compact,
+      node: <IdleCompact />,
+    };
+  }
 
   return (
     <NotchShell
@@ -50,64 +177,12 @@ export default function Notch({
       contentSize={view.size}
       radius={view.radius}
       layerKey={view.key}
-      label={expanded ? event?.title ?? "MyBuddy" : "Open MyBuddy"}
+      direction={nav.direction}
+      label={expanded ? (event?.title ?? "MyBuddy") : "Open MyBuddy"}
       onActivate={onExpand}
       onHoverChange={setHover}
     >
       {view.node}
     </NotchShell>
   );
-}
-
-function resolveView({
-  mode,
-  event,
-  onCollapse,
-  onAction,
-  actionLabel,
-}: {
-  mode: NotchMode;
-  event: CompanionEvent | null;
-  onCollapse: () => void;
-  onAction?: () => void;
-  actionLabel?: string;
-}): NotchView {
-  if (mode === "expanded") {
-    return event
-      ? {
-          key: "event-expanded",
-          size: SIZES.eventExpanded,
-          radius: RADIUS.expanded,
-          node: (
-            <EventExpanded
-              event={event}
-              onCollapse={onCollapse}
-              onAction={onAction}
-              actionLabel={actionLabel}
-            />
-          ),
-        }
-      : {
-          key: "idle-expanded",
-          size: SIZES.idleExpanded,
-          radius: RADIUS.expanded,
-          node: <IdleExpanded onCollapse={onCollapse} />,
-        };
-  }
-
-  if (mode === "active" && event) {
-    return {
-      key: "event-active",
-      size: SIZES.active,
-      radius: RADIUS.active,
-      node: <EventActive event={event} />,
-    };
-  }
-
-  return {
-    key: "idle-compact",
-    size: SIZES.compact,
-    radius: RADIUS.compact,
-    node: <IdleCompact />,
-  };
 }

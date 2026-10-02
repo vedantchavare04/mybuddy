@@ -7,12 +7,17 @@ import { eventQueue } from "./events/eventQueue";
 import { eventLifecycle } from "./events/eventLifecycle";
 import { startBatteryMonitor } from "./system/batteryMonitor";
 import { positionMyBuddy } from "./system/windowPosition";
+import { notificationService } from "./services/notifications/notificationStore";
 
 function App() {
   const [activeEvent, setActiveEvent] = useState<CompanionEvent | null>(null);
   const [islandOpen, setIslandOpen] = useState(false);
   const activeEventRef = useRef<CompanionEvent | null>(null);
   const transitioningRef = useRef(false);
+
+  useEffect(() => {
+    if (activeEvent) notificationService.recordEvent(activeEvent);
+  }, [activeEvent]);
 
   useEffect(() => {
     positionMyBuddy();
@@ -77,7 +82,6 @@ function App() {
     }, 300);
   };
 
-  // "Done" finishes the event AND tucks the notch away.
   const handleDone = () => {
     dismissEvent();
     closeIsland();
