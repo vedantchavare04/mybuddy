@@ -1,8 +1,3 @@
-/*
- * src/components/notch/notchTokens.ts
- * Every number that affects how the notch feels lives here.
- */
-
 import type { ReactNode } from "react";
 
 export type NotchMode = "compact" | "active" | "expanded";

@@ -1,9 +1,3 @@
-/*
- * src/services/createStore.ts
- * A minimal external store. Services own state here; views subscribe with
- * useStore. No Zustand needed, and no re-render unless the state changes.
- */
-
 import { useSyncExternalStore } from "react";
 
 export type Store<T> = {

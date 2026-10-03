@@ -1,11 +1,3 @@
-/*
- * src/services/tauri.ts
- *
- * The only file that touches @tauri-apps/api. Rust commands reject with a
- * short error code string (e.g. "offline", "revoked"); services translate
- * those into human messages. Raw errors never reach the UI.
- */
-
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
@@ -21,7 +13,6 @@ export async function call<T>(
     return await invoke<T>(command, args);
   } catch (e) {
     const msg = typeof e === "string" ? e : "failed";
-    // command not registered yet (partial integration) = unavailable
     throw /not found|not allowed/i.test(msg) ? "unavailable" : msg;
   }
 }

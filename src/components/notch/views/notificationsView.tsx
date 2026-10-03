@@ -1,7 +1,3 @@
-/*
- * src/components/notch/views/notificationsView.tsx
- */
-
 import { useEffect, useState } from "react";
 import { Info } from "lucide-react";
 import {
@@ -49,7 +45,6 @@ function AccessNote({ access }: { access: Access }) {
 export function NotificationsView({ onBack, onCollapse }: Props) {
   const { items, access } = useNotifications();
 
-  // remember which were unread when the view opened, then mark them read
   const [unreadAtOpen] = useState(
     () => new Set(items.filter((n) => !n.read).map((n) => n.id))
   );

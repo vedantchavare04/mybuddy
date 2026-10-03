@@ -1,12 +1,3 @@
-/*
- * src/services/media/mediaService.ts
- *
- * MediaService: React <- Tauri events <- Rust <- Windows media sessions.
- * Started once for the app's lifetime. No polling: Rust pushes events when
- * playback, track or metadata change. Position is extrapolated locally and
- * only while the Music view is on screen.
- */
-
 import { useEffect, useState } from "react";
 import { createStore, useStore } from "../createStore";
 import { call, subscribe } from "../tauri";
@@ -69,7 +60,6 @@ export const mediaService = {
 
 export const useMedia = () => useStore(store);
 
-/** current playback position, ticking only while the caller is mounted */
 export function usePlaybackPosition(s: MediaState | null): number {
   const playing = s?.status === "playing";
   const [now, setNow] = useState(() => Date.now());

@@ -1,11 +1,3 @@
-/*
- * src/components/notch/notchShell.tsx
- *
- * Same shell as before. The only change: content layers now slide a few
- * pixels in the direction of navigation (forward / back) while they
- * cross-fade. Shape, material and springs are unchanged.
- */
-
 import {
   useEffect,
   useRef,

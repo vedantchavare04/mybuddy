@@ -1,8 +1,3 @@
-/*
- * src/components/notch/views/idleViews.tsx
- * Compact idle: just the time. (The old IdleExpanded became HomeView.)
- */
-
 import { useEffect, useState } from "react";
 
 const timeFmt = new Intl.DateTimeFormat([], {

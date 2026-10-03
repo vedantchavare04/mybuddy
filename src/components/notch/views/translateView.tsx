@@ -1,9 +1,3 @@
-/*
- * src/components/notch/views/translateView.tsx
- * Compact translator. Original is editable, so it works with typed text and
- * with text captured by the Ctrl+Alt+T shortcut.
- */
-
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeftRight, Check, Copy, Square, Volume2 } from "lucide-react";
 import {
@@ -12,7 +6,10 @@ import {
   SHORTCUTS,
   useSelection,
 } from "../../../services/selection/selectionService";
-import { speechService, useSpeech } from "../../../services/speech/speechService";
+import {
+  speechService,
+  useSpeech,
+} from "../../../services/speech/speechService";
 import {
   LANGUAGES,
   translateError,
@@ -37,7 +34,7 @@ function LangSelect({
   label,
 }: {
   value: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
   auto?: boolean;
   label: string;
 }) {
@@ -48,9 +45,27 @@ function LangSelect({
       onChange={(e) => onChange(e.target.value)}
       className={selectCls}
     >
-      {auto && <option value="auto">Detect language</option>}
+      {auto && (
+        <option
+          value="auto"
+          style={{
+            color: "#111827",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          Detect language
+        </option>
+      )}
+
       {LANGUAGES.map((l) => (
-        <option key={l.code} value={l.code}>
+        <option
+          key={l.code}
+          value={l.code}
+          style={{
+            color: "#111827",
+            backgroundColor: "#ffffff",
+          }}
+        >
           {l.name}
         </option>
       ))}
@@ -127,9 +142,7 @@ export function TranslateView({ onBack, onCollapse }: Props) {
       await navigator.clipboard.writeText(result);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
-    } catch {
-      /* clipboard denied */
-    }
+    } catch {}
   };
 
   const speakingThis = speech.state === "speaking" && speech.text === result;
@@ -143,7 +156,11 @@ export function TranslateView({ onBack, onCollapse }: Props) {
 
       <div className="mt-3.5 flex items-center gap-2">
         <LangSelect label="From" value={source} onChange={setSource} auto />
-        <IconButton label="Swap languages" disabled={source === "auto"} onClick={swap}>
+        <IconButton
+          label="Swap languages"
+          disabled={source === "auto"}
+          onClick={swap}
+        >
           <ArrowLeftRight size={14} strokeWidth={1.8} />
         </IconButton>
         <LangSelect label="To" value={target} onChange={setTarget} />
@@ -162,7 +179,9 @@ export function TranslateView({ onBack, onCollapse }: Props) {
         className={`${textareaCls} mt-2.5 h-[60px] shrink-0`}
       />
 
-      <div className="mt-3 text-[12px] font-medium text-white/35">Translation</div>
+      <div className="mt-3 text-[12px] font-medium text-white/35">
+        Translation
+      </div>
       <div className={`${scrollCls} mt-1 text-[13.5px] leading-[1.45]`}>
         {status === "loading" ? (
           <span className="text-white/35">Translating…</span>
@@ -177,7 +196,11 @@ export function TranslateView({ onBack, onCollapse }: Props) {
 
       <div className="mt-3 flex shrink-0 items-center gap-1.5">
         <Button variant="quiet" disabled={!result} onClick={() => void copy()}>
-          {copied ? <Check size={14} strokeWidth={1.9} /> : <Copy size={14} strokeWidth={1.8} />}
+          {copied ? (
+            <Check size={14} strokeWidth={1.9} />
+          ) : (
+            <Copy size={14} strokeWidth={1.8} />
+          )}
           {copied ? "Copied" : "Copy"}
         </Button>
         <Button

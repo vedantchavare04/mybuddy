@@ -1,12 +1,3 @@
-/*
- * src/services/selection/selectionService.ts
- *
- * MyBuddy cannot read arbitrary text from other apps on its own. The
- * reliable Windows approach is user-triggered: select text, press a global
- * shortcut, Rust copies the selection (preserving the clipboard) and emits
- * it here. Translate and Speak then pick it up.
- */
-
 import { createStore, useStore } from "../createStore";
 import { speechService } from "../speech/speechService";
 import { subscribe } from "../tauri";
@@ -43,7 +34,6 @@ export const selectionService = {
       "selection://captured",
       (p) => {
         store.set({ pending: { ...p, nonce: Date.now() } });
-        // speaking needs no UI: start right away, the view just shows status
         if (p.intent === "speak" && p.text) speechService.speak(p.text);
       }
     );

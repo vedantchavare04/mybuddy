@@ -1,9 +1,3 @@
-/*
- * src/components/notch/views/homeView.tsx
- * The expanded home: same identity as before (date, headline, message),
- * with a single quiet row of destinations underneath.
- */
-
 import { Bell, Calendar, Music, Wrench, type LucideIcon } from "lucide-react";
 import type { CompanionEvent } from "../../../events/eventTypes";
 import { useNotifications } from "../../../services/notifications/notificationStore";
@@ -21,7 +15,6 @@ const ITEMS: { route: Route; label: string; icon: LucideIcon }[] = [
 type Props = {
   event: CompanionEvent | null;
   onOpen: (route: Route) => void;
-  /** only provided when an event is pending, so you can return to it */
   onBack?: () => void;
   onCollapse: () => void;
 };

@@ -1,9 +1,3 @@
-/*
- * src/components/notch/views/speechView.tsx
- * Minimal controls over native Windows speech: Speak / Pause / Resume / Stop,
- * plus voice and speed.
- */
-
 import { useEffect, useState } from "react";
 import { Pause, Play, Square } from "lucide-react";
 import {
@@ -17,13 +11,7 @@ import {
   speechService,
   useSpeech,
 } from "../../../services/speech/speechService";
-import {
-  BackLabel,
-  Button,
-  ViewHeader,
-  selectCls,
-  textareaCls,
-} from "./parts";
+import { BackLabel, Button, ViewHeader, selectCls, textareaCls } from "./parts";
 
 type Props = { onBack: () => void; onCollapse: () => void };
 
@@ -35,7 +23,6 @@ export function SpeechView({ onBack, onCollapse }: Props) {
   const [draft, setDraft] = useState(sp.text);
   const [note, setNote] = useState<string | null>(null);
 
-  // capture from Ctrl+Alt+S (speaking already started in the service)
   useEffect(() => {
     if (!pending || pending.intent !== "speak") return;
     selectionService.consume();
@@ -70,7 +57,9 @@ export function SpeechView({ onBack, onCollapse }: Props) {
         leading={<BackLabel title="Text to speech" onBack={onBack} />}
       />
 
-      <div className="mt-3.5 text-[12px] font-medium text-white/40">{status}</div>
+      <div className="mt-3.5 text-[12px] font-medium text-white/40">
+        {status}
+      </div>
 
       <textarea
         value={text}
@@ -80,7 +69,7 @@ export function SpeechView({ onBack, onCollapse }: Props) {
         className={`${textareaCls} mt-1.5 h-[76px] shrink-0`}
       />
 
-      <div className="mt-3 flex shrink-0 items-center gap-1.5">
+      <div className="mt-3 flex shrink-0 items-center gap-1.5 mb-2">
         {sp.state === "speaking" ? (
           <Button variant="primary" onClick={() => speechService.pause()}>
             <Pause size={13} fill="currentColor" strokeWidth={0} />
@@ -117,10 +106,17 @@ export function SpeechView({ onBack, onCollapse }: Props) {
           value={sp.voiceId ?? ""}
           disabled={sp.voices.length === 0}
           onChange={(e) => speechService.setVoice(e.target.value)}
-          className={selectCls}
+          className={`${selectCls} bg-white text-black`}
         >
           {sp.voices.map((v) => (
-            <option key={v.id} value={v.id}>
+            <option
+              key={v.id}
+              value={v.id}
+              style={{
+                color: "#111827",
+                backgroundColor: "#ffffff",
+              }}
+            >
               {v.name.replace(/^Microsoft /, "")}
             </option>
           ))}
@@ -129,11 +125,18 @@ export function SpeechView({ onBack, onCollapse }: Props) {
           aria-label="Speed"
           value={sp.rate}
           onChange={(e) => speechService.setRate(Number(e.target.value))}
-          className={`${selectCls} !flex-none !w-[84px]`}
+          className={`${selectCls} bg-white text-black !flex-none !w-[84px]`}
         >
           {SPEEDS.map((s) => (
-            <option key={s} value={s}>
-              {s}×
+            <option
+              key={s}
+              value={s}
+              style={{
+                color: "#111827",
+                backgroundColor: "#ffffff",
+              }}
+            >
+              {s}x
             </option>
           ))}
         </select>

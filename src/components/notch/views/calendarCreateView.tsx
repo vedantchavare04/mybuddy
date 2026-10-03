@@ -1,9 +1,3 @@
-/*
- * src/components/notch/views/calendarCreateView.tsx
- * Title, date, time, duration, and optional location / attendees / notes.
- * Creates a real Google Calendar event.
- */
-
 import { useState } from "react";
 import {
   calendarError,
@@ -17,7 +11,6 @@ import { BackLabel, Button, ViewHeader, inputCls, selectCls } from "./parts";
 type Props = {
   onBack: () => void;
   onCollapse: () => void;
-  /** called after the event was really created */
   onDone: () => void;
 };
 
@@ -113,7 +106,7 @@ export function CalendarCreateView({ onBack, onCollapse, onDone }: Props) {
             value={duration}
             onChange={(e) => setDuration(Number(e.target.value))}
             aria-label="Duration"
-            className={`${selectCls} !flex-none !w-[92px]`}
+            className={`${selectCls} bg-white text-black !flex-none !w-[92px]`}
           >
             {DURATIONS.map((d) => (
               <option key={d.min} value={d.min}>

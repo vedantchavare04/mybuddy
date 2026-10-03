@@ -1,9 +1,3 @@
-/*
- * src/components/notch/views/calendarView.tsx
- * Upcoming events, Connect / Connected / Disconnect, and + Schedule.
- * "Connected" is only shown after real authentication succeeded.
- */
-
 import { useEffect, useMemo } from "react";
 import { AlertCircle, Check, Plus } from "lucide-react";
 import {
@@ -45,7 +39,6 @@ export function CalendarView({ onBack, onCollapse, onSchedule }: Props) {
     if (cal.status === "connected") void calendarService.refresh();
   }, [cal.status]);
 
-  // confirmation is subtle and temporary
   useEffect(() => {
     if (!cal.created) return;
     const id = window.setTimeout(() => calendarService.clearCreated(), 5000);
@@ -68,7 +61,6 @@ export function CalendarView({ onBack, onCollapse, onSchedule }: Props) {
     </p>
   );
 
-  /* ---- not connected ---- */
   if (cal.status !== "connected") {
     let title = "Connect Google Calendar";
     let body = "See what's next and schedule events without leaving your desktop.";
@@ -111,7 +103,6 @@ export function CalendarView({ onBack, onCollapse, onSchedule }: Props) {
     );
   }
 
-  /* ---- connected ---- */
   return (
     <div className="flex h-full flex-col px-6 pb-5 pt-5">
       {header}
@@ -127,7 +118,7 @@ export function CalendarView({ onBack, onCollapse, onSchedule }: Props) {
         </div>
       )}
 
-      <div className={`${scrollCls} mt-3`}>
+      <div className={`${scrollCls} mt-3 notch-scrollbar`}>
         {cal.events === null ? (
           <p className="pt-6 text-center text-[13px] text-white/35">Loading…</p>
         ) : groups.length === 0 ? (

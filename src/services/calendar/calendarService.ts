@@ -12,7 +12,6 @@ import { call } from "../tauri";
 export type CalEvent = {
   id: string;
   title: string;
-  /** ISO datetime, or YYYY-MM-DD for all-day events */
   start: string;
   end: string;
   allDay: boolean;
@@ -62,7 +61,6 @@ const MESSAGES: Record<string, string> = {
 export const calendarError = (code: string) =>
   MESSAGES[code] ?? "Something went wrong. Try again.";
 
-/* ---------- date helpers shared by the views ---------- */
 
 const timeFmt = new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" });
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -94,7 +92,6 @@ export const nextHalfHourInput = () => {
 const localIso = (d: Date) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 
-/* ---------- service ---------- */
 
 export type NewEventInput = {
   title: string;
@@ -143,7 +140,6 @@ export const calendarService = {
     try {
       await call<GStatus>("google_disconnect");
     } catch {
-      /* local state is cleared regardless */
     }
     store.set({ status: "disconnected", events: null, error: null, created: null });
   },

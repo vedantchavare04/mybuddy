@@ -1,7 +1,3 @@
-/*
- * src/components/notch/views/toolsView.tsx
- */
-
 import { Languages, Volume2, type LucideIcon } from "lucide-react";
 import { SHORTCUTS } from "../../../services/selection/selectionService";
 import type { Route } from "../notchRoutes";

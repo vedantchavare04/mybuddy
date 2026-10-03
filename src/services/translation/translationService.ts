@@ -1,12 +1,3 @@
-/*
- * src/services/translation/translationService.ts
- *
- * TranslationService.translate(text, source, target). UI components never
- * know which provider is behind it, and no API keys exist in the frontend.
- * The provider is resolved in Rust (translate.rs). To add one, add a branch
- * there and change PROVIDER here.
- */
-
 import { call } from "../tauri";
 
 const PROVIDER = "mymemory";

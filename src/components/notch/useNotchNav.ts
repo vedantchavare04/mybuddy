@@ -1,11 +1,3 @@
-/*
- * src/components/notch/useNotchNav.ts
- *
- * Internal navigation for the expanded notch. The route is null until the
- * user navigates, so the default is derived (event view if an event is
- * pending, otherwise home). It resets whenever the notch collapses.
- */
-
 import { useEffect, useState } from "react";
 import { PARENT, type Route } from "./notchRoutes";
 

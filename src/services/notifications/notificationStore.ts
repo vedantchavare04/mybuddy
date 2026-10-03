@@ -1,14 +1,3 @@
-/*
- * src/services/notifications/notificationStore.ts
- *
- * NotificationService. Two sources feed one chronological list:
- *   1. MyBuddy's own events (battery, etc.). Always works.
- *   2. Windows app notifications, via Rust UserNotificationListener.
- *      Windows only grants this to packaged apps (MSIX). In the current
- *      unpackaged build the access state is "unsupported" and we say so
- *      honestly. Nothing is faked.
- */
-
 import type { CompanionEvent } from "../../events/eventTypes";
 import { createStore, useStore } from "../createStore";
 import { call } from "../tauri";
@@ -52,7 +41,6 @@ function commit(items: AppNotification[]) {
   try {
     localStorage.setItem(KEY, JSON.stringify(trimmed));
   } catch {
-    /* storage unavailable: keep in memory */
   }
 }
 
@@ -94,7 +82,6 @@ async function poll() {
       .filter((n) => !known.has(n.id));
     if (fresh.length) commit([...fresh, ...items]);
   } catch {
-    /* transient: try again next tick */
   }
 }
 
@@ -128,7 +115,6 @@ export const notificationService = {
   recordEvent(event: CompanionEvent) {
     const items = store.get().items;
     const latest = items[0];
-    // ignore double-fires of the same event
     if (latest && latest.id === `event:${event.id}` && Date.now() - latest.at < 30_000) {
       return;
     }

@@ -1,8 +1,3 @@
-/*
- * src/components/notch/views/parts.tsx
- * Shared chrome for expanded notch screens.
- */
-
 import type { ReactNode } from "react";
 import { ChevronLeft, X } from "lucide-react";
 

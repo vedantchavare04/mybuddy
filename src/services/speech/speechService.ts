@@ -1,10 +1,3 @@
-/*
- * src/services/speech/speechService.ts
- *
- * Native Windows TTS via Rust (speech.rs). The UI never talks to WinRT;
- * it calls this service and subscribes to speech://state.
- */
-
 import { createStore, useStore } from "../createStore";
 import { call, subscribe } from "../tauri";
 

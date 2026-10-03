@@ -1,9 +1,3 @@
-/*
- * src/components/notch/views/musicView.tsx
- * Music inside the notch. Real Windows media session data only; controls the
- * session doesn't support are disabled. No fake data anywhere.
- */
-
 import type { PointerEvent } from "react";
 import { Music, Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import {

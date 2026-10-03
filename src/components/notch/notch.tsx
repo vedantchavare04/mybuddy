@@ -1,15 +1,3 @@
-/*
- * src/components/notch/notch.tsx
- *
- * Composes the notch:
- *   1. mode (compact / active / expanded) is derived from props, as before
- *   2. inside expanded, useNotchNav picks the screen (route)
- *   3. the route resolves to a NotchView { key, size, radius, node }
- *   4. the shell animates to that size and cross-fades the content
- *
- * The shell is never remounted when you navigate.
- */
-
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CompanionEvent } from "../../events/eventTypes";
 import { calendarService } from "../../services/calendar/calendarService";
@@ -35,7 +23,6 @@ import { SpeechView } from "./views/speechView";
 
 
 type NotchProps = {
-  /** pass null when there is nothing to show */
   event: CompanionEvent | null;
   expanded: boolean;
   onExpand: () => void;
