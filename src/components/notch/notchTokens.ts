@@ -26,6 +26,7 @@ export const SIZES = {
   notifications: { width: W, height: 292 },
   translate: { width: W, height: 300 },
   speech: { width: W, height: 248 },
+  settings: { width: W, height: 176 },
 } satisfies Record<string, NotchSize>;
 
 export const RADIUS = { compact: 16, active: 22, expanded: 30 };

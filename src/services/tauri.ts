@@ -6,7 +6,7 @@ export const inTauri = () =>
 
 export async function call<T>(
   command: string,
-  args?: Record<string, unknown>
+  args?: Record<string, unknown>,
 ): Promise<T> {
   if (!inTauri()) throw "unavailable";
   try {
@@ -19,7 +19,7 @@ export async function call<T>(
 
 export async function subscribe<T>(
   event: string,
-  handler: (payload: T) => void
+  handler: (payload: T) => void,
 ): Promise<() => void> {
   if (!inTauri()) return () => {};
   return listen<T>(event, (e) => handler(e.payload));

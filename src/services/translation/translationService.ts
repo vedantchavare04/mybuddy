@@ -41,7 +41,11 @@ export const translateError = (code: string) =>
   ERRORS[code] ?? "Couldn't translate that. Try again.";
 
 export const translationService = {
-  translate(text: string, source: string, target: string): Promise<Translation> {
+  translate(
+    text: string,
+    source: string,
+    target: string,
+  ): Promise<Translation> {
     return call<Translation>("translate", {
       text,
       source,

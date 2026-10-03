@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CompanionEvent } from "../../events/eventTypes";
 import { calendarService } from "../../services/calendar/calendarService";
 import { mediaService } from "../../services/media/mediaService";
 import { notificationService } from "../../services/notifications/notificationStore";
-import { selectionService, useSelection } from "../../services/selection/selectionService";
+import {
+  selectionService,
+  useSelection,
+} from "../../services/selection/selectionService";
 import { speechService } from "../../services/speech/speechService";
 import NotchShell from "./notchShell";
 import { useNotchDismiss } from "./useNotchDismiss";
@@ -20,7 +23,7 @@ import { CalendarCreateView } from "./views/calendarCreateView";
 import { NotificationsView } from "./views/notificationsView";
 import { TranslateView } from "./views/translateView";
 import { SpeechView } from "./views/speechView";
-
+import { SettingsView } from "./views/settingsView";
 
 type NotchProps = {
   event: CompanionEvent | null;
@@ -46,7 +49,6 @@ export default function Notch({
 
   useNotchDismiss(shellRef, expanded, onCollapse);
 
-  // start every service exactly once for the app's lifetime
   useEffect(() => {
     mediaService.start();
     speechService.start();
@@ -55,13 +57,10 @@ export default function Notch({
     calendarService.start();
   }, []);
 
-  // text captured by a global shortcut opens the matching tool
   useEffect(() => {
     if (!pending) return;
     onExpand();
     nav.go(pending.intent === "translate" ? "translate" : "speech");
-    // react to a new capture only
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending?.nonce]);
 
   const mode: NotchMode = expanded ? "expanded" : event ? "active" : "compact";
@@ -70,7 +69,11 @@ export default function Notch({
   const size = mode === "compact" && hover ? SIZES.compactHover : view.size;
 
   function resolveView(): NotchView {
-    const expandedView = (key: string, size: NotchView["size"], node: ReactNode): NotchView => ({
+    const expandedView = (
+      key: string,
+      size: NotchView["size"],
+      node: React.ReactNode,
+    ): NotchView => ({
       key,
       size,
       radius: RADIUS.expanded,
@@ -92,38 +95,64 @@ export default function Notch({
               onMenu={() => nav.go("home")}
               onAction={onAction}
               actionLabel={actionLabel}
-            />
+            />,
           );
         case "music":
-          return expandedView("music", SIZES.music, <MusicView onBack={back} onCollapse={onCollapse} />);
+          return expandedView(
+            "music",
+            SIZES.music,
+            <MusicView onBack={back} onCollapse={onCollapse} />,
+          );
         case "calendar":
           return expandedView(
             "calendar",
             SIZES.calendar,
-            <CalendarView onBack={back} onCollapse={onCollapse} onSchedule={() => nav.go("calendar/new")} />
+            <CalendarView
+              onBack={back}
+              onCollapse={onCollapse}
+              onSchedule={() => nav.go("calendar/new")}
+            />,
           );
         case "calendar/new":
           return expandedView(
             "calendar/new",
             SIZES.calendarCreate,
-            <CalendarCreateView onBack={back} onCollapse={onCollapse} onDone={back} />
+            <CalendarCreateView
+              onBack={back}
+              onCollapse={onCollapse}
+              onDone={back}
+            />,
           );
         case "notifications":
           return expandedView(
             "notifications",
             SIZES.notifications,
-            <NotificationsView onBack={back} onCollapse={onCollapse} />
+            <NotificationsView onBack={back} onCollapse={onCollapse} />,
           );
         case "tools":
           return expandedView(
             "tools",
             SIZES.tools,
-            <ToolsView onBack={back} onCollapse={onCollapse} onOpen={nav.go} />
+            <ToolsView onBack={back} onCollapse={onCollapse} onOpen={nav.go} />,
           );
         case "translate":
-          return expandedView("translate", SIZES.translate, <TranslateView onBack={back} onCollapse={onCollapse} />);
+          return expandedView(
+            "translate",
+            SIZES.translate,
+            <TranslateView onBack={back} onCollapse={onCollapse} />,
+          );
         case "speech":
-          return expandedView("speech", SIZES.speech, <SpeechView onBack={back} onCollapse={onCollapse} />);
+          return expandedView(
+            "speech",
+            SIZES.speech,
+            <SpeechView onBack={back} onCollapse={onCollapse} />,
+          );
+        case "settings":
+          return expandedView(
+            "settings",
+            SIZES.settings,
+            <SettingsView onBack={back} onCollapse={onCollapse} />,
+          );
         case "home":
         default:
           return expandedView(
@@ -132,9 +161,10 @@ export default function Notch({
             <HomeView
               event={event}
               onOpen={nav.go}
+              onSettings={() => nav.go("settings")}
               onBack={event ? back : undefined}
               onCollapse={onCollapse}
-            />
+            />,
           );
       }
     }

@@ -1,9 +1,23 @@
-import { Bell, Calendar, Music, Wrench, type LucideIcon } from "lucide-react";
+import {
+  Bell,
+  Calendar,
+  Music,
+  Settings,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import type { CompanionEvent } from "../../../events/eventTypes";
 import { useNotifications } from "../../../services/notifications/notificationStore";
 import type { Route } from "../notchRoutes";
 import { dateFmt, useNow } from "./idleViews";
-import { BackLabel, Body, Button, Title, ViewHeader } from "./parts";
+import {
+  BackLabel,
+  Body,
+  Button,
+  IconButton,
+  Title,
+  ViewHeader,
+} from "./parts";
 
 const ITEMS: { route: Route; label: string; icon: LucideIcon }[] = [
   { route: "music", label: "Music", icon: Music },
@@ -15,11 +29,18 @@ const ITEMS: { route: Route; label: string; icon: LucideIcon }[] = [
 type Props = {
   event: CompanionEvent | null;
   onOpen: (route: Route) => void;
+  onSettings: () => void;
   onBack?: () => void;
   onCollapse: () => void;
 };
 
-export function HomeView({ event, onOpen, onBack, onCollapse }: Props) {
+export function HomeView({
+  event,
+  onOpen,
+  onSettings,
+  onBack,
+  onCollapse,
+}: Props) {
   const now = useNow();
   const { items } = useNotifications();
   const unread = items.filter((n) => !n.read).length;
@@ -29,7 +50,20 @@ export function HomeView({ event, onOpen, onBack, onCollapse }: Props) {
       <ViewHeader
         onClose={onCollapse}
         leading={
-          onBack ? <BackLabel title="Back" onBack={onBack} /> : dateFmt.format(now)
+          onBack ? (
+            <BackLabel title="Back" onBack={onBack} />
+          ) : (
+            dateFmt.format(now)
+          )
+        }
+        trailing={
+          <IconButton
+            label="Settings"
+            onClick={onSettings}
+            className="!h-6 !w-6 !text-white/30 hover:!text-white/75"
+          >
+            <Settings size={13} strokeWidth={1.8} />
+          </IconButton>
         }
       />
 

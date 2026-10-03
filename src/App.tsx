@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import Character from "./components/character/character";
+import SpiderLayer from "./components/character/spiderLayer";
 import Notch from "./components/notch/notch";
 import type { CompanionEvent } from "./events/eventTypes";
 import { eventManager } from "./events/eventManager";
@@ -8,6 +8,7 @@ import { eventLifecycle } from "./events/eventLifecycle";
 import { startBatteryMonitor } from "./system/batteryMonitor";
 import { positionMyBuddy } from "./system/windowPosition";
 import { notificationService } from "./services/notifications/notificationStore";
+import { useSettings } from "./services/settings/settingsStore";
 
 function App() {
   const [activeEvent, setActiveEvent] = useState<CompanionEvent | null>(null);
@@ -15,9 +16,7 @@ function App() {
   const activeEventRef = useRef<CompanionEvent | null>(null);
   const transitioningRef = useRef(false);
 
-  useEffect(() => {
-    if (activeEvent) notificationService.recordEvent(activeEvent);
-  }, [activeEvent]);
+  const { spiderEnabled } = useSettings();
 
   useEffect(() => {
     positionMyBuddy();
@@ -48,6 +47,10 @@ function App() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (activeEvent) notificationService.recordEvent(activeEvent);
+  }, [activeEvent]);
 
   const handleCharacterClick = () => {
     setIslandOpen((open) => !open);
@@ -89,7 +92,8 @@ function App() {
 
   return (
     <main className="relative min-h-screen overflow-visible text-white">
-      <Character
+      <SpiderLayer
+        enabled={spiderEnabled}
         eventActive={activeEvent !== null}
         event={activeEvent}
         onClick={handleCharacterClick}

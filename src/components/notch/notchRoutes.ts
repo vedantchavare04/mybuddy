@@ -7,8 +7,8 @@ export type Route =
   | "notifications"
   | "tools"
   | "translate"
-  | "speech";
-
+  | "speech"
+  | "settings";
 
 export const PARENT: Record<Route, Route | null> = {
   event: null,
@@ -20,4 +20,5 @@ export const PARENT: Record<Route, Route | null> = {
   tools: "home",
   translate: "tools",
   speech: "tools",
+  settings: "home",
 };

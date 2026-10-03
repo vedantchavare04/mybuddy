@@ -110,11 +110,13 @@ export function IconButton({
   label,
   onClick,
   disabled,
+  className,
   children,
 }: {
   label: string;
   onClick: () => void;
   disabled?: boolean;
+  className?:string;
   children: ReactNode;
 }) {
   return (
