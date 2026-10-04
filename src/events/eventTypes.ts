@@ -4,7 +4,8 @@ export type CompanionEventType =
   | "download"
   | "music"
   | "meeting"
-  | "focus";
+  | "focus"
+  | "reminder";
 
 export type CompanionEvent = {
   id: string;
@@ -13,3 +14,4 @@ export type CompanionEvent = {
   message: string;
   priority: number;
 };
+

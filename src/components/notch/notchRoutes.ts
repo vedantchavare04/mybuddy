@@ -4,11 +4,15 @@ export type Route =
   | "music"
   | "calendar"
   | "calendar/new"
+  | "reminders"
+  | "reminders/new"
   | "notifications"
   | "tools"
   | "translate"
   | "speech"
-  | "settings";
+  | "ai"
+  | "settings"
+  | "settings/ai";
 
 export const PARENT: Record<Route, Route | null> = {
   event: null,
@@ -16,9 +20,13 @@ export const PARENT: Record<Route, Route | null> = {
   music: "home",
   calendar: "home",
   "calendar/new": "calendar",
+  reminders: "home",
+  "reminders/new": "reminders",
   notifications: "home",
   tools: "home",
   translate: "tools",
   speech: "tools",
+  ai: "tools",
   settings: "home",
+  "settings/ai": "settings",
 };

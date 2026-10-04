@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { ChevronRight } from "lucide-react";
+import { PROVIDERS, useAiConfig } from "../../../services/ai/aiConfig";
 import {
   settingsService,
   useSettings,
@@ -6,7 +8,7 @@ import {
 import ToggleSwitch from "../../ui/toggleSwitch";
 import { BackLabel, ViewHeader, scrollCls } from "./parts";
 
-type Props = { onBack: () => void; onCollapse: () => void };
+type Props = { onBack: () => void; onCollapse: () => void; onOpenAi: () => void };
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -43,8 +45,14 @@ function SettingRow({
   );
 }
 
-export function SettingsView({ onBack, onCollapse }: Props) {
+export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const { spiderEnabled } = useSettings();
+  const ai = useAiConfig();
+
+  const id = ai.provider;
+  const name = id ? PROVIDERS.find((p) => p.id === id)?.name : undefined;
+  const connected = id ? !!ai.configured[id] : false;
+  const summary = name ? `${name} · ${connected ? "Connected" : "Not connected"}` : "Not set up";
 
   return (
     <div className="flex h-full flex-col px-6 pb-5 pt-5">
@@ -53,7 +61,7 @@ export function SettingsView({ onBack, onCollapse }: Props) {
         leading={<BackLabel title="Settings" onBack={onBack} />}
       />
 
-      <div className={`${scrollCls} mt-3.5`}>
+      <div className={`${scrollCls} mt-3.5 flex flex-col gap-4`}>
         <Section title="Appearance">
           <SettingRow
             title="Spider Companion"
@@ -69,6 +77,24 @@ export function SettingsView({ onBack, onCollapse }: Props) {
               />
             }
           />
+        </Section>
+
+        <Section title="AI">
+          <button
+            type="button"
+            onClick={onOpenAi}
+            className="flex w-full items-center gap-4 py-3.5 text-left outline-none transition-colors duration-150 hover:bg-white/[0.03] focus-visible:ring-1 focus-visible:ring-white/30"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="text-[14px] font-medium tracking-[-0.01em] text-white/90">
+                AI provider
+              </div>
+              <div className="mt-0.5 truncate text-[12.5px] leading-[1.4] text-white/45">
+                {summary}
+              </div>
+            </div>
+            <ChevronRight size={16} strokeWidth={1.8} className="shrink-0 text-white/30" />
+          </button>
         </Section>
       </div>
     </div>

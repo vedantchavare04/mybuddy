@@ -5,10 +5,13 @@ import { subscribe } from "../tauri";
 export const SHORTCUTS = {
   translate: "Ctrl+Alt+T",
   speak: "Ctrl+Alt+S",
+  ai: "Ctrl+Shift+Space",
 } as const;
 
+export type Intent = "translate" | "speak" | "ai";
+
 export type Pending = {
-  intent: "translate" | "speak";
+  intent: Intent;
   text: string;
   error?: string;
   nonce: number;
@@ -30,7 +33,7 @@ export const selectionService = {
   start() {
     if (started) return;
     started = true;
-    void subscribe<{ intent: "translate" | "speak"; text: string; error?: string }>(
+    void subscribe<{ intent: Intent; text: string; error?: string }>(
       "selection://captured",
       (p) => {
         store.set({ pending: { ...p, nonce: Date.now() } });

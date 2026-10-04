@@ -1,16 +1,3 @@
-//! src-tauri/src/selection.rs
-//!
-//! Selected-text capture, user-triggered (Ctrl+Alt+T translate, Ctrl+Alt+S speak).
-//!
-//! Flow: wait for the shortcut keys to be released -> snapshot every
-//! memory-backed clipboard format -> send Ctrl+C -> wait for the clipboard
-//! sequence number to change -> read text -> RESTORE the snapshot.
-//! If nothing was selected the clipboard never changes and is left alone.
-//!
-//! Limit: formats backed by GDI handles that Windows can't re-synthesize
-//! (rare private ones) are not preserved. Text, rich text, HTML, images
-//! (DIB) and file lists are.
-
 use std::{ptr, thread, time::Duration};
 
 use tauri::{AppHandle, Emitter};
@@ -27,7 +14,7 @@ use windows::Win32::{
     UI::Input::KeyboardAndMouse::{
         GetAsyncKeyState, SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT,
         KEYBD_EVENT_FLAGS, KEYEVENTF_KEYUP, VIRTUAL_KEY, VK_C, VK_CONTROL, VK_LWIN, VK_MENU,
-        VK_RWIN, VK_SHIFT,
+        VK_RWIN, VK_SHIFT, VK_SPACE,
     },
 };
 
@@ -41,6 +28,10 @@ pub fn speak_shortcut() -> Shortcut {
     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyS)
 }
 
+pub fn ai_shortcut() -> Shortcut {
+    Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::Space)
+}
+
 pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
     if event.state() != ShortcutState::Pressed {
         return;
@@ -49,6 +40,8 @@ pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
         "translate"
     } else if shortcut == &speak_shortcut() {
         "speak"
+    } else if shortcut == &ai_shortcut() {
+        "ai"
     } else {
         return;
     };
@@ -57,6 +50,9 @@ pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
     thread::spawn(move || {
         let payload = match capture() {
             Ok(text) => serde_json::json!({ "intent": intent, "text": text }),
+            Err("no_selection") if intent == "ai" => {
+                serde_json::json!({ "intent": intent, "text": "" })
+            }
             Err(code) => serde_json::json!({ "intent": intent, "text": "", "error": code }),
         };
         let _ = app.emit("selection://captured", payload);
@@ -71,8 +67,6 @@ fn is_down(vk: VIRTUAL_KEY) -> bool {
     unsafe { (GetAsyncKeyState(vk.0 as i32) as u16) & 0x8000 != 0 }
 }
 
-/// Ctrl+Alt are still held when the shortcut fires; sending Ctrl+C now would
-/// become Ctrl+Alt+C. Wait (briefly) for the user to let go.
 fn wait_modifiers_released() {
     let keys = [
         VK_CONTROL,
@@ -80,6 +74,7 @@ fn wait_modifiers_released() {
         VK_SHIFT,
         VK_LWIN,
         VK_RWIN,
+        VK_SPACE,
         VIRTUAL_KEY(b'T' as u16),
         VIRTUAL_KEY(b'S' as u16),
     ];
@@ -133,11 +128,10 @@ fn open_clipboard() -> bool {
 
 struct Saved(Vec<(u32, Vec<u8>)>);
 
-/// Formats that are GDI/handle based (not plain memory) or derived/display-only.
 fn skip_format(f: u32) -> bool {
-    matches!(f, 2 | 3 | 9 | 14 | 16) // BITMAP, METAFILEPICT, PALETTE, ENHMETAFILE, LOCALE
-        || (0x0080..=0x008E).contains(&f) // CF_DSP*
-        || (0x0200..=0x03FF).contains(&f) // private + GDI object ranges
+    matches!(f, 2 | 3 | 9 | 14 | 16)
+        || (0x0080..=0x008E).contains(&f)
+        || (0x0200..=0x03FF).contains(&f)
 }
 
 fn snapshot() -> Option<Saved> {
@@ -188,7 +182,6 @@ fn restore(saved: &Saved) {
             }
             ptr::copy_nonoverlapping(bytes.as_ptr(), p as *mut u8, bytes.len());
             let _ = GlobalUnlock(h);
-            // on success the clipboard owns the memory
             let _ = SetClipboardData(*fmt, Some(HANDLE(h.0)));
         }
         let _ = CloseClipboard();

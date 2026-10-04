@@ -1,4 +1,4 @@
-import { Languages, Volume2, type LucideIcon } from "lucide-react";
+import { Languages, Sparkles, Volume2, type LucideIcon } from "lucide-react";
 import { SHORTCUTS } from "../../../services/selection/selectionService";
 import type { Route } from "../notchRoutes";
 import { BackLabel, ViewHeader } from "./parts";
@@ -43,6 +43,12 @@ export function ToolsView({ onBack, onCollapse, onOpen }: Props) {
         leading={<BackLabel title="Tools" onBack={onBack} />}
       />
       <div className="mt-3">
+        <ToolRow
+          icon={Sparkles}
+          title="Ask AI"
+          hint={SHORTCUTS.ai}
+          onClick={() => onOpen("ai")}
+        />
         <ToolRow
           icon={Languages}
           title="Translate"

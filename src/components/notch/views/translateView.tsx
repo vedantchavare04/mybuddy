@@ -109,7 +109,6 @@ export function TranslateView({ onBack, onCollapse }: Props) {
     }
   };
 
-  // text arriving from the Ctrl+Alt+T shortcut
   useEffect(() => {
     if (!pending || pending.intent !== "translate") return;
     selectionService.consume();
@@ -121,8 +120,6 @@ export function TranslateView({ onBack, onCollapse }: Props) {
     setOriginal(pending.text);
     setResult(null);
     void run(pending.text, source, target);
-    // only react to a new capture
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending]);
 
   const swap = () => {

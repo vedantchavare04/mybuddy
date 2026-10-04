@@ -18,15 +18,19 @@ export const SIZES = {
   active: { width: 324, height: 44 },
 
   eventExpanded: { width: W, height: 176 },
-  home: { width: W, height: 196 },
-  tools: { width: W, height: 164 },
+  home: { width: W, height: 236 },
+  tools: { width: W, height: 216 },
   music: { width: W, height: 226 },
   calendar: { width: W, height: 292 },
   calendarCreate: { width: W, height: 336 },
+  reminders: { width: W, height: 292 },
+  remindersNew: { width: W, height: 244 },
   notifications: { width: W, height: 292 },
   translate: { width: W, height: 300 },
   speech: { width: W, height: 248 },
-  settings: { width: W, height: 176 },
+  ai: { width: W, height: 384 },
+  settings: { width: W, height: 276 },
+  aiSettings: { width: W, height: 352 },
 } satisfies Record<string, NotchSize>;
 
 export const RADIUS = { compact: 16, active: 22, expanded: 30 };

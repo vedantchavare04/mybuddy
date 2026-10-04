@@ -1,4 +1,5 @@
 import {
+  AlarmClock,
   BatteryLow,
   Bell,
   Calendar,
@@ -19,16 +20,19 @@ const LOOK: Record<string, Look> = {
   music: { icon: Music, label: "Now playing" },
   meeting: { icon: Calendar, label: "Calendar" },
   focus: { icon: Timer, label: "Focus" },
+  reminder: { icon: AlarmClock, label: "Reminder" },
 };
 
 const NEUTRAL = "rgba(255,255,255,0.7)";
 
-function lookFor(event: CompanionEvent): Look {
+export function lookFor(event: CompanionEvent): Look {
   return LOOK[event.type] ?? LOOK.notification;
 }
 
 export function EventActive({ event }: { event: CompanionEvent }) {
   const { icon: Icon, accent } = lookFor(event);
+  const text =
+    event.type === "reminder" ? `${event.title} · ${event.message}` : event.title;
   return (
     <div className="flex h-full items-center gap-3 px-[18px]">
       <Icon
@@ -38,7 +42,7 @@ export function EventActive({ event }: { event: CompanionEvent }) {
         className="shrink-0"
       />
       <span className="min-w-0 flex-1 truncate text-[13px] font-medium tracking-[-0.01em] text-white/90">
-        {event.title}
+        {text}
       </span>
     </div>
   );
@@ -82,14 +86,14 @@ export function EventExpanded({
             {actionLabel}
           </Button>
         )}
+        <Button variant="quiet" onClick={onCollapse}>
+          Later
+        </Button>
         {onMenu && (
-          <Button variant="quiet" onClick={onMenu}>
+          <Button variant="quiet" className="ml-auto" onClick={onMenu}>
             Menu
           </Button>
         )}
-        <Button variant="quiet" onClick={onCollapse}>
-          Dismiss
-        </Button>
       </div>
     </div>
   );

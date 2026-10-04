@@ -1,4 +1,5 @@
 import {
+  AlarmClock,
   Bell,
   Calendar,
   Music,
@@ -10,18 +11,12 @@ import type { CompanionEvent } from "../../../events/eventTypes";
 import { useNotifications } from "../../../services/notifications/notificationStore";
 import type { Route } from "../notchRoutes";
 import { dateFmt, useNow } from "./idleViews";
-import {
-  BackLabel,
-  Body,
-  Button,
-  IconButton,
-  Title,
-  ViewHeader,
-} from "./parts";
+import { BackLabel, Body, Button, Title, ViewHeader } from "./parts";
 
 const ITEMS: { route: Route; label: string; icon: LucideIcon }[] = [
   { route: "music", label: "Music", icon: Music },
   { route: "calendar", label: "Calendar", icon: Calendar },
+  { route: "reminders", label: "Reminders", icon: AlarmClock },
   { route: "notifications", label: "Notifications", icon: Bell },
   { route: "tools", label: "Tools", icon: Wrench },
 ];
@@ -34,13 +29,7 @@ type Props = {
   onCollapse: () => void;
 };
 
-export function HomeView({
-  event,
-  onOpen,
-  onSettings,
-  onBack,
-  onCollapse,
-}: Props) {
+export function HomeView({ event, onOpen, onSettings, onBack, onCollapse }: Props) {
   const now = useNow();
   const { items } = useNotifications();
   const unread = items.filter((n) => !n.read).length;
@@ -50,20 +39,18 @@ export function HomeView({
       <ViewHeader
         onClose={onCollapse}
         leading={
-          onBack ? (
-            <BackLabel title="Back" onBack={onBack} />
-          ) : (
-            dateFmt.format(now)
-          )
+          onBack ? <BackLabel title="Back" onBack={onBack} /> : dateFmt.format(now)
         }
         trailing={
-          <IconButton
-            label="Settings"
+          <button
+            type="button"
+            aria-label="Settings"
+            title="Settings"
             onClick={onSettings}
-            className="!h-6 !w-6 !text-white/30 hover:!text-white/75"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-white/30 outline-none transition-colors duration-150 hover:bg-white/[0.07] hover:text-white/75 focus-visible:ring-1 focus-visible:ring-white/30"
           >
             <Settings size={13} strokeWidth={1.8} />
-          </IconButton>
+          </button>
         }
       />
 
@@ -72,7 +59,7 @@ export function HomeView({
 
       <div className="mt-auto">
         <div className="mb-4 h-px bg-white/[0.07]" />
-        <nav className="flex gap-2" aria-label="MyBuddy">
+        <nav className="flex flex-wrap gap-2" aria-label="MyBuddy">
           {ITEMS.map(({ route, label, icon: Icon }) => (
             <Button key={route} onClick={() => onOpen(route)}>
               <Icon size={14} strokeWidth={1.8} />
