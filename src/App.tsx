@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { cursorPosition, getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
+import {
+  cursorPosition,
+  getCurrentWindow,
+} from "@tauri-apps/api/window";
 import SpiderLayer from "./components/character/spiderLayer";
 import Notch from "./components/notch/notch";
 import type { CompanionEvent } from "./events/eventTypes";
@@ -10,14 +14,28 @@ import { startBatteryMonitor } from "./system/batteryMonitor";
 import { positionMyBuddy } from "./system/windowPosition";
 import { notificationService } from "./services/notifications/notificationStore";
 import { useSettings } from "./services/settings/settingsStore";
+import SpecialCursor from "./components/cursor/specialCursor";
+import { cursorService } from "./services/cursor/cursorService";
+import type { CursorPosition } from "./components/cursor/cursorEffect";
 
 function App() {
-  const [activeEvent, setActiveEvent] = useState<CompanionEvent | null>(null);
+  const [activeEvent, setActiveEvent] =
+    useState<CompanionEvent | null>(null);
+
   const [islandOpen, setIslandOpen] = useState(false);
-  const activeEventRef = useRef<CompanionEvent | null>(null);
+
+  const [cursor, setCursor] =
+    useState<CursorPosition | null>(null);
+
+  const activeEventRef =
+    useRef<CompanionEvent | null>(null);
+
   const transitioningRef = useRef(false);
 
-  const { spiderEnabled } = useSettings();
+  const {
+    spiderEnabled,
+    specialCursorEnabled,
+  } = useSettings();
 
   useEffect(() => {
     if (spiderEnabled) {
@@ -37,29 +55,41 @@ function App() {
       updating = true;
 
       try {
-        const [cursor, position, scale] = await Promise.all([
-          cursorPosition(),
-          appWindow.outerPosition(),
-          appWindow.scaleFactor(),
-        ]);
+        const [cursor, position, scale] =
+          await Promise.all([
+            cursorPosition(),
+            appWindow.outerPosition(),
+            appWindow.scaleFactor(),
+          ]);
 
-        const localX = (cursor.x - position.x) / scale;
-        const localY = (cursor.y - position.y) / scale;
+        const localX =
+          (cursor.x - position.x) / scale;
 
-        const notch = document.querySelector<HTMLElement>(
-          '[data-mybuddy-notch="true"]',
-        );
+        const localY =
+          (cursor.y - position.y) / scale;
+
+        const notch =
+          document.querySelector<HTMLElement>(
+            '[data-mybuddy-notch="true"]',
+          );
 
         const insideNotch =
           notch !== null &&
           localX >= notch.offsetLeft &&
-          localX <= notch.offsetLeft + notch.offsetWidth &&
+          localX <=
+            notch.offsetLeft +
+              notch.offsetWidth &&
           localY >= notch.offsetTop &&
-          localY <= notch.offsetTop + notch.offsetHeight;
+          localY <=
+            notch.offsetTop +
+              notch.offsetHeight;
 
-        const shouldCapture = islandOpen || insideNotch;
+        const shouldCapture =
+          islandOpen || insideNotch;
 
-        await appWindow.setIgnoreCursorEvents(!shouldCapture);
+        await appWindow.setIgnoreCursorEvents(
+          !shouldCapture,
+        );
       } catch {
         return;
       } finally {
@@ -67,14 +97,22 @@ function App() {
       }
     };
 
-    const interval = globalThis.setInterval(updateNotchCapture, 50);
+    const interval =
+      globalThis.setInterval(
+        updateNotchCapture,
+        50,
+      );
 
     updateNotchCapture();
 
     return () => {
       mounted = false;
+
       globalThis.clearInterval(interval);
-      void appWindow.setIgnoreCursorEvents(true);
+
+      void appWindow.setIgnoreCursorEvents(
+        true,
+      );
     };
   }, [spiderEnabled, islandOpen]);
 
@@ -82,15 +120,22 @@ function App() {
     positionMyBuddy();
 
     return eventManager.subscribe(() => {
-      if (activeEventRef.current !== null || transitioningRef.current) {
+      if (
+        activeEventRef.current !== null ||
+        transitioningRef.current
+      ) {
         return;
       }
 
-      const nextEvent = eventQueue.getNext();
+      const nextEvent =
+        eventQueue.getNext();
 
       if (nextEvent) {
         eventLifecycle.setActive(nextEvent);
-        activeEventRef.current = nextEvent;
+
+        activeEventRef.current =
+          nextEvent;
+
         setActiveEvent(nextEvent);
       }
     });
@@ -102,8 +147,12 @@ function App() {
         eventId !== null &&
         activeEventRef.current?.id === eventId
       ) {
-        eventLifecycle.setDismissed(activeEventRef.current);
+        eventLifecycle.setDismissed(
+          activeEventRef.current,
+        );
+
         activeEventRef.current = null;
+
         setActiveEvent(null);
       }
     });
@@ -111,9 +160,36 @@ function App() {
 
   useEffect(() => {
     if (activeEvent) {
-      notificationService.recordEvent(activeEvent);
+      notificationService.recordEvent(
+        activeEvent,
+      );
     }
   }, [activeEvent]);
+
+  useEffect(() => {
+    void cursorService.start();
+
+    return () => {
+      cursorService.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    return cursorService.moveBus.subscribe(
+      (position) => {
+        setCursor(position);
+      },
+    );
+  }, []);
+
+  useEffect(() => {
+    void invoke(
+      "set_special_cursor_enabled",
+      {
+        enabled: specialCursorEnabled,
+      },
+    );
+  }, [specialCursorEnabled]);
 
   const handleCharacterClick = () => {
     setIslandOpen((open) => !open);
@@ -124,23 +200,33 @@ function App() {
   };
 
   const dismissEvent = () => {
-    const currentEvent = activeEventRef.current;
+    const currentEvent =
+      activeEventRef.current;
 
     transitioningRef.current = true;
 
     if (currentEvent) {
-      eventLifecycle.setDismissed(currentEvent);
+      eventLifecycle.setDismissed(
+        currentEvent,
+      );
     }
 
     activeEventRef.current = null;
+
     setActiveEvent(null);
 
     window.setTimeout(() => {
-      const nextEvent = eventQueue.getNext();
+      const nextEvent =
+        eventQueue.getNext();
 
       if (nextEvent) {
-        eventLifecycle.setActive(nextEvent);
-        activeEventRef.current = nextEvent;
+        eventLifecycle.setActive(
+          nextEvent,
+        );
+
+        activeEventRef.current =
+          nextEvent;
+
         setActiveEvent(nextEvent);
       }
 
@@ -157,19 +243,37 @@ function App() {
     <main className="relative min-h-screen overflow-visible text-white">
       <SpiderLayer
         enabled={spiderEnabled}
-        eventActive={activeEvent !== null}
+        eventActive={
+          activeEvent !== null
+        }
         event={activeEvent}
         onClick={handleCharacterClick}
         islandOpen={islandOpen}
       />
 
+      <SpecialCursor
+        bus={cursorService.clickBus}
+        position={cursor}
+        enabled={specialCursorEnabled}
+      />
+
       <Notch
         event={activeEvent}
         expanded={islandOpen}
-        onExpand={() => setIslandOpen(true)}
+        onExpand={() =>
+          setIslandOpen(true)
+        }
         onCollapse={closeIsland}
-        onAction={activeEvent ? handleDone : undefined}
-        actionLabel={activeEvent ? "Done" : undefined}
+        onAction={
+          activeEvent
+            ? handleDone
+            : undefined
+        }
+        actionLabel={
+          activeEvent
+            ? "Done"
+            : undefined
+        }
       />
     </main>
   );
