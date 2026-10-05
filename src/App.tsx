@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { cursorPosition, getCurrentWindow } from "@tauri-apps/api/window";
 import SpiderLayer from "./components/character/spiderLayer";
 import Notch from "./components/notch/notch";
 import type { CompanionEvent } from "./events/eventTypes";
@@ -19,7 +20,67 @@ function App() {
   const { spiderEnabled } = useSettings();
 
   useEffect(() => {
+    if (spiderEnabled) {
+      return;
+    }
+
+    const appWindow = getCurrentWindow();
+
+    let mounted = true;
+    let updating = false;
+
+    const updateNotchCapture = async () => {
+      if (!mounted || updating) {
+        return;
+      }
+
+      updating = true;
+
+      try {
+        const [cursor, position, scale] = await Promise.all([
+          cursorPosition(),
+          appWindow.outerPosition(),
+          appWindow.scaleFactor(),
+        ]);
+
+        const localX = (cursor.x - position.x) / scale;
+        const localY = (cursor.y - position.y) / scale;
+
+        const notch = document.querySelector<HTMLElement>(
+          '[data-mybuddy-notch="true"]',
+        );
+
+        const insideNotch =
+          notch !== null &&
+          localX >= notch.offsetLeft &&
+          localX <= notch.offsetLeft + notch.offsetWidth &&
+          localY >= notch.offsetTop &&
+          localY <= notch.offsetTop + notch.offsetHeight;
+
+        const shouldCapture = islandOpen || insideNotch;
+
+        await appWindow.setIgnoreCursorEvents(!shouldCapture);
+      } catch {
+        return;
+      } finally {
+        updating = false;
+      }
+    };
+
+    const interval = globalThis.setInterval(updateNotchCapture, 50);
+
+    updateNotchCapture();
+
+    return () => {
+      mounted = false;
+      globalThis.clearInterval(interval);
+      void appWindow.setIgnoreCursorEvents(true);
+    };
+  }, [spiderEnabled, islandOpen]);
+
+  useEffect(() => {
     positionMyBuddy();
+
     return eventManager.subscribe(() => {
       if (activeEventRef.current !== null || transitioningRef.current) {
         return;
@@ -49,7 +110,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (activeEvent) notificationService.recordEvent(activeEvent);
+    if (activeEvent) {
+      notificationService.recordEvent(activeEvent);
+    }
   }, [activeEvent]);
 
   const handleCharacterClick = () => {

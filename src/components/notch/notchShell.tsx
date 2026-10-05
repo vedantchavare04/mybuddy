@@ -84,6 +84,7 @@ export default function NotchShell({
     <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex justify-center antialiased">
       <motion.div
         ref={shellRef}
+        data-mybuddy-notch="true"
         className="pointer-events-auto relative"
         style={{ transformOrigin: "50% 0%" }}
         initial={{ width: SIZES.compact.width * 0.8, height: 0 }}

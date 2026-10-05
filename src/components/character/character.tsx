@@ -182,6 +182,7 @@ export default function Character({
     return () => {
       mounted = false;
       globalThis.clearInterval(interval);
+      void appWindow.setIgnoreCursorEvents(true);
     };
   }, []);
 
