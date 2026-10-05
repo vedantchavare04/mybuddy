@@ -25,14 +25,12 @@ function load(): Settings {
 
     return {
       spiderEnabled:
-        typeof stored.spiderEnabled ===
-        "boolean"
+        typeof stored.spiderEnabled === "boolean"
           ? stored.spiderEnabled
           : DEFAULTS.spiderEnabled,
 
       specialCursorEnabled:
-        typeof stored.specialCursorEnabled ===
-        "boolean"
+        typeof stored.specialCursorEnabled === "boolean"
           ? stored.specialCursorEnabled
           : DEFAULTS.specialCursorEnabled,
     };
@@ -41,8 +39,7 @@ function load(): Settings {
   }
 }
 
-const store =
-  createStore<Settings>(load());
+const store = createStore<Settings>(load());
 
 export const settingsService = {
   set<K extends keyof Settings>(
