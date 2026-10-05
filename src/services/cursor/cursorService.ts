@@ -26,12 +26,21 @@ type CursorButtonPayload = {
   pressed: boolean;
 };
 
-const clickBus = createCursorClickBus();
-const moveBus = createCursorMoveBus();
+type CursorKeyboardPayload = {
+  pressed: boolean;
+  vk_code: number;
+};
+
+const clickBus =
+  createCursorClickBus();
+
+const moveBus =
+  createCursorMoveBus();
 
 let unlistenClick: UnlistenFn | null = null;
 let unlistenMove: UnlistenFn | null = null;
 let unlistenButton: UnlistenFn | null = null;
+let unlistenKeyboard: UnlistenFn | null = null;
 
 let started = false;
 
@@ -46,102 +55,124 @@ export const cursorService = {
 
     started = true;
 
-    const appWindow = getCurrentWindow();
+    const appWindow =
+      getCurrentWindow();
 
-    unlistenClick = await listen<CursorClickPayload>(
-      "cursor://click",
-      async (event) => {
-        const payload = event.payload;
+    unlistenClick =
+      await listen<CursorClickPayload>(
+        "cursor://click",
+        async (event) => {
+          const payload =
+            event.payload;
 
-        try {
-          const [position, scaleFactor] =
-            await Promise.all([
+          try {
+            const [
+              position,
+              scaleFactor,
+            ] = await Promise.all([
               appWindow.outerPosition(),
               appWindow.scaleFactor(),
             ]);
 
-          const x =
-            (payload.x - position.x) /
-            scaleFactor;
+            const x =
+              (payload.x -
+                position.x) /
+              scaleFactor;
 
-          const y =
-            (payload.y - position.y) /
-            scaleFactor;
+            const y =
+              (payload.y -
+                position.y) /
+              scaleFactor;
 
-          const click: CursorClick = {
-            id: payload.id,
-            x,
-            y,
-            button: payload.button,
-          };
+            const click: CursorClick = {
+              id: payload.id,
+              x,
+              y,
+              button: payload.button,
+            };
 
-          clickBus.emit(click);
-        } catch {
-          return;
-        }
-      },
-    );
+            clickBus.emit(click);
+          } catch {
+            return;
+          }
+        },
+      );
 
-    unlistenMove = await listen<CursorMovePayload>(
-      "cursor://move",
-      async (event) => {
-        const payload = event.payload;
+    unlistenMove =
+      await listen<CursorMovePayload>(
+        "cursor://move",
+        async (event) => {
+          const payload =
+            event.payload;
 
-        try {
-          const [position, scaleFactor] =
-            await Promise.all([
+          try {
+            const [
+              position,
+              scaleFactor,
+            ] = await Promise.all([
               appWindow.outerPosition(),
               appWindow.scaleFactor(),
             ]);
 
-          const x =
-            (payload.x - position.x) /
-            scaleFactor;
+            const x =
+              (payload.x -
+                position.x) /
+              scaleFactor;
 
-          const y =
-            (payload.y - position.y) /
-            scaleFactor;
+            const y =
+              (payload.y -
+                position.y) /
+              scaleFactor;
 
-          const cursorPosition: CursorPosition = {
-            x,
-            y,
-          };
+            const cursorPosition:
+              CursorPosition = {
+              x,
+              y,
+            };
 
-          moveBus.emit(cursorPosition);
+            moveBus.emit(
+              cursorPosition,
+            );
 
-          window.dispatchEvent(
-            new CustomEvent(
-              "mybuddy-cursor-move",
-              {
-                detail: cursorPosition,
-              },
-            ),
-          );
-        } catch {
-          return;
-        }
-      },
-    );
+            window.dispatchEvent(
+              new CustomEvent(
+                "mybuddy-cursor-move",
+                {
+                  detail:
+                    cursorPosition,
+                },
+              ),
+            );
+          } catch {
+            return;
+          }
+        },
+      );
 
     unlistenButton =
       await listen<CursorButtonPayload>(
         "cursor://button",
         async (event) => {
-          const payload = event.payload;
+          const payload =
+            event.payload;
 
           try {
-            const [position, scaleFactor] =
-              await Promise.all([
-                appWindow.outerPosition(),
-                appWindow.scaleFactor(),
-              ]);
+            const [
+              position,
+              scaleFactor,
+            ] = await Promise.all([
+              appWindow.outerPosition(),
+              appWindow.scaleFactor(),
+            ]);
 
             const x =
-              (payload.x - position.x) /
+              (payload.x -
+                position.x) /
               scaleFactor;
 
             const y =
-              (payload.y - position.y) /
+              (payload.y -
+                position.y) /
               scaleFactor;
 
             window.dispatchEvent(
@@ -151,8 +182,10 @@ export const cursorService = {
                   detail: {
                     x,
                     y,
-                    button: payload.button,
-                    pressed: payload.pressed,
+                    button:
+                      payload.button,
+                    pressed:
+                      payload.pressed,
                   },
                 },
               ),
@@ -160,6 +193,21 @@ export const cursorService = {
           } catch {
             return;
           }
+        },
+      );
+
+    unlistenKeyboard =
+      await listen<CursorKeyboardPayload>(
+        "cursor://keyboard",
+        (event) => {
+          window.dispatchEvent(
+            new CustomEvent(
+              "mybuddy-cursor-keyboard",
+              {
+                detail: event.payload,
+              },
+            ),
+          );
         },
       );
   },
@@ -178,6 +226,11 @@ export const cursorService = {
     if (unlistenButton) {
       unlistenButton();
       unlistenButton = null;
+    }
+
+    if (unlistenKeyboard) {
+      unlistenKeyboard();
+      unlistenKeyboard = null;
     }
 
     started = false;
