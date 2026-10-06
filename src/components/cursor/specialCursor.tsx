@@ -332,8 +332,8 @@ const IBeamCursor = memo(function IBeamCursor({
       <div
         style={{
           position: "relative",
-          width: 18,
-          height: 34,
+          width: 10,
+          height: 20,
         }}
       >
         <div
@@ -342,7 +342,7 @@ const IBeamCursor = memo(function IBeamCursor({
             left: 8,
             top: 2,
             width: 2,
-            height: 30,
+            height: 15,
             borderRadius: 999,
             background: cursorColor,
           }}
@@ -353,7 +353,7 @@ const IBeamCursor = memo(function IBeamCursor({
             position: "absolute",
             left: 2,
             top: 2,
-            width: 14,
+            width: 12,
             height: 2,
             borderRadius: 999,
             background: cursorColor,
@@ -365,7 +365,7 @@ const IBeamCursor = memo(function IBeamCursor({
             position: "absolute",
             left: 2,
             bottom: 2,
-            width: 14,
+            width: 12,
             height: 2,
             borderRadius: 999,
             background: cursorColor,

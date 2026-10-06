@@ -3,23 +3,38 @@ use std::sync::OnceLock;
 use std::thread;
 
 use tauri::{AppHandle, Emitter};
+
 use windows::Win32::Foundation::{LPARAM, LRESULT, WPARAM};
+
 use windows::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx,
     CreateCursor,
     GetMessageW,
+    SetCursor,
     SetSystemCursor,
     SetWindowsHookExW,
-    ShowCursor,
     SystemParametersInfoW,
     UnhookWindowsHookEx,
     KBDLLHOOKSTRUCT,
     MSLLHOOKSTRUCT,
     MSG,
+    OCR_APPSTARTING,
+    OCR_CROSS,
+    OCR_HAND,
+    OCR_HELP,
     OCR_IBEAM,
+    OCR_NO,
     OCR_NORMAL,
+    OCR_SIZEALL,
+    OCR_SIZENESW,
+    OCR_SIZENS,
+    OCR_SIZENWSE,
+    OCR_SIZEWE,
+    OCR_UP,
+    OCR_WAIT,
     SPI_SETCURSORS,
     SPIF_SENDCHANGE,
+    SYSTEM_CURSOR_ID,
     WH_KEYBOARD_LL,
     WH_MOUSE_LL,
     WM_KEYDOWN,
@@ -34,7 +49,9 @@ use windows::Win32::UI::WindowsAndMessaging::{
 };
 
 static CLICK_ID: AtomicU64 = AtomicU64::new(1);
+
 static CURSOR_APP: OnceLock<AppHandle> = OnceLock::new();
+
 static SPECIAL_CURSOR_ENABLED: AtomicBool =
     AtomicBool::new(false);
 
@@ -99,8 +116,7 @@ pub fn start(_app: AppHandle) {
                     "[cursor] could not install keyboard hook: {error}"
                 );
 
-                let _ =
-                    UnhookWindowsHookEx(mouse_hook);
+                let _ = UnhookWindowsHookEx(mouse_hook);
 
                 return;
             }
@@ -128,36 +144,13 @@ pub fn start(_app: AppHandle) {
             }
         }
 
-        let _ =
-            UnhookWindowsHookEx(mouse_hook);
+        let _ = UnhookWindowsHookEx(mouse_hook);
 
-        let _ =
-            UnhookWindowsHookEx(keyboard_hook);
+        let _ = UnhookWindowsHookEx(keyboard_hook);
     });
 }
 
-fn hide_native_cursor() {
-    unsafe {
-        let mut count = ShowCursor(false);
-
-        while count >= 0 {
-            count = ShowCursor(false);
-        }
-    }
-}
-
-fn show_native_cursor() {
-    unsafe {
-        let mut count = ShowCursor(true);
-
-        while count < 0 {
-            count = ShowCursor(true);
-        }
-    }
-}
-
-fn create_invisible_cursor(
-) -> Result<
+fn create_invisible_cursor() -> Result<
     windows::Win32::UI::WindowsAndMessaging::HCURSOR,
     String,
 > {
@@ -178,28 +171,45 @@ fn create_invisible_cursor(
     }
 }
 
-fn set_invisible_system_cursor() -> Result<(), String> {
+fn set_invisible_cursor(
+    cursor_id: SYSTEM_CURSOR_ID,
+) -> Result<(), String> {
     unsafe {
-        let normal_cursor =
-            create_invisible_cursor()?;
+        let cursor = create_invisible_cursor()?;
 
         SetSystemCursor(
-            normal_cursor,
-            OCR_NORMAL,
-        )
-        .map_err(|error| error.to_string())?;
-
-        let ibeam_cursor =
-            create_invisible_cursor()?;
-
-        SetSystemCursor(
-            ibeam_cursor,
-            OCR_IBEAM,
+            cursor,
+            cursor_id,
         )
         .map_err(|error| error.to_string())?;
 
         Ok(())
     }
+}
+
+fn set_invisible_system_cursors() -> Result<(), String> {
+    let cursor_ids = [
+        OCR_NORMAL,
+        OCR_IBEAM,
+        OCR_WAIT,
+        OCR_CROSS,
+        OCR_UP,
+        OCR_SIZENWSE,
+        OCR_SIZENESW,
+        OCR_SIZEWE,
+        OCR_SIZENS,
+        OCR_SIZEALL,
+        OCR_NO,
+        OCR_HAND,
+        OCR_APPSTARTING,
+        OCR_HELP,
+    ];
+
+    for cursor_id in cursor_ids {
+        set_invisible_cursor(cursor_id)?;
+    }
+
+    Ok(())
 }
 
 fn restore_system_cursors() -> Result<(), String> {
@@ -213,6 +223,12 @@ fn restore_system_cursors() -> Result<(), String> {
         .map_err(|error| error.to_string())?;
 
         Ok(())
+    }
+}
+
+fn remove_current_cursor() {
+    unsafe {
+        SetCursor(None);
     }
 }
 
@@ -231,10 +247,9 @@ pub fn set_special_cursor_enabled(
     }
 
     if enabled {
-        set_invisible_system_cursor()?;
-        hide_native_cursor();
+        set_invisible_system_cursors()?;
+        remove_current_cursor();
     } else {
-        show_native_cursor();
         restore_system_cursors()?;
     }
 
@@ -257,7 +272,7 @@ unsafe extern "system" fn mouse_hook(
         if SPECIAL_CURSOR_ENABLED.load(
             Ordering::SeqCst,
         ) {
-            hide_native_cursor();
+            remove_current_cursor();
         }
 
         let message = wparam.0 as u32;
@@ -274,9 +289,7 @@ unsafe extern "system" fn mouse_hook(
                 y: mouse.pt.y,
             };
 
-            if let Some(app) =
-                CURSOR_APP.get()
-            {
+            if let Some(app) = CURSOR_APP.get() {
                 let _ = app.emit(
                     "cursor://move",
                     payload,
@@ -317,9 +330,7 @@ unsafe extern "system" fn mouse_hook(
                     pressed: true,
                 };
 
-            if let Some(app) =
-                CURSOR_APP.get()
-            {
+            if let Some(app) = CURSOR_APP.get() {
                 let _ = app.emit(
                     "cursor://click",
                     click_payload,
@@ -341,9 +352,7 @@ unsafe extern "system" fn mouse_hook(
                     pressed: false,
                 };
 
-            if let Some(app) =
-                CURSOR_APP.get()
-            {
+            if let Some(app) = CURSOR_APP.get() {
                 let _ = app.emit(
                     "cursor://button",
                     payload,
@@ -385,8 +394,7 @@ unsafe extern "system" fn keyboard_hook(
                 || message == WM_SYSKEYUP;
 
         if is_key_down || is_key_up {
-            let vk_code =
-                keyboard.vkCode;
+            let vk_code = keyboard.vkCode;
 
             if is_typing_key(vk_code) {
                 let payload =
