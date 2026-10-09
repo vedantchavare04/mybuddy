@@ -68,12 +68,14 @@ export default function NotchShell({
   const area = size.width * size.height;
   const prevArea = useRef(0);
   const spring = area >= prevArea.current ? SPRING_OPEN : SPRING_CLOSE;
+
   useEffect(() => {
     prevArea.current = area;
   }, [area]);
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (expanded) return;
+
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onActivate();
@@ -89,6 +91,11 @@ export default function NotchShell({
         style={{ transformOrigin: "50% 0%" }}
         initial={{ width: SIZES.compact.width * 0.8, height: 0 }}
         animate={{ width: size.width, height: size.height }}
+        exit={{
+          width: SIZES.compact.width * 0.8,
+          height: 0,
+          opacity: 0,
+        }}
         transition={spring}
         whileTap={expanded ? undefined : { scale: 0.97 }}
         onPointerEnter={() => onHoverChange(true)}
@@ -155,6 +162,7 @@ export default function NotchShell({
 
 function Ear({ side }: { side: "left" | "right" }) {
   const w = EAR + 0.5;
+
   const d =
     side === "left"
       ? `M0 0H${w}V${EAR}H${EAR}Q${EAR} 0 0 0Z`

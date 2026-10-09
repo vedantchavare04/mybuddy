@@ -3,11 +3,15 @@ import { createStore, useStore } from "../createStore";
 export type Settings = {
   spiderEnabled: boolean;
   specialCursorEnabled: boolean;
+  notchEnabled: boolean;
+  dockX: number;
 };
 
 const KEY = "mybuddy.settings.v1";
 
 const DEFAULTS: Settings = {
+  notchEnabled: true,
+  dockX: 0.5,
   spiderEnabled: true,
   specialCursorEnabled: true,
 };
@@ -33,6 +37,18 @@ function load(): Settings {
         typeof stored.specialCursorEnabled === "boolean"
           ? stored.specialCursorEnabled
           : DEFAULTS.specialCursorEnabled,
+
+          notchEnabled:
+          typeof stored.notchEnabled === "boolean"
+            ? stored.notchEnabled
+            : DEFAULTS.notchEnabled,
+        
+        dockX:
+          typeof stored.dockX === "number" &&
+          stored.dockX >= 0 &&
+          stored.dockX <= 1
+            ? stored.dockX
+            : DEFAULTS.dockX,
     };
   } catch {
     return DEFAULTS;

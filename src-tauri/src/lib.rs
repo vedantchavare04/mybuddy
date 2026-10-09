@@ -1,5 +1,6 @@
 mod ai;
 mod cursor;
+mod dock;
 mod google;
 mod media;
 mod notifications;
@@ -32,31 +33,15 @@ pub fn run() {
                 )?;
             }
 
-            cursor::register_app(
-                app.handle().clone(),
-            );
+            app.manage(dock::Dock::new());
 
-            cursor::start(
-                app.handle().clone(),
-            );
+            cursor::register_app(app.handle().clone());
+            cursor::start(app.handle().clone());
 
-            app.manage(
-                media::start(
-                    app.handle().clone(),
-                ),
-            );
+            app.manage(media::start(app.handle().clone()));
+            app.manage(speech::start(app.handle().clone()));
 
-            app.manage(
-                speech::start(
-                    app.handle().clone(),
-                ),
-            );
-
-            let reminders =
-                reminders::start(
-                    app.handle().clone(),
-                )?;
-
+            let reminders = reminders::start(app.handle().clone())?;
             app.manage(reminders);
 
             for shortcut in [
@@ -64,71 +49,66 @@ pub fn run() {
                 selection::speak_shortcut(),
                 selection::ai_shortcut(),
             ] {
-                if let Err(error) =
-                    app.global_shortcut().register(shortcut)
-                {
-                    eprintln!(
-                        "[shortcut] could not register: {error}"
-                    );
+                if let Err(error) = app.global_shortcut().register(shortcut) {
+                    eprintln!("[shortcut] could not register: {error}");
                 }
             }
 
             Ok(())
         })
-        .invoke_handler(
-            tauri::generate_handler![
-                get_battery_status,
+        .invoke_handler(tauri::generate_handler![
+            get_battery_status,
 
-                cursor::set_special_cursor_enabled,
-                cursor::is_special_cursor_enabled,
+            cursor::set_special_cursor_enabled,
+            cursor::is_special_cursor_enabled,
 
-                media::media_snapshot,
-                media::media_control,
+            dock::dock_enter,
+            dock::dock_hold,
+            dock::dock_leave,
 
-                speech::speech_voices,
-                speech::speech_speak,
-                speech::speech_pause,
-                speech::speech_resume,
-                speech::speech_stop,
-                speech::speech_rate,
+            media::media_snapshot,
+            media::media_control,
 
-                translate::translate,
+            speech::speech_voices,
+            speech::speech_speak,
+            speech::speech_pause,
+            speech::speech_resume,
+            speech::speech_stop,
+            speech::speech_rate,
 
-                google::google_status,
-                google::google_connect,
-                google::google_cancel,
-                google::google_disconnect,
-                google::calendar_upcoming,
-                google::calendar_create,
+            translate::translate,
 
-                notifications::notif_status,
-                notifications::notif_request,
-                notifications::notif_poll,
+            google::google_status,
+            google::google_connect,
+            google::google_cancel,
+            google::google_disconnect,
+            google::calendar_upcoming,
+            google::calendar_create,
 
-                reminders::reminders_list,
-                reminders::reminder_create,
-                reminders::reminder_done,
-                reminders::reminder_delete,
-                reminders::reminder_snooze,
-                reminders::reminder_presented,
+            notifications::notif_status,
+            notifications::notif_request,
+            notifications::notif_poll,
 
-                ai::ai_connect,
-                ai::ai_status,
-                ai::ai_disconnect,
-                ai::ai_models,
-                ai::ai_ask,
-            ],
-        )
+            reminders::reminders_list,
+            reminders::reminder_create,
+            reminders::reminder_done,
+            reminders::reminder_delete,
+            reminders::reminder_snooze,
+            reminders::reminder_presented,
+
+            ai::ai_connect,
+            ai::ai_status,
+            ai::ai_disconnect,
+            ai::ai_models,
+            ai::ai_ask,
+        ])
         .run(tauri::generate_context!())
-        .expect(
-            "error while building tauri application",
-        );
+        .expect("error while building tauri application");
 }
 
 #[tauri::command]
 fn get_battery_status() -> Result<BatteryStatus, String> {
-    let mut status =
-        SYSTEM_POWER_STATUS::default();
+    let mut status = SYSTEM_POWER_STATUS::default();
 
     unsafe {
         GetSystemPowerStatus(&mut status)

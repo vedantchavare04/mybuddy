@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import {
   cursorPosition,
   getCurrentWindow,
 } from "@tauri-apps/api/window";
 import SpiderLayer from "./components/character/spiderLayer";
+import Dock from "./components/dock/dock";
 import Notch from "./components/notch/notch";
 import type { CompanionEvent } from "./events/eventTypes";
 import { eventManager } from "./events/eventManager";
@@ -13,7 +15,10 @@ import { eventLifecycle } from "./events/eventLifecycle";
 import { startBatteryMonitor } from "./system/batteryMonitor";
 import { positionMyBuddy } from "./system/windowPosition";
 import { notificationService } from "./services/notifications/notificationStore";
-import { useSettings } from "./services/settings/settingsStore";
+import {
+  settingsService,
+  useSettings,
+} from "./services/settings/settingsStore";
 import SpecialCursor from "./components/cursor/specialCursor";
 import { cursorService } from "./services/cursor/cursorService";
 import type { CursorPosition } from "./components/cursor/cursorEffect";
@@ -35,7 +40,14 @@ function App() {
   const {
     spiderEnabled,
     specialCursorEnabled,
+    notchEnabled,
   } = useSettings();
+
+  useEffect(() => {
+    if (!notchEnabled) {
+      setIslandOpen(false);
+    }
+  }, [notchEnabled]);
 
   useEffect(() => {
     if (spiderEnabled) {
@@ -48,7 +60,7 @@ function App() {
     let updating = false;
 
     const updateNotchCapture = async () => {
-      if (!mounted || updating) {
+      if (!mounted || updating || !notchEnabled) {
         return;
       }
 
@@ -114,7 +126,7 @@ function App() {
         true,
       );
     };
-  }, [spiderEnabled, islandOpen]);
+  }, [spiderEnabled, islandOpen, notchEnabled]);
 
   useEffect(() => {
     positionMyBuddy();
@@ -242,10 +254,8 @@ function App() {
   return (
     <main className="relative min-h-screen overflow-visible text-white">
       <SpiderLayer
-        enabled={spiderEnabled}
-        eventActive={
-          activeEvent !== null
-        }
+        enabled={spiderEnabled && notchEnabled}
+        eventActive={activeEvent !== null}
         event={activeEvent}
         onClick={handleCharacterClick}
         islandOpen={islandOpen}
@@ -258,23 +268,24 @@ function App() {
       />
 
       <Notch
+        visible={notchEnabled}
         event={activeEvent}
         expanded={islandOpen}
-        onExpand={() =>
-          setIslandOpen(true)
-        }
+        onExpand={() => {
+          if (!notchEnabled) {
+            settingsService.set("notchEnabled", true);
+          }
+
+          setIslandOpen(true);
+        }}
         onCollapse={closeIsland}
-        onAction={
-          activeEvent
-            ? handleDone
-            : undefined
-        }
-        actionLabel={
-          activeEvent
-            ? "Done"
-            : undefined
-        }
+        onAction={activeEvent ? handleDone : undefined}
+        actionLabel={activeEvent ? "Done" : undefined}
       />
+
+      <AnimatePresence>
+        {!notchEnabled && <Dock />}
+      </AnimatePresence>
     </main>
   );
 }
