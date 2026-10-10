@@ -1,4 +1,7 @@
+
 mod ai;
+mod app_launcher;
+mod clipboard;
 mod cursor;
 mod dock;
 mod google;
@@ -11,10 +14,7 @@ mod translate;
 
 use tauri::Manager;
 use tauri_plugin_global_shortcut::GlobalShortcutExt;
-use windows::Win32::System::Power::{
-    GetSystemPowerStatus,
-    SYSTEM_POWER_STATUS,
-};
+use windows::Win32::System::Power::{GetSystemPowerStatus, SYSTEM_POWER_STATUS};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -44,6 +44,8 @@ pub fn run() {
             let reminders = reminders::start(app.handle().clone())?;
             app.manage(reminders);
 
+            clipboard::start(app.handle().clone());
+
             for shortcut in [
                 selection::translate_shortcut(),
                 selection::speak_shortcut(),
@@ -58,49 +60,44 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_battery_status,
-
             cursor::set_special_cursor_enabled,
             cursor::is_special_cursor_enabled,
-
             dock::dock_enter,
             dock::dock_hold,
             dock::dock_leave,
-
+            app_launcher::list_installed_apps,
+            app_launcher::launch_app,
             media::media_snapshot,
             media::media_control,
-
             speech::speech_voices,
             speech::speech_speak,
             speech::speech_pause,
             speech::speech_resume,
             speech::speech_stop,
             speech::speech_rate,
-
             translate::translate,
-
             google::google_status,
             google::google_connect,
             google::google_cancel,
             google::google_disconnect,
             google::calendar_upcoming,
             google::calendar_create,
-
             notifications::notif_status,
             notifications::notif_request,
             notifications::notif_poll,
-
             reminders::reminders_list,
             reminders::reminder_create,
             reminders::reminder_done,
             reminders::reminder_delete,
             reminders::reminder_snooze,
             reminders::reminder_presented,
-
             ai::ai_connect,
             ai::ai_status,
             ai::ai_disconnect,
             ai::ai_models,
             ai::ai_ask,
+            clipboard::clipboard_write_text,
+            clipboard::clipboard_history_list,
         ])
         .run(tauri::generate_context!())
         .expect("error while building tauri application");

@@ -1,6 +1,8 @@
+
 export type Route =
   | "event"
   | "home"
+  | "launcher"
   | "music"
   | "calendar"
   | "calendar/new"
@@ -12,11 +14,14 @@ export type Route =
   | "speech"
   | "ai"
   | "settings"
+  | "clipboard"
   | "settings/ai";
 
 export const PARENT: Record<Route, Route | null> = {
   event: null,
   home: null,
+  clipboard: "home",
+  launcher: "home",
   music: "home",
   calendar: "home",
   "calendar/new": "calendar",

@@ -32,6 +32,8 @@ import { SpeechView } from "./views/speechView";
 import { AiView } from "./views/aiView";
 import { SettingsView } from "./views/settingsView";
 import { AiSettingsView } from "./views/aiSettingsView";
+import LauncherView from "./views/launcherView";
+import ClipboardView from "./views/clipboardView";
 
 type NotchProps = {
   event: CompanionEvent | null;
@@ -131,6 +133,22 @@ export default function Notch({
             SIZES.music,
             <MusicView onBack={back} onCollapse={onCollapse} />,
           );
+
+        case "clipboard":
+          return expandedView("clipboard", SIZES.home, <ClipboardView />);
+
+        case "launcher":
+          return expandedView(
+            "launcher",
+            SIZES.home,
+            <LauncherView
+              onOpenApps={() => nav.go("home")}
+              onOpenPlanner={() => nav.go("calendar")}
+              onOpenClipboard={() => nav.go("clipboard")}
+              onOpenMemory={() => nav.go("home")}
+            />,
+          );
+
         case "calendar":
           return expandedView(
             "calendar",
