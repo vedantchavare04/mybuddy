@@ -135,7 +135,11 @@ export default function Notch({
           );
 
         case "clipboard":
-          return expandedView("clipboard", SIZES.home, <ClipboardView />);
+          return expandedView(
+            "clipboard",
+            SIZES.home,
+            <ClipboardView onBack={back} onCollapse={onCollapse} />,
+          );
 
         case "launcher":
           return expandedView(

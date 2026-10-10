@@ -80,6 +80,36 @@
   color: var(--nx-text-1);
 }
 
+/* Search field: solid charcoal, no gradient or glow */
+.cb .nx-field {
+  background: #111113;
+  background-image: none;
+  border: 1px solid #29292e;
+  box-shadow: none;
+  color: #f4f4f5;
+  transition: border-color 160ms ease;
+}
+
+.cb .nx-field:focus-within {
+  background: #111113;
+  background-image: none;
+  border-color: #52525b;
+  box-shadow: none;
+}
+
+.cb .nx-field input {
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: #f4f4f5;
+}
+
+.cb .nx-field input::placeholder {
+  color: #71717a;
+  opacity: 1;
+}
+
+/* Clipboard history */
 .cb-list {
   flex: 1 1 auto;
   min-height: 0;
@@ -88,20 +118,6 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scroll-padding: 6px 0;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 6px,
-    #000 calc(100% - 6px),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 6px,
-    #000 calc(100% - 6px),
-    transparent 100%
-  );
 }
 
 .cb-list::-webkit-scrollbar {
