@@ -1,0 +1,489 @@
+@import "./tokens.css";
+
+.mem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 20px 24px 16px;
+  color: var(--nx-text-1);
+  cursor: default;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss03";
+}
+
+.mem-new,
+.mem-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 11px 0 9px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: default;
+  transition:
+    background-color var(--nx-dur-fast) var(--nx-ease),
+    color var(--nx-dur-fast) var(--nx-ease),
+    opacity var(--nx-dur) var(--nx-ease),
+    transform var(--nx-dur-fast) var(--nx-ease);
+}
+
+.mem-new {
+  background: var(--nx-fill-2);
+  color: var(--nx-text-1);
+}
+
+.mem-new:hover {
+  background: var(--nx-fill-3);
+}
+
+.mem-save {
+  padding: 0 13px;
+  background: var(--nx-text-1);
+  color: #0a0a0a;
+}
+
+.mem-save:hover:not(:disabled) {
+  background: #ffffff;
+}
+
+.mem-save:disabled {
+  opacity: 0.35;
+}
+
+.mem-new:active,
+.mem-save:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.mem-new:focus-visible,
+.mem-save:focus-visible {
+  outline: 1.5px solid var(--nx-accent);
+  outline-offset: 2px;
+}
+
+.mem-search-clear {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--nx-fill-3);
+  color: var(--nx-text-2);
+  cursor: default;
+  transition: background-color var(--nx-dur-fast) var(--nx-ease);
+}
+
+.mem-search-clear:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--nx-text-1);
+}
+
+.mem-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mem-list::-webkit-scrollbar,
+.mem-editor::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mem-list::-webkit-scrollbar-track,
+.mem-editor::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mem-list::-webkit-scrollbar-thumb,
+.mem-editor::-webkit-scrollbar-thumb {
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  background-clip: content-box;
+}
+
+.mem-section {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 12px;
+  color: var(--nx-text-4);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mem-row-wrap {
+  height: 48px;
+  overflow: hidden;
+}
+
+.mem-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 6px 0 12px;
+  border-radius: var(--nx-radius-md);
+  transition:
+    background-color var(--nx-dur-fast) var(--nx-ease),
+    box-shadow var(--nx-dur-fast) var(--nx-ease),
+    transform var(--nx-dur-fast) var(--nx-ease);
+}
+
+.mem-row.is-selected {
+  background: var(--nx-fill-2);
+  box-shadow: inset 0 0 0 1px var(--nx-line);
+}
+
+.mem-row:active {
+  transform: scale(0.992);
+}
+
+.mem-row.is-copied {
+  animation: mem-flash 520ms var(--nx-ease-out);
+}
+
+@keyframes mem-flash {
+  0% {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  100% {
+    background: var(--nx-fill-2);
+  }
+}
+
+.mem-lead {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--nx-text-3);
+  transition: color var(--nx-dur-fast) var(--nx-ease);
+}
+
+.mem-row.is-selected .mem-lead {
+  color: var(--nx-text-2);
+}
+
+.mem-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+
+.mem-main:focus-visible {
+  outline: 1.5px solid var(--nx-accent);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.mem-title {
+  display: block;
+  overflow: hidden;
+  color: var(--nx-text-1);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mem-title mark {
+  padding: 0 1px;
+  margin: 0 -1px;
+  border-radius: 3px;
+  background: var(--nx-accent-soft);
+  color: #ffffff;
+}
+
+.mem-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 12px;
+  overflow: hidden;
+  color: var(--nx-text-3);
+  font-size: 11px;
+  line-height: 12px;
+  white-space: nowrap;
+  transition: color var(--nx-dur-fast) var(--nx-ease);
+}
+
+.mem-meta.is-copied {
+  gap: 5px;
+  color: var(--nx-accent-text);
+  font-weight: 500;
+}
+
+.mem-tag {
+  flex: none;
+  color: var(--nx-text-2);
+}
+
+.mem-preview {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mem-actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+}
+
+.mem-act {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--nx-text-3);
+  opacity: 0;
+  cursor: default;
+  transition:
+    background-color var(--nx-dur-fast) var(--nx-ease),
+    color var(--nx-dur-fast) var(--nx-ease),
+    opacity var(--nx-dur) var(--nx-ease);
+}
+
+.mem-act.is-active {
+  color: var(--nx-accent-text);
+  opacity: 1;
+}
+
+.mem-row.is-selected .mem-act,
+.mem-row:hover .mem-act,
+.mem-row:focus-within .mem-act {
+  opacity: 1;
+}
+
+.mem-act:hover {
+  background: var(--nx-fill-3);
+  color: var(--nx-text-1);
+}
+
+.mem-act.is-active:hover {
+  color: var(--nx-accent-text);
+}
+
+.mem-act.is-danger:hover {
+  background: var(--nx-danger-soft);
+  color: var(--nx-danger-text);
+}
+
+.mem-act:focus-visible {
+  outline: 1.5px solid var(--nx-accent);
+  outline-offset: -1.5px;
+}
+
+.mem-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 96px;
+  text-align: center;
+}
+
+.mem-empty-title {
+  color: var(--nx-text-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+}
+
+.mem-empty-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nx-text-3);
+  font-size: 12px;
+}
+
+.mem-editor {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mem-seg {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-fill-1);
+  box-shadow: inset 0 0 0 1px var(--nx-line);
+}
+
+.mem-seg button {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--nx-text-3);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: default;
+  transition:
+    background-color var(--nx-dur-fast) var(--nx-ease),
+    color var(--nx-dur-fast) var(--nx-ease);
+}
+
+.mem-seg button:hover {
+  color: var(--nx-text-2);
+}
+
+.mem-seg button[aria-checked="true"] {
+  background: var(--nx-fill-3);
+  box-shadow: inset 0 0 0 1px var(--nx-line);
+  color: var(--nx-text-1);
+}
+
+.mem-seg button:focus-visible {
+  outline: 1.5px solid var(--nx-accent);
+  outline-offset: -1.5px;
+}
+
+.mem-textarea {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--nx-radius-md);
+  outline: 0;
+  background: var(--nx-fill-1);
+  box-shadow: inset 0 0 0 1px var(--nx-line);
+  color: var(--nx-text-1);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: -0.006em;
+  line-height: 18px;
+  caret-color: var(--nx-text-1);
+  resize: none;
+  user-select: text;
+  transition:
+    background-color var(--nx-dur) var(--nx-ease),
+    box-shadow var(--nx-dur) var(--nx-ease);
+}
+
+.mem-textarea::placeholder {
+  color: var(--nx-text-3);
+}
+
+.mem-textarea::selection {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.mem-textarea:focus {
+  background: var(--nx-fill-2);
+  box-shadow: inset 0 0 0 1px var(--nx-line-strong);
+}
+
+.mem-textarea.is-mono {
+  font-family: var(--nx-mono);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.mem-field-tags {
+  height: 32px;
+}
+
+.mem-footer-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.mem-undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--nx-text-1);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: default;
+}
+
+.mem-undo:hover {
+  color: #ffffff;
+}
+
+.mem-undo:focus-visible {
+  outline: 1.5px solid var(--nx-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mem-new,
+  .mem-save,
+  .mem-search-clear,
+  .mem-row,
+  .mem-lead,
+  .mem-meta,
+  .mem-act,
+  .mem-seg button,
+  .mem-textarea {
+    transition: none;
+  }
+
+  .mem-row.is-copied {
+    animation: none;
+    background: var(--nx-fill-3);
+  }
+}

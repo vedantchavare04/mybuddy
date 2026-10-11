@@ -2,6 +2,9 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence } from "framer-motion";
 import { listen } from "@tauri-apps/api/event";
 
+import MemoryView from "./views/memoryView";
+import TaskManagerView from "./views/taskManagerView";
+
 import type { CompanionEvent } from "../../events/eventTypes";
 import { aiConfig } from "../../services/ai/aiConfig";
 import { calendarService } from "../../services/calendar/calendarService";
@@ -135,19 +138,12 @@ export default function Notch({
           ? "speech"
           : "ai",
     );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending?.nonce]);
 
-  const mode: NotchMode = expanded
-    ? "expanded"
-    : event
-      ? "active"
-      : "compact";
+  const mode: NotchMode = expanded ? "expanded" : event ? "active" : "compact";
 
   const view = resolveView();
-  const size =
-    mode === "compact" && hover ? SIZES.compactHover : view.size;
+  const size = mode === "compact" && hover ? SIZES.compactHover : view.size;
 
   function resolveView(): NotchView {
     const expandedView = (
@@ -162,8 +158,7 @@ export default function Notch({
     });
 
     if (mode === "expanded") {
-      const route: Route =
-        nav.route === "event" && !event ? "home" : nav.route;
+      const route: Route = nav.route === "event" && !event ? "home" : nav.route;
 
       const back = nav.back;
 
@@ -189,12 +184,25 @@ export default function Notch({
               />
             ),
           );
+        case "tasks":
+          return expandedView(
+            "tasks",
+            SIZES.home,
+            <TaskManagerView onBack={back} onCollapse={onCollapse} />,
+          );
 
         case "music":
           return expandedView(
             "music",
             SIZES.music,
             <MusicView onBack={back} onCollapse={onCollapse} />,
+          );
+
+        case "memory":
+          return expandedView(
+            "memory",
+            SIZES.home,
+            <MemoryView onBack={back} onCollapse={onCollapse} />,
           );
 
         case "clipboard":
@@ -217,8 +225,9 @@ export default function Notch({
               onCollapse={onCollapse}
               onOpenPlanner={() => nav.go("calendar")}
               onOpenClipboard={() => nav.go("clipboard")}
-              onOpenMemory={() => nav.go("home")}
+              onOpenMemory={() => nav.go("memory")}
               onLaunched={onCollapse}
+              onOpenTasks={() => nav.go("tasks")}
             />,
           );
 
@@ -270,41 +279,28 @@ export default function Notch({
           return expandedView(
             "notifications",
             SIZES.notifications,
-            <NotificationsView
-              onBack={back}
-              onCollapse={onCollapse}
-            />,
+            <NotificationsView onBack={back} onCollapse={onCollapse} />,
           );
 
         case "tools":
           return expandedView(
             "tools",
             SIZES.tools,
-            <ToolsView
-              onBack={back}
-              onCollapse={onCollapse}
-              onOpen={nav.go}
-            />,
+            <ToolsView onBack={back} onCollapse={onCollapse} onOpen={nav.go} />,
           );
 
         case "translate":
           return expandedView(
             "translate",
             SIZES.translate,
-            <TranslateView
-              onBack={back}
-              onCollapse={onCollapse}
-            />,
+            <TranslateView onBack={back} onCollapse={onCollapse} />,
           );
 
         case "speech":
           return expandedView(
             "speech",
             SIZES.speech,
-            <SpeechView
-              onBack={back}
-              onCollapse={onCollapse}
-            />,
+            <SpeechView onBack={back} onCollapse={onCollapse} />,
           );
 
         case "ai":
@@ -333,10 +329,7 @@ export default function Notch({
           return expandedView(
             "settings/ai",
             SIZES.aiSettings,
-            <AiSettingsView
-              onBack={back}
-              onCollapse={onCollapse}
-            />,
+            <AiSettingsView onBack={back} onCollapse={onCollapse} />,
           );
 
         case "home":

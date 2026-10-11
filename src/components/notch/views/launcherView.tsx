@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Clipboard,
   CornerDownLeft,
+  Download,
   FileText,
   Search,
   type LucideIcon,
@@ -34,6 +35,7 @@ type LauncherViewProps = {
   onOpenPlanner: () => void;
   onOpenClipboard: () => void;
   onOpenMemory: () => void;
+  onOpenTasks: () => void;
   onLaunched?: () => void;
 };
 
@@ -43,6 +45,7 @@ export default function LauncherView({
   onOpenPlanner,
   onOpenClipboard,
   onOpenMemory,
+  onOpenTasks,
   onLaunched,
 }: LauncherViewProps) {
   const [query, setQuery] = useState("");
@@ -120,7 +123,7 @@ export default function LauncherView({
         setLaunchingId(null);
       }
     },
-    [onLaunched]
+    [onLaunched],
   );
 
   const actions = useMemo<LauncherAction[]>(
@@ -157,8 +160,22 @@ export default function LauncherView({
         icon: FileText,
         run: onOpenMemory,
       },
+      {
+        id: "tasks",
+        title: "Downloads & tasks",
+        description: "Track downloads and background work",
+        keywords: "downloads progress background tasks status",
+        icon: Download,
+        run: onOpenTasks,
+      },
     ],
-    [openApps, onOpenPlanner, onOpenClipboard, onOpenMemory]
+    [
+      openApps,
+      onOpenPlanner,
+      onOpenClipboard,
+      onOpenMemory,
+      onOpenTasks,
+    ],
   );
 
   const filteredActions = useMemo(() => {
@@ -169,7 +186,7 @@ export default function LauncherView({
     return actions.filter((action) =>
       `${action.title} ${action.description} ${action.keywords}`
         .toLowerCase()
-        .includes(search)
+        .includes(search),
     );
   }, [actions, query]);
 

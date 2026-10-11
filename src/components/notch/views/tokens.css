@@ -26,7 +26,8 @@
   --nx-radius-sm: 6px;
   --nx-radius-md: 10px;
 
-  --nx-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+  --nx-mono:
+    ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, monospace;
 }
 
 .nx-field {

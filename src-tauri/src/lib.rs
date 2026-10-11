@@ -9,6 +9,7 @@ mod notifications;
 mod reminders;
 mod selection;
 mod speech;
+mod tasks;
 mod translate;
 
 use tauri::Manager;
@@ -30,6 +31,7 @@ pub fn run() {
                         .level(log::LevelFilter::Info)
                         .build(),
                 )?;
+                app.manage(tasks::TaskManager::default());
             }
 
             app.manage(dock::Dock::new());
@@ -63,6 +65,12 @@ pub fn run() {
             cursor::set_special_cursor_enabled,
             cursor::is_special_cursor_enabled,
             dock::dock_enter,
+            tasks::tasks_list,
+            tasks::task_create,
+            tasks::task_update,
+            tasks::task_finish,
+            tasks::download_start,
+            tasks::task_cancel,
             dock::dock_hold,
             dock::dock_leave,
             app_launcher::list_installed_apps,
