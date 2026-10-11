@@ -1,4 +1,3 @@
-
 mod ai;
 mod app_launcher;
 mod clipboard;
@@ -50,6 +49,7 @@ pub fn run() {
                 selection::translate_shortcut(),
                 selection::speak_shortcut(),
                 selection::ai_shortcut(),
+                selection::launcher_shortcut(),
             ] {
                 if let Err(error) = app.global_shortcut().register(shortcut) {
                     eprintln!("[shortcut] could not register: {error}");
@@ -108,8 +108,7 @@ fn get_battery_status() -> Result<BatteryStatus, String> {
     let mut status = SYSTEM_POWER_STATUS::default();
 
     unsafe {
-        GetSystemPowerStatus(&mut status)
-            .map_err(|error| error.to_string())?;
+        GetSystemPowerStatus(&mut status).map_err(|error| error.to_string())?;
     }
 
     Ok(BatteryStatus {

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   AppWindow,
-  ArrowLeft,
   CalendarDays,
   Clipboard,
   CornerDownLeft,
@@ -10,6 +9,7 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react";
+import { BackLabel, ViewHeader } from "./parts";
 import "./launcher.css";
 
 type InstalledApp = {
@@ -28,6 +28,8 @@ type LauncherAction = {
 };
 
 type LauncherViewProps = {
+  onBack: () => void;
+  onCollapse: () => void;
   onOpenApps?: () => void;
   onOpenPlanner: () => void;
   onOpenClipboard: () => void;
@@ -36,6 +38,8 @@ type LauncherViewProps = {
 };
 
 export default function LauncherView({
+  onBack,
+  onCollapse,
   onOpenPlanner,
   onOpenClipboard,
   onOpenMemory,
@@ -116,7 +120,7 @@ export default function LauncherView({
         setLaunchingId(null);
       }
     },
-    [onLaunched],
+    [onLaunched]
   );
 
   const actions = useMemo<LauncherAction[]>(
@@ -154,7 +158,7 @@ export default function LauncherView({
         run: onOpenMemory,
       },
     ],
-    [openApps, onOpenPlanner, onOpenClipboard, onOpenMemory],
+    [openApps, onOpenPlanner, onOpenClipboard, onOpenMemory]
   );
 
   const filteredActions = useMemo(() => {
@@ -165,7 +169,7 @@ export default function LauncherView({
     return actions.filter((action) =>
       `${action.title} ${action.description} ${action.keywords}`
         .toLowerCase()
-        .includes(search),
+        .includes(search)
     );
   }, [actions, query]);
 
@@ -231,7 +235,7 @@ export default function LauncherView({
 
         if (
           target instanceof HTMLElement &&
-          target.closest(".launcher-back, .launcher-retry")
+          target.closest("button:not([role='option'])")
         ) {
           return;
         }
@@ -267,19 +271,18 @@ export default function LauncherView({
 
   return (
     <section className="launcher">
-      <div className="launcher-search">
-        {showApps ? (
-          <button
-            type="button"
-            className="launcher-back"
-            onClick={backToActions}
-            aria-label="Back to quick actions"
-          >
-            <ArrowLeft size={16} strokeWidth={1.75} />
-          </button>
-        ) : (
-          <Search size={16} strokeWidth={1.75} />
-        )}
+      <ViewHeader
+        onClose={onCollapse}
+        leading={
+          <BackLabel
+            title={showApps ? "Applications" : "Quick Actions"}
+            onBack={showApps ? backToActions : onBack}
+          />
+        }
+      />
+
+      <div className="nx-field">
+        <Search size={16} strokeWidth={1.6} />
 
         <input
           ref={inputRef}
@@ -388,7 +391,7 @@ export default function LauncherView({
       </div>
 
       {error && (
-        <div className="launcher-error" role="alert">
+        <div className="nx-error launcher-error" role="alert">
           <span>{error}</span>
 
           {showApps && !appsLoading && apps.length === 0 && (
@@ -403,24 +406,24 @@ export default function LauncherView({
         </div>
       )}
 
-      <footer className="launcher-footer">
-        <span className="launcher-footer-label">
+      <footer className="nx-footer">
+        <span className="nx-footer-lead">
           {showApps ? "Applications" : "MyBuddy"}
         </span>
 
-        <span className="launcher-hint">
-          <kbd>↑↓</kbd>
+        <span className="nx-hint">
+          <kbd className="nx-kbd">↑↓</kbd>
           Navigate
         </span>
 
-        <span className="launcher-hint">
-          <kbd>↵</kbd>
+        <span className="nx-hint">
+          <kbd className="nx-kbd">↵</kbd>
           {showApps ? "Launch" : "Select"}
         </span>
 
         {showApps && (
-          <span className="launcher-hint">
-            <kbd>Esc</kbd>
+          <span className="nx-hint">
+            <kbd className="nx-kbd">Esc</kbd>
             Back
           </span>
         )}

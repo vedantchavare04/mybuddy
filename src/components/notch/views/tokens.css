@@ -1,139 +1,136 @@
 :root {
-    --nx-ease: cubic-bezier(0.2, 0, 0, 1);
-    --nx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --nx-dur-fast: 100ms;
-    --nx-dur: 160ms;
-  
-    --nx-text-1: rgba(255, 255, 255, 0.92);
-    --nx-text-2: rgba(255, 255, 255, 0.58);
-    --nx-text-3: rgba(255, 255, 255, 0.38);
-    --nx-text-4: rgba(255, 255, 255, 0.24);
-  
-    --nx-fill-1: rgba(255, 255, 255, 0.04);
-    --nx-fill-2: rgba(255, 255, 255, 0.07);
-    --nx-fill-3: rgba(255, 255, 255, 0.11);
-  
-    --nx-line: rgba(255, 255, 255, 0.08);
-    --nx-line-strong: rgba(255, 255, 255, 0.18);
-  
-    --nx-accent: #9124c8;
-    --nx-accent-text: #c685ea;
-    --nx-accent-soft: rgba(145, 36, 200, 0.3);
-    --nx-accent-ring: rgba(145, 36, 200, 0.22);
-  
-    --nx-danger-text: #ff8a8f;
-    --nx-danger-soft: rgba(255, 90, 95, 0.12);
-  
-    --nx-radius-sm: 6px;
-    --nx-radius-md: 10px;
-  
-    --nx-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, monospace;
-  }
-  
+  --nx-ease: cubic-bezier(0.2, 0, 0, 1);
+  --nx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --nx-dur-fast: 100ms;
+  --nx-dur: 160ms;
+
+  --nx-text-1: rgba(255, 255, 255, 0.92);
+  --nx-text-2: rgba(255, 255, 255, 0.58);
+  --nx-text-3: rgba(255, 255, 255, 0.38);
+  --nx-text-4: rgba(255, 255, 255, 0.24);
+
+  --nx-fill-1: rgba(255, 255, 255, 0.04);
+  --nx-fill-2: rgba(255, 255, 255, 0.07);
+  --nx-fill-3: rgba(255, 255, 255, 0.11);
+
+  --nx-line: rgba(255, 255, 255, 0.08);
+  --nx-line-strong: rgba(255, 255, 255, 0.18);
+
+  --nx-accent: #9124c8;
+  --nx-accent-text: #c685ea;
+  --nx-accent-soft: rgba(145, 36, 200, 0.3);
+
+  --nx-danger-text: #ff8a8f;
+  --nx-danger-soft: rgba(255, 90, 95, 0.12);
+
+  --nx-radius-sm: 6px;
+  --nx-radius-md: 10px;
+
+  --nx-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+}
+
+.nx-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-fill-1);
+  box-shadow: inset 0 0 0 1px var(--nx-line);
+  color: var(--nx-text-3);
+  transition:
+    background-color var(--nx-dur) var(--nx-ease),
+    box-shadow var(--nx-dur) var(--nx-ease),
+    color var(--nx-dur) var(--nx-ease);
+}
+
+.nx-field:focus-within {
+  background: var(--nx-fill-2);
+  box-shadow: inset 0 0 0 1px var(--nx-line-strong);
+  color: var(--nx-text-2);
+}
+
+.nx-field svg {
+  flex: none;
+}
+
+.nx-field input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--nx-text-1);
+  font: inherit;
+  font-size: 13.5px;
+  letter-spacing: -0.006em;
+  caret-color: var(--nx-text-1);
+}
+
+.nx-field input::placeholder {
+  color: var(--nx-text-3);
+}
+
+.nx-kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: var(--nx-fill-2);
+  box-shadow:
+    inset 0 0 0 1px var(--nx-line),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  color: var(--nx-text-2);
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.nx-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+  height: 18px;
+  margin-top: 4px;
+  color: var(--nx-text-3);
+  font-size: 11.5px;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.nx-footer-lead {
+  margin-right: auto;
+  color: var(--nx-text-3);
+}
+
+.nx-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nx-error {
+  flex: none;
+  padding: 8px 10px;
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-danger-soft);
+  box-shadow: inset 0 0 0 1px rgba(255, 90, 95, 0.22);
+  color: var(--nx-danger-text);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
   .nx-field {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: none;
-    height: 36px;
-    padding: 0 12px;
-    border-radius: var(--nx-radius-md);
-    background: var(--nx-fill-1);
-    box-shadow: inset 0 0 0 1px var(--nx-line);
-    color: var(--nx-text-3);
-    transition:
-      background-color var(--nx-dur) var(--nx-ease),
-      box-shadow var(--nx-dur) var(--nx-ease),
-      color var(--nx-dur) var(--nx-ease);
+    transition: none;
   }
-  
-  .nx-field:focus-within {
-    background: var(--nx-fill-2);
-    box-shadow:
-      inset 0 0 0 1px var(--nx-line-strong),
-      0 0 0 3px var(--nx-accent-ring);
-    color: var(--nx-text-2);
-  }
-  
-  .nx-field svg {
-    flex: none;
-  }
-  
-  .nx-field input {
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: var(--nx-text-1);
-    font: inherit;
-    font-size: 13.5px;
-    letter-spacing: -0.006em;
-    caret-color: var(--nx-accent-text);
-  }
-  
-  .nx-field input::placeholder {
-    color: var(--nx-text-3);
-  }
-  
-  .nx-kbd {
-    display: inline-grid;
-    place-items: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border-radius: 5px;
-    background: var(--nx-fill-2);
-    box-shadow:
-      inset 0 0 0 1px var(--nx-line),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
-    color: var(--nx-text-2);
-    font: inherit;
-    font-size: 10.5px;
-    font-weight: 500;
-    line-height: 1;
-  }
-  
-  .nx-footer {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex: none;
-    height: 18px;
-    margin-top: 4px;
-    color: var(--nx-text-3);
-    font-size: 11.5px;
-    line-height: 1;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-  
-  .nx-footer-lead {
-    margin-right: auto;
-    color: var(--nx-text-3);
-  }
-  
-  .nx-hint {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  
-  .nx-error {
-    flex: none;
-    padding: 8px 10px;
-    border-radius: var(--nx-radius-md);
-    background: var(--nx-danger-soft);
-    box-shadow: inset 0 0 0 1px rgba(255, 90, 95, 0.22);
-    color: var(--nx-danger-text);
-    font-size: 12px;
-    line-height: 16px;
-  }
-  
-  @media (prefers-reduced-motion: reduce) {
-    .nx-field {
-      transition: none;
-    }
-  }
+}

@@ -28,14 +28,30 @@ pub fn speak_shortcut() -> Shortcut {
     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyS)
 }
 
+pub fn launcher_shortcut() -> Shortcut {
+    Shortcut::new(Some(Modifiers::CONTROL), Code::Space)
+}
+
 pub fn ai_shortcut() -> Shortcut {
     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::Space)
 }
 
-pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
+pub fn on_shortcut(
+    app: &AppHandle,
+    shortcut: &Shortcut,
+    event: ShortcutEvent,
+) {
     if event.state() != ShortcutState::Pressed {
         return;
     }
+
+    if shortcut == &launcher_shortcut() {
+        if let Err(error) = app.emit("launcher://toggle", ()) {
+            eprintln!("[shortcut] Could not open launcher: {error}");
+        }
+        return;
+    }
+
     let intent = if shortcut == &translate_shortcut() {
         "translate"
     } else if shortcut == &speak_shortcut() {
@@ -47,18 +63,29 @@ pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
     };
 
     let app = app.clone();
+
     thread::spawn(move || {
         let payload = match capture() {
-            Ok(text) => serde_json::json!({ "intent": intent, "text": text }),
+            Ok(text) => serde_json::json!({
+                "intent": intent,
+                "text": text
+            }),
             Err("no_selection") if intent == "ai" => {
-                serde_json::json!({ "intent": intent, "text": "" })
+                serde_json::json!({
+                    "intent": intent,
+                    "text": ""
+                })
             }
-            Err(code) => serde_json::json!({ "intent": intent, "text": "", "error": code }),
+            Err(code) => serde_json::json!({
+                "intent": intent,
+                "text": "",
+                "error": code
+            }),
         };
+
         let _ = app.emit("selection://captured", payload);
     });
 }
-
 fn sleep(ms: u64) {
     thread::sleep(Duration::from_millis(ms));
 }
