@@ -1,7 +1,13 @@
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence } from "framer-motion";
 import { listen } from "@tauri-apps/api/event";
+import {
+  register,
+  unregister,
+} from "@tauri-apps/plugin-global-shortcut";
 
+import ContextSaverView from "./views/contextSaverView";
 import MemoryView from "./views/memoryView";
 import TaskManagerView from "./views/taskManagerView";
 
@@ -85,6 +91,78 @@ export default function Notch({
   }, [expanded, nav.route, onExpand, onCollapse, nav.go]);
 
   useEffect(() => {
+    const shortcut = "Ctrl+Shift+K";
+    let disposed = false;
+    let registered = false;
+
+    void register(shortcut, (event) => {
+      if (event.state !== "Pressed") return;
+
+      const current = launcherToggleRef.current;
+
+      current.onExpand();
+      current.go("context");
+    })
+      .then(() => {
+        registered = true;
+
+        if (disposed) {
+          void unregister(shortcut).catch((error) => {
+            console.error(
+              "Could not unregister Context Saver shortcut:",
+              error,
+            );
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(
+          "Could not register Context Saver shortcut:",
+          error,
+        );
+      });
+
+    return () => {
+      disposed = true;
+
+      if (registered) {
+        void unregister(shortcut).catch((error) => {
+          console.error(
+            "Could not unregister Context Saver shortcut:",
+            error,
+          );
+        });
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+  
+    listen("context-saver://open", () => {
+      const current = launcherToggleRef.current;
+      current.onExpand();
+      current.go("context");
+    })
+      .then((stopListening) => {
+        if (disposed) {
+          stopListening();
+        } else {
+          unlisten = stopListening;
+        }
+      })
+      .catch((error) => {
+        console.error("Could not listen for Context Saver shortcut:", error);
+      });
+  
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, []);
+
+  useEffect(() => {
     let unlisten: (() => void) | undefined;
     let disposed = false;
 
@@ -140,10 +218,16 @@ export default function Notch({
     );
   }, [pending?.nonce]);
 
-  const mode: NotchMode = expanded ? "expanded" : event ? "active" : "compact";
+  const mode: NotchMode = expanded
+    ? "expanded"
+    : event
+      ? "active"
+      : "compact";
 
   const view = resolveView();
-  const size = mode === "compact" && hover ? SIZES.compactHover : view.size;
+  const size = mode === "compact" && hover
+    ? SIZES.compactHover
+    : view.size;
 
   function resolveView(): NotchView {
     const expandedView = (
@@ -158,7 +242,8 @@ export default function Notch({
     });
 
     if (mode === "expanded") {
-      const route: Route = nav.route === "event" && !event ? "home" : nav.route;
+      const route: Route =
+        nav.route === "event" && !event ? "home" : nav.route;
 
       const back = nav.back;
 
@@ -184,25 +269,45 @@ export default function Notch({
               />
             ),
           );
+
         case "tasks":
           return expandedView(
             "tasks",
             SIZES.home,
-            <TaskManagerView onBack={back} onCollapse={onCollapse} />,
+            <TaskManagerView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
+          );
+
+        case "context":
+          return expandedView(
+            "context",
+            SIZES.home,
+            <ContextSaverView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
           );
 
         case "music":
           return expandedView(
             "music",
             SIZES.music,
-            <MusicView onBack={back} onCollapse={onCollapse} />,
+            <MusicView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
           );
 
         case "memory":
           return expandedView(
             "memory",
             SIZES.home,
-            <MemoryView onBack={back} onCollapse={onCollapse} />,
+            <MemoryView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
           );
 
         case "clipboard":
@@ -226,8 +331,9 @@ export default function Notch({
               onOpenPlanner={() => nav.go("calendar")}
               onOpenClipboard={() => nav.go("clipboard")}
               onOpenMemory={() => nav.go("memory")}
-              onLaunched={onCollapse}
+              onOpenContext={() => nav.go("context")}
               onOpenTasks={() => nav.go("tasks")}
+              onLaunched={onCollapse}
             />,
           );
 
@@ -279,28 +385,41 @@ export default function Notch({
           return expandedView(
             "notifications",
             SIZES.notifications,
-            <NotificationsView onBack={back} onCollapse={onCollapse} />,
+            <NotificationsView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
           );
 
         case "tools":
           return expandedView(
             "tools",
             SIZES.tools,
-            <ToolsView onBack={back} onCollapse={onCollapse} onOpen={nav.go} />,
+            <ToolsView
+              onBack={back}
+              onCollapse={onCollapse}
+              onOpen={nav.go}
+            />,
           );
 
         case "translate":
           return expandedView(
             "translate",
             SIZES.translate,
-            <TranslateView onBack={back} onCollapse={onCollapse} />,
+            <TranslateView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
           );
 
         case "speech":
           return expandedView(
             "speech",
             SIZES.speech,
-            <SpeechView onBack={back} onCollapse={onCollapse} />,
+            <SpeechView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
           );
 
         case "ai":
@@ -329,7 +448,10 @@ export default function Notch({
           return expandedView(
             "settings/ai",
             SIZES.aiSettings,
-            <AiSettingsView onBack={back} onCollapse={onCollapse} />,
+            <AiSettingsView
+              onBack={back}
+              onCollapse={onCollapse}
+            />,
           );
 
         case "home":
@@ -376,7 +498,7 @@ export default function Notch({
           radius={view.radius}
           layerKey={view.key}
           direction={nav.direction}
-          label={expanded ? (event?.title ?? "MyBuddy") : "Open MyBuddy"}
+          label={expanded ? event?.title ?? "MyBuddy" : "Open MyBuddy"}
           onActivate={onExpand}
           onHoverChange={setHover}
         >

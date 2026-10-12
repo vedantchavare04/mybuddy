@@ -1,7 +1,9 @@
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   AppWindow,
+  BookmarkCheck,
   CalendarDays,
   Clipboard,
   CornerDownLeft,
@@ -36,6 +38,7 @@ type LauncherViewProps = {
   onOpenClipboard: () => void;
   onOpenMemory: () => void;
   onOpenTasks: () => void;
+  onOpenContext: () => void;
   onLaunched?: () => void;
 };
 
@@ -46,6 +49,7 @@ export default function LauncherView({
   onOpenClipboard,
   onOpenMemory,
   onOpenTasks,
+  onOpenContext,
   onLaunched,
 }: LauncherViewProps) {
   const [query, setQuery] = useState("");
@@ -168,6 +172,14 @@ export default function LauncherView({
         icon: Download,
         run: onOpenTasks,
       },
+      {
+        id: "context",
+        title: "Context Saver",
+        description: "Save your place and resume later",
+        keywords: "checkpoint project progress resume work",
+        icon: BookmarkCheck,
+        run: onOpenContext,
+      },
     ],
     [
       openApps,
@@ -175,6 +187,7 @@ export default function LauncherView({
       onOpenClipboard,
       onOpenMemory,
       onOpenTasks,
+      onOpenContext,
     ],
   );
 
@@ -362,7 +375,10 @@ export default function LauncherView({
                     </span>
                   </span>
 
-                  <span className="launcher-action-hint" aria-hidden="true">
+                  <span
+                    className="launcher-action-hint"
+                    aria-hidden="true"
+                  >
                     <CornerDownLeft size={12} strokeWidth={2} />
                   </span>
                 </button>
@@ -389,7 +405,9 @@ export default function LauncherView({
                 </span>
 
                 <span className="launcher-action-copy">
-                  <span className="launcher-action-title">{action.title}</span>
+                  <span className="launcher-action-title">
+                    {action.title}
+                  </span>
 
                   <span className="launcher-action-description">
                     {action.description}

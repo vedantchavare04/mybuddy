@@ -1,6 +1,8 @@
+
 mod ai;
 mod app_launcher;
 mod clipboard;
+mod context_saver;
 mod cursor;
 mod dock;
 mod google;
@@ -14,7 +16,10 @@ mod translate;
 
 use tauri::Manager;
 use tauri_plugin_global_shortcut::GlobalShortcutExt;
-use windows::Win32::System::Power::{GetSystemPowerStatus, SYSTEM_POWER_STATUS};
+use windows::Win32::System::Power::{
+    GetSystemPowerStatus,
+    SYSTEM_POWER_STATUS,
+};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -31,6 +36,7 @@ pub fn run() {
                         .level(log::LevelFilter::Info)
                         .build(),
                 )?;
+
                 app.manage(tasks::TaskManager::default());
             }
 
@@ -52,6 +58,7 @@ pub fn run() {
                 selection::speak_shortcut(),
                 selection::ai_shortcut(),
                 selection::launcher_shortcut(),
+                selection::context_saver_shortcut(),
             ] {
                 if let Err(error) = app.global_shortcut().register(shortcut) {
                     eprintln!("[shortcut] could not register: {error}");
@@ -64,11 +71,15 @@ pub fn run() {
             get_battery_status,
             cursor::set_special_cursor_enabled,
             cursor::is_special_cursor_enabled,
+            context_saver::context_open_target,
             dock::dock_enter,
             tasks::tasks_list,
             tasks::task_create,
             tasks::task_update,
             tasks::task_finish,
+            context_saver::context_list,
+            context_saver::context_save,
+            context_saver::context_delete,
             tasks::download_start,
             tasks::task_cancel,
             dock::dock_hold,
@@ -116,7 +127,8 @@ fn get_battery_status() -> Result<BatteryStatus, String> {
     let mut status = SYSTEM_POWER_STATUS::default();
 
     unsafe {
-        GetSystemPowerStatus(&mut status).map_err(|error| error.to_string())?;
+        GetSystemPowerStatus(&mut status)
+            .map_err(|error| error.to_string())?;
     }
 
     Ok(BatteryStatus {
