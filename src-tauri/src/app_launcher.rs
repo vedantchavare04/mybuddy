@@ -1,4 +1,3 @@
-
 use serde::Serialize;
 use std::{
     fs,
@@ -64,9 +63,7 @@ fn collect_apps(dir: &Path, depth: usize, apps: &mut Vec<InstalledApp>) {
             continue;
         };
 
-        if !extension.eq_ignore_ascii_case("lnk")
-            && !extension.eq_ignore_ascii_case("exe")
-        {
+        if !extension.eq_ignore_ascii_case("lnk") && !extension.eq_ignore_ascii_case("exe") {
             continue;
         }
 
@@ -107,9 +104,7 @@ pub fn launch_app(path: String) -> Result<(), String> {
         .and_then(|value| value.to_str())
         .ok_or_else(|| "Unsupported application path".to_string())?;
 
-    if !extension.eq_ignore_ascii_case("lnk")
-        && !extension.eq_ignore_ascii_case("exe")
-    {
+    if !extension.eq_ignore_ascii_case("lnk") && !extension.eq_ignore_ascii_case("exe") {
         return Err("Only Start Menu shortcuts and executables are supported".into());
     }
 

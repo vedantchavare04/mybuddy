@@ -22,10 +22,10 @@ use std::{
     time::{Duration, Instant},
 };
 
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -160,10 +160,9 @@ async fn wait_for_code(listener: &TcpListener, state: &str) -> Result<String, St
             .and_then(|l| l.split_whitespace().nth(1))
             .unwrap_or("/");
 
-        let params: HashMap<String, String> =
-            url::Url::parse(&format!("http://127.0.0.1{path}"))
-                .map(|u| u.query_pairs().into_owned().collect())
-                .unwrap_or_default();
+        let params: HashMap<String, String> = url::Url::parse(&format!("http://127.0.0.1{path}"))
+            .map(|u| u.query_pairs().into_owned().collect())
+            .unwrap_or_default();
 
         let (status, body, outcome): (&str, &str, Option<Result<String, String>>) =
             if params.get("state").map(String::as_str) == Some(state) {
@@ -210,7 +209,10 @@ pub async fn google_connect() -> Result<Status, String> {
     let listener = TcpListener::bind("127.0.0.1:0")
         .await
         .map_err(|_| "failed".to_string())?;
-    let port = listener.local_addr().map_err(|_| "failed".to_string())?.port();
+    let port = listener
+        .local_addr()
+        .map_err(|_| "failed".to_string())?
+        .port();
     let redirect = format!("http://127.0.0.1:{port}");
 
     let auth = url::Url::parse_with_params(
@@ -269,7 +271,10 @@ pub async fn google_connect() -> Result<Status, String> {
         .map_err(|_| "failed".to_string())?;
     remember_access(&token);
 
-    Ok(Status { configured: true, connected: true })
+    Ok(Status {
+        configured: true,
+        connected: true,
+    })
 }
 
 /* ---------- tokens ---------- */
@@ -351,8 +356,14 @@ pub async fn calendar_upcoming(days: Option<i64>) -> Result<Vec<CalEvent>, Strin
     let now = chrono::Utc::now();
     let max = now + chrono::Duration::days(days.unwrap_or(7));
     let query = vec![
-        ("timeMin", now.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)),
-        ("timeMax", max.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)),
+        (
+            "timeMin",
+            now.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+        ),
+        (
+            "timeMax",
+            max.to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+        ),
         ("singleEvents", "true".to_string()),
         ("orderBy", "startTime".to_string()),
         ("maxResults", "20".to_string()),
@@ -410,11 +421,13 @@ pub async fn calendar_create(event: NewEvent) -> Result<CalEvent, String> {
         body["description"] = json!(d);
     }
     if !event.attendees.is_empty() {
-        body["attendees"] = json!(event
-            .attendees
-            .iter()
-            .map(|e| json!({ "email": e }))
-            .collect::<Vec<_>>());
+        body["attendees"] = json!(
+            event
+                .attendees
+                .iter()
+                .map(|e| json!({ "email": e }))
+                .collect::<Vec<_>>()
+        );
     }
 
     for attempt in 0..2 {

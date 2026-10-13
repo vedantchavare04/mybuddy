@@ -50,8 +50,7 @@ fn now_ms() -> i64 {
 }
 
 fn persist(path: &Path, items: &[Reminder]) -> Result<(), String> {
-    let json =
-        serde_json::to_vec_pretty(items).map_err(|_| "serialize_failed".to_string())?;
+    let json = serde_json::to_vec_pretty(items).map_err(|_| "serialize_failed".to_string())?;
 
     let tmp = path.with_extension("json.tmp");
 
@@ -71,9 +70,7 @@ fn load(path: &Path) -> Vec<Reminder> {
         Ok(mut items) => {
             let cutoff = now_ms().saturating_sub(WEEK_MS);
 
-            items.retain(|r| {
-                !(r.status == Status::Done && r.due_ms < cutoff)
-            });
+            items.retain(|r| !(r.status == Status::Done && r.due_ms < cutoff));
 
             items
         }
@@ -131,9 +128,10 @@ fn validate_id(id: &str) -> Result<(), String> {
 
 fn scheduler(app: AppHandle, shared: Arc<Shared>) {
     loop {
-        let mut items = shared.items.lock().unwrap_or_else(|poisoned| {
-            poisoned.into_inner()
-        });
+        let mut items = shared
+            .items
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
 
         let now = now_ms();
 
@@ -165,10 +163,7 @@ fn scheduler(app: AppHandle, shared: Arc<Shared>) {
             .map(|reminder| reminder.due_ms)
             .min()
             .map(|due_ms| {
-                Duration::from_millis(
-                    due_ms.saturating_sub(now).max(0) as u64
-                )
-                .min(MAX_WAIT)
+                Duration::from_millis(due_ms.saturating_sub(now).max(0) as u64).min(MAX_WAIT)
             })
             .unwrap_or(MAX_WAIT);
 
@@ -182,8 +177,7 @@ pub fn start(app: AppHandle) -> Result<Reminders, String> {
         .app_data_dir()
         .map_err(|_| "app_data_dir_failed".to_string())?;
 
-    fs::create_dir_all(&dir)
-        .map_err(|_| "create_data_dir_failed".to_string())?;
+    fs::create_dir_all(&dir).map_err(|_| "create_data_dir_failed".to_string())?;
 
     let path = dir.join("reminders.json");
 
@@ -228,10 +222,7 @@ fn mutate(
     Ok(())
 }
 
-fn find<'a>(
-    items: &'a mut [Reminder],
-    id: &str,
-) -> Result<&'a mut Reminder, String> {
+fn find<'a>(items: &'a mut [Reminder], id: &str) -> Result<&'a mut Reminder, String> {
     validate_id(id)?;
 
     items
@@ -284,11 +275,7 @@ pub fn reminder_create(
 }
 
 #[tauri::command]
-pub fn reminder_done(
-    app: AppHandle,
-    state: State<Reminders>,
-    id: String,
-) -> Result<(), String> {
+pub fn reminder_done(app: AppHandle, state: State<Reminders>, id: String) -> Result<(), String> {
     mutate(&app, &state, move |items| {
         let reminder = find(items, &id)?;
 
@@ -300,11 +287,7 @@ pub fn reminder_done(
 }
 
 #[tauri::command]
-pub fn reminder_delete(
-    app: AppHandle,
-    state: State<Reminders>,
-    id: String,
-) -> Result<(), String> {
+pub fn reminder_delete(app: AppHandle, state: State<Reminders>, id: String) -> Result<(), String> {
     validate_id(&id)?;
 
     mutate(&app, &state, move |items| {

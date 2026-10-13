@@ -155,7 +155,6 @@ async fn check(res: reqwest::Response) -> Result<Value, String> {
 
     let body = res.text().await.unwrap_or_default().to_lowercase();
 
-    
     let code = match status {
         401 | 403 => "invalid_key",
 

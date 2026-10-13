@@ -33,11 +33,9 @@ pub struct CheckpointInput {
 }
 
 fn store_path(app: &AppHandle) -> Result<PathBuf, String> {
-    let directory = app.path().app_data_dir()
-        .map_err(|e| e.to_string())?;
+    let directory = app.path().app_data_dir().map_err(|e| e.to_string())?;
 
-    fs::create_dir_all(&directory)
-        .map_err(|e| e.to_string())?;
+    fs::create_dir_all(&directory).map_err(|e| e.to_string())?;
 
     Ok(directory.join("context_checkpoints.json"))
 }
@@ -47,27 +45,19 @@ fn read_all(path: &PathBuf) -> Result<Vec<Checkpoint>, String> {
         return Ok(Vec::new());
     }
 
-    let contents = fs::read_to_string(path)
-        .map_err(|e| e.to_string())?;
+    let contents = fs::read_to_string(path).map_err(|e| e.to_string())?;
 
-    serde_json::from_str(&contents)
-        .map_err(|e| format!("Could not read checkpoints: {e}"))
+    serde_json::from_str(&contents).map_err(|e| format!("Could not read checkpoints: {e}"))
 }
 
-fn write_all(
-    path: &PathBuf,
-    checkpoints: &[Checkpoint],
-) -> Result<(), String> {
-    let contents = serde_json::to_string_pretty(checkpoints)
-        .map_err(|e| e.to_string())?;
+fn write_all(path: &PathBuf, checkpoints: &[Checkpoint]) -> Result<(), String> {
+    let contents = serde_json::to_string_pretty(checkpoints).map_err(|e| e.to_string())?;
 
     let temporary = path.with_extension("json.tmp");
 
-    fs::write(&temporary, contents)
-        .map_err(|e| e.to_string())?;
+    fs::write(&temporary, contents).map_err(|e| e.to_string())?;
 
-    fs::rename(&temporary, path)
-        .map_err(|e| e.to_string())?;
+    fs::rename(&temporary, path).map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -84,10 +74,7 @@ pub fn context_list(app: AppHandle) -> Result<Vec<Checkpoint>, String> {
 }
 
 #[tauri::command]
-pub fn context_save(
-    app: AppHandle,
-    input: CheckpointInput,
-) -> Result<Checkpoint, String> {
+pub fn context_save(app: AppHandle, input: CheckpointInput) -> Result<Checkpoint, String> {
     let title = input.title.trim();
 
     if title.is_empty() {
@@ -114,21 +101,23 @@ pub fn context_save(
     let mut checkpoints = read_all(&path)?;
     let now = chrono::Utc::now().timestamp_millis();
 
-    let existing = input.id.as_deref().and_then(|id| {
-        checkpoints.iter().find(|item| item.id == id)
-    });
+    let existing = input
+        .id
+        .as_deref()
+        .and_then(|id| checkpoints.iter().find(|item| item.id == id));
 
     let checkpoint = Checkpoint {
-        id: input.id.filter(|id| {
-            checkpoints.iter().any(|item| item.id == *id)
-        }).unwrap_or_else(|| {
-            format!("checkpoint-{now}")
-        }),
+        id: input
+            .id
+            .filter(|id| checkpoints.iter().any(|item| item.id == *id))
+            .unwrap_or_else(|| format!("checkpoint-{now}")),
         title: title.to_string(),
         project_path: input.project_path.trim().to_string(),
         progress_note: input.progress_note.trim().to_string(),
         next_action: input.next_action.trim().to_string(),
-        links: input.links.iter()
+        links: input
+            .links
+            .iter()
             .map(|link| link.trim().to_string())
             .filter(|link| !link.is_empty())
             .collect(),
@@ -136,9 +125,7 @@ pub fn context_save(
         updated_at: now,
     };
 
-    if let Some(index) = checkpoints.iter()
-        .position(|item| item.id == checkpoint.id)
-    {
+    if let Some(index) = checkpoints.iter().position(|item| item.id == checkpoint.id) {
         checkpoints[index] = checkpoint.clone();
     } else {
         checkpoints.push(checkpoint.clone());
@@ -150,10 +137,7 @@ pub fn context_save(
 }
 
 #[tauri::command]
-pub fn context_delete(
-    app: AppHandle,
-    id: String,
-) -> Result<(), String> {
+pub fn context_delete(app: AppHandle, id: String) -> Result<(), String> {
     let lock = STORE_LOCK.get_or_init(|| Mutex::new(()));
     let _guard = lock.lock().map_err(|e| e.to_string())?;
 
@@ -163,7 +147,6 @@ pub fn context_delete(
 
     write_all(&path, &checkpoints)
 }
-
 
 #[tauri::command]
 pub fn context_open_target(target: String) -> Result<(), String> {
@@ -176,8 +159,7 @@ pub fn context_open_target(target: String) -> Result<(), String> {
     }
 
     if target.starts_with("https://") || target.starts_with("http://") {
-        let parsed = url::Url::parse(target)
-            .map_err(|e| format!("Invalid URL: {e}"))?;
+        let parsed = url::Url::parse(target).map_err(|e| format!("Invalid URL: {e}"))?;
 
         if parsed.scheme() != "http" && parsed.scheme() != "https" {
             return Err("Only HTTP and HTTPS links are supported.".into());

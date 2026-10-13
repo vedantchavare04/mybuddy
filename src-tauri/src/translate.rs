@@ -71,7 +71,11 @@ fn chunks(text: &str) -> Vec<String> {
 }
 
 async fn mymemory(text: &str, source: &str, target: &str) -> Result<Translation, String> {
-    let src = if source == "auto" { "Autodetect" } else { source };
+    let src = if source == "auto" {
+        "Autodetect"
+    } else {
+        source
+    };
     let email = std::env::var("MYBUDDY_MYMEMORY_EMAIL").ok();
     let client = reqwest::Client::new();
 
@@ -121,5 +125,8 @@ async fn mymemory(text: &str, source: &str, target: &str) -> Result<Translation,
         }
     }
 
-    Ok(Translation { text: joined, detected })
+    Ok(Translation {
+        text: joined,
+        detected,
+    })
 }

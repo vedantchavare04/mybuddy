@@ -1,4 +1,3 @@
-
 use std::{
     sync::{Mutex, OnceLock},
     thread,
@@ -25,10 +24,7 @@ fn history() -> &'static Mutex<Vec<ClipboardEntry>> {
 }
 
 fn next_id() -> u64 {
-    let mut id = NEXT_ID
-        .get_or_init(|| Mutex::new(0))
-        .lock()
-        .unwrap();
+    let mut id = NEXT_ID.get_or_init(|| Mutex::new(0)).lock().unwrap();
 
     *id += 1;
     *id
@@ -55,9 +51,7 @@ pub fn start(app: AppHandle) {
                             entries.truncate(MAX_ENTRIES);
                         }
 
-                        if let Err(error) =
-                            app.emit("clipboard://changed", entry)
-                        {
+                        if let Err(error) = app.emit("clipboard://changed", entry) {
                             eprintln!("[clipboard] Event error: {error}");
                         }
                     }
@@ -79,11 +73,7 @@ pub fn clipboard_history_list() -> Result<Vec<ClipboardEntry>, String> {
 
 #[tauri::command]
 pub fn clipboard_write_text(text: String) -> Result<(), String> {
-    let mut clipboard =
-        Clipboard::new().map_err(|error| error.to_string())?;
+    let mut clipboard = Clipboard::new().map_err(|error| error.to_string())?;
 
-    clipboard
-        .set_text(text)
-        .map_err(|error| error.to_string())
+    clipboard.set_text(text).map_err(|error| error.to_string())
 }
-

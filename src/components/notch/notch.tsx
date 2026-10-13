@@ -2,10 +2,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence } from "framer-motion";
 import { listen } from "@tauri-apps/api/event";
-import {
-  register,
-  unregister,
-} from "@tauri-apps/plugin-global-shortcut";
 
 import ContextSaverView from "./views/contextSaverView";
 import MemoryView from "./views/memoryView";
@@ -47,6 +43,7 @@ import { SettingsView } from "./views/settingsView";
 import { AiSettingsView } from "./views/aiSettingsView";
 import LauncherView from "./views/launcherView";
 import ClipboardView from "./views/clipboardView";
+import PromiseKeeperView from "./views/promiseKeeperView";
 
 type NotchProps = {
   event: CompanionEvent | null;
@@ -91,52 +88,6 @@ export default function Notch({
   }, [expanded, nav.route, onExpand, onCollapse, nav.go]);
 
   useEffect(() => {
-    const shortcut = "Ctrl+Shift+K";
-    let disposed = false;
-    let registered = false;
-
-    void register(shortcut, (event) => {
-      if (event.state !== "Pressed") return;
-
-      const current = launcherToggleRef.current;
-
-      current.onExpand();
-      current.go("context");
-    })
-      .then(() => {
-        registered = true;
-
-        if (disposed) {
-          void unregister(shortcut).catch((error) => {
-            console.error(
-              "Could not unregister Context Saver shortcut:",
-              error,
-            );
-          });
-        }
-      })
-      .catch((error) => {
-        console.error(
-          "Could not register Context Saver shortcut:",
-          error,
-        );
-      });
-
-    return () => {
-      disposed = true;
-
-      if (registered) {
-        void unregister(shortcut).catch((error) => {
-          console.error(
-            "Could not unregister Context Saver shortcut:",
-            error,
-          );
-        });
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     let unlisten: (() => void) | undefined;
     let disposed = false;
   
@@ -156,6 +107,29 @@ export default function Notch({
         console.error("Could not listen for Context Saver shortcut:", error);
       });
   
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+
+    listen("promise-keeper://open", () => {
+      const current = launcherToggleRef.current;
+      current.onExpand();
+      current.go("promises");
+    })
+      .then((stopListening) => {
+        if (disposed) stopListening();
+        else unlisten = stopListening;
+      })
+      .catch((error) => {
+        console.error("Could not listen for Promise Keeper shortcut:", error);
+      });
+
     return () => {
       disposed = true;
       unlisten?.();
@@ -290,6 +264,13 @@ export default function Notch({
             />,
           );
 
+        case "promises":
+          return expandedView(
+            "promises",
+            SIZES.promises,
+            <PromiseKeeperView onBack={back} onCollapse={onCollapse} />,
+          );
+
         case "music":
           return expandedView(
             "music",
@@ -332,6 +313,7 @@ export default function Notch({
               onOpenClipboard={() => nav.go("clipboard")}
               onOpenMemory={() => nav.go("memory")}
               onOpenContext={() => nav.go("context")}
+              onOpenPromises={() => nav.go("promises")}
               onOpenTasks={() => nav.go("tasks")}
               onLaunched={onCollapse}
             />,

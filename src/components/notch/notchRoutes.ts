@@ -17,6 +17,7 @@ export type Route =
   | "clipboard"
   |"tasks"
   | "context"
+  | "promises"
   | "settings/ai";
 
 export const PARENT: Record<Route, Route | null> = {
@@ -28,6 +29,7 @@ export const PARENT: Record<Route, Route | null> = {
   music: "home",
   calendar: "home",
   context: "launcher",
+  promises: "launcher",
   "calendar/new": "calendar",
   reminders: "home",
   "reminders/new": "reminders",

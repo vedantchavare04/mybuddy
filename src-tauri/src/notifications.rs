@@ -62,7 +62,9 @@ mod imp {
 
     pub fn poll() -> Vec<WinNotification> {
         let mut out = Vec::new();
-        let Ok(listener) = Listener::Current() else { return out };
+        let Ok(listener) = Listener::Current() else {
+            return out;
+        };
         let Ok(list) = listener
             .GetNotificationsAsync(NotificationKinds::Toast)
             .and_then(|op| op.get())

@@ -19,6 +19,7 @@ export const SIZES = {
 
   eventExpanded: { width: W, height: 176 },
   home: { width: W, height: 236 },
+  promises: { width: W, height: 300 },
   tools: { width: W, height: 216 },
   music: { width: W, height: 226 },
   calendar: { width: W, height: 292 },

@@ -1,7 +1,7 @@
 use std::{
     sync::{
-        atomic::{AtomicBool, AtomicU64, Ordering},
         Arc, Mutex,
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
     thread,
     time::{Duration, Instant},
@@ -43,7 +43,9 @@ fn main_window(app: &AppHandle) -> Option<WebviewWindow> {
 }
 
 fn cursor_inside(window: &WebviewWindow, region: Region) -> bool {
-    let Ok(origin) = window.inner_position() else { return false };
+    let Ok(origin) = window.inner_position() else {
+        return false;
+    };
     let scale = window.scale_factor().unwrap_or(1.0);
 
     let mut point = POINT::default();

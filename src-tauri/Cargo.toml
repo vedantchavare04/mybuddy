@@ -7,7 +7,6 @@ license = ""
 repository = ""
 edition = "2024"
 rust-version = "1.90"
-arboard = "3"
 
 [lib]
 name = "app_lib"

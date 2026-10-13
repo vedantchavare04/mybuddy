@@ -9,6 +9,7 @@ import {
   CornerDownLeft,
   Download,
   FileText,
+  Handshake,
   Search,
   type LucideIcon,
 } from "lucide-react";
@@ -39,6 +40,7 @@ type LauncherViewProps = {
   onOpenMemory: () => void;
   onOpenTasks: () => void;
   onOpenContext: () => void;
+  onOpenPromises: () => void;
   onLaunched?: () => void;
 };
 
@@ -50,6 +52,7 @@ export default function LauncherView({
   onOpenMemory,
   onOpenTasks,
   onOpenContext,
+  onOpenPromises,
   onLaunched,
 }: LauncherViewProps) {
   const [query, setQuery] = useState("");
@@ -180,6 +183,14 @@ export default function LauncherView({
         icon: BookmarkCheck,
         run: onOpenContext,
       },
+      {
+        id: "promises",
+        title: "Promise Keeper",
+        description: "Keep track of promises and follow-ups",
+        keywords: "promises commitments people follow up remember",
+        icon: Handshake,
+        run: onOpenPromises,
+      },
     ],
     [
       openApps,
@@ -188,6 +199,7 @@ export default function LauncherView({
       onOpenMemory,
       onOpenTasks,
       onOpenContext,
+      onOpenPromises,
     ],
   );
 

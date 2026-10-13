@@ -1,10 +1,7 @@
-
 use std::{ptr, thread, time::Duration};
 
 use tauri::{AppHandle, Emitter};
-use tauri_plugin_global_shortcut::{
-    Code, Modifiers, Shortcut, ShortcutEvent, ShortcutState,
-};
+use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut, ShortcutEvent, ShortcutState};
 use windows::Win32::{
     Foundation::{HANDLE, HGLOBAL},
     System::{
@@ -12,12 +9,12 @@ use windows::Win32::{
             CloseClipboard, EmptyClipboard, EnumClipboardFormats, GetClipboardData,
             GetClipboardSequenceNumber, OpenClipboard, SetClipboardData,
         },
-        Memory::{GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE},
+        Memory::{GMEM_MOVEABLE, GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock},
     },
     UI::Input::KeyboardAndMouse::{
-        GetAsyncKeyState, SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT,
-        KEYBD_EVENT_FLAGS, KEYEVENTF_KEYUP, VIRTUAL_KEY, VK_C, VK_CONTROL, VK_LWIN,
-        VK_MENU, VK_RWIN, VK_SHIFT, VK_SPACE,
+        GetAsyncKeyState, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBD_EVENT_FLAGS, KEYBDINPUT,
+        KEYEVENTF_KEYUP, SendInput, VIRTUAL_KEY, VK_C, VK_CONTROL, VK_LWIN, VK_MENU, VK_RWIN,
+        VK_SHIFT, VK_SPACE,
     },
 };
 
@@ -43,11 +40,11 @@ pub fn context_saver_shortcut() -> Shortcut {
     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyK)
 }
 
-pub fn on_shortcut(
-    app: &AppHandle,
-    shortcut: &Shortcut,
-    event: ShortcutEvent,
-) {
+pub fn promise_keeper_shortcut() -> Shortcut {
+    Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyP)
+}
+
+pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
     if event.state() != ShortcutState::Pressed {
         return;
     }
@@ -62,6 +59,13 @@ pub fn on_shortcut(
     if shortcut == &context_saver_shortcut() {
         if let Err(error) = app.emit("context-saver://open", ()) {
             eprintln!("[shortcut] Could not open Context Saver: {error}");
+        }
+        return;
+    }
+
+    if shortcut == &promise_keeper_shortcut() {
+        if let Err(error) = app.emit("promise-keeper://open", ()) {
+            eprintln!("[shortcut] Could not open Promise Keeper: {error}");
         }
         return;
     }
@@ -222,8 +226,7 @@ fn snapshot() -> Option<Saved> {
                 continue;
             }
 
-            let bytes =
-                std::slice::from_raw_parts(p as *const u8, size).to_vec();
+            let bytes = std::slice::from_raw_parts(p as *const u8, size).to_vec();
 
             let _ = GlobalUnlock(g);
             items.push((fmt, bytes));
@@ -253,11 +256,7 @@ fn restore(saved: &Saved) {
                 continue;
             }
 
-            ptr::copy_nonoverlapping(
-                bytes.as_ptr(),
-                p as *mut u8,
-                bytes.len(),
-            );
+            ptr::copy_nonoverlapping(bytes.as_ptr(), p as *mut u8, bytes.len());
 
             let _ = GlobalUnlock(h);
             let _ = SetClipboardData(*fmt, Some(HANDLE(h.0)));
@@ -289,8 +288,7 @@ fn read_text() -> Option<String> {
                 len += 1;
             }
 
-            let s =
-                String::from_utf16_lossy(std::slice::from_raw_parts(p, len));
+            let s = String::from_utf16_lossy(std::slice::from_raw_parts(p, len));
 
             let _ = GlobalUnlock(g);
             Some(s)

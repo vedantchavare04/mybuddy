@@ -1,4 +1,3 @@
-
 mod ai;
 mod app_launcher;
 mod clipboard;
@@ -8,6 +7,7 @@ mod dock;
 mod google;
 mod media;
 mod notifications;
+mod promises;
 mod reminders;
 mod selection;
 mod speech;
@@ -16,10 +16,7 @@ mod translate;
 
 use tauri::Manager;
 use tauri_plugin_global_shortcut::GlobalShortcutExt;
-use windows::Win32::System::Power::{
-    GetSystemPowerStatus,
-    SYSTEM_POWER_STATUS,
-};
+use windows::Win32::System::Power::{GetSystemPowerStatus, SYSTEM_POWER_STATUS};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -59,6 +56,7 @@ pub fn run() {
                 selection::ai_shortcut(),
                 selection::launcher_shortcut(),
                 selection::context_saver_shortcut(),
+                selection::promise_keeper_shortcut(),
             ] {
                 if let Err(error) = app.global_shortcut().register(shortcut) {
                     eprintln!("[shortcut] could not register: {error}");
@@ -80,6 +78,11 @@ pub fn run() {
             context_saver::context_list,
             context_saver::context_save,
             context_saver::context_delete,
+            promises::promises_list,
+            promises::promise_create,
+            promises::promise_update,
+            promises::promise_complete,
+            promises::promise_delete,
             tasks::download_start,
             tasks::task_cancel,
             dock::dock_hold,
@@ -127,8 +130,7 @@ fn get_battery_status() -> Result<BatteryStatus, String> {
     let mut status = SYSTEM_POWER_STATUS::default();
 
     unsafe {
-        GetSystemPowerStatus(&mut status)
-            .map_err(|error| error.to_string())?;
+        GetSystemPowerStatus(&mut status).map_err(|error| error.to_string())?;
     }
 
     Ok(BatteryStatus {
