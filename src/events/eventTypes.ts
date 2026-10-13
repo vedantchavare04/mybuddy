@@ -5,7 +5,8 @@ export type CompanionEventType =
   | "music"
   | "meeting"
   | "focus"
-  | "reminder";
+  | "reminder"
+  | "promise";
 
 export type CompanionEvent = {
   id: string;

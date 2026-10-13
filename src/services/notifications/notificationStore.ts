@@ -51,6 +51,7 @@ const EVENT_LABELS: Record<string, string> = {
   music: "Now playing",
   meeting: "Calendar",
   focus: "Focus",
+  promise: "Promise Keeper",
 };
 
 type WinNotification = {

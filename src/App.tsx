@@ -15,6 +15,7 @@ import { eventLifecycle } from "./events/eventLifecycle";
 import { startBatteryMonitor } from "./system/batteryMonitor";
 import { positionMyBuddy } from "./system/windowPosition";
 import { notificationService } from "./services/notifications/notificationStore";
+import { promiseService } from "./services/promises/promiseService";
 import {
   settingsService,
   useSettings,
@@ -131,7 +132,7 @@ function App() {
   useEffect(() => {
     positionMyBuddy();
 
-    return eventManager.subscribe(() => {
+    const unsubscribe = eventManager.subscribe(() => {
       if (
         activeEventRef.current !== null ||
         transitioningRef.current
@@ -151,6 +152,10 @@ function App() {
         setActiveEvent(nextEvent);
       }
     });
+
+    promiseService.start();
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {

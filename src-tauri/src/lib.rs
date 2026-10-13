@@ -47,6 +47,7 @@ pub fn run() {
 
             let reminders = reminders::start(app.handle().clone())?;
             app.manage(reminders);
+            promises::start(app.handle().clone())?;
 
             clipboard::start(app.handle().clone());
 
@@ -83,6 +84,7 @@ pub fn run() {
             promises::promise_update,
             promises::promise_complete,
             promises::promise_delete,
+            promises::promise_presented,
             tasks::download_start,
             tasks::task_cancel,
             dock::dock_hold,

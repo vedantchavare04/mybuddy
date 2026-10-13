@@ -3,6 +3,8 @@ use std::{
     fs,
     path::PathBuf,
     sync::{Mutex, OnceLock},
+    thread,
+    time::Duration,
 };
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -11,6 +13,7 @@ const MAX_TITLE_LENGTH: usize = 200;
 const MAX_PERSON_LENGTH: usize = 200;
 const MAX_NOTE_LENGTH: usize = 4_000;
 const CHANGED_EVENT: &str = "promise-keeper://changed";
+const DUE_EVENT: &str = "promise-keeper://due";
 
 static STORE_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
@@ -26,6 +29,8 @@ pub struct Promise {
     pub created_at: i64,
     pub updated_at: i64,
     pub completed_at: Option<i64>,
+    #[serde(default)]
+    pub notified_at: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -39,6 +44,29 @@ pub struct PromiseInput {
 
 fn now_ms() -> i64 {
     chrono::Utc::now().timestamp_millis()
+}
+
+fn schedule_due_promises(app: AppHandle, path: PathBuf) {
+    loop {
+        thread::sleep(Duration::from_secs(15));
+        let lock = STORE_LOCK.get_or_init(|| Mutex::new(()));
+        let Ok(_guard) = lock.lock() else { continue };
+        let Ok(items) = read_all(&path) else { continue };
+        let now = now_ms();
+        for promise in items.iter().filter(|promise| {
+            !promise.completed
+                && promise.notified_at.is_none()
+                && promise.due_ms.is_some_and(|due_ms| due_ms <= now)
+        }) {
+            let _ = app.emit(DUE_EVENT, promise);
+        }
+    }
+}
+
+pub fn start(app: AppHandle) -> Result<(), String> {
+    let path = store_path(&app)?;
+    thread::spawn(move || schedule_due_promises(app, path));
+    Ok(())
 }
 
 fn store_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -132,6 +160,7 @@ pub fn promise_create(app: AppHandle, input: PromiseInput) -> Result<Promise, St
         created_at: now,
         updated_at: now,
         completed_at: None,
+        notified_at: None,
     };
     transact(&app, |items| {
         if items.len() >= MAX_PROMISES {
@@ -165,6 +194,9 @@ pub fn promise_update(app: AppHandle, id: String, input: PromiseInput) -> Result
         item.title = title;
         item.person = person;
         item.note = note;
+        if item.due_ms != input.due_ms {
+            item.notified_at = None;
+        }
         item.due_ms = input.due_ms;
         item.updated_at = now_ms();
         Ok(item.clone())
@@ -180,6 +212,23 @@ pub fn promise_complete(app: AppHandle, id: String, completed: bool) -> Result<(
             .ok_or("Promise not found.")?;
         item.completed = completed;
         item.completed_at = if completed { Some(now_ms()) } else { None };
+        item.notified_at = if completed { Some(now_ms()) } else { None };
+        item.updated_at = now_ms();
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn promise_presented(app: AppHandle, id: String) -> Result<(), String> {
+    transact(&app, |items| {
+        let item = items
+            .iter_mut()
+            .find(|item| item.id == id)
+            .ok_or("Promise not found.")?;
+        if item.completed {
+            return Err("Promise is already completed.".into());
+        }
+        item.notified_at = Some(now_ms());
         item.updated_at = now_ms();
         Ok(())
     })

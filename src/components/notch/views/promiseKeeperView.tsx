@@ -188,7 +188,17 @@ export default function PromiseKeeperView({
           </>
         )}
       </div>
-      <footer className="nx-footer"><span className="nx-footer-lead">{openItems.length} open {openItems.length === 1 ? "promise" : "promises"}</span><span>Stored on this device</span></footer>
+      <footer className="nx-footer">
+        <span className="nx-footer-lead">
+          {openItems.length} open {openItems.length === 1 ? "promise" : "promises"}
+        </span>
+        <span className="nx-hint" aria-label="Shortcut: Control Alt P">
+          <kbd className="nx-kbd">Ctrl</kbd>
+          <kbd className="nx-kbd">Alt</kbd>
+          <kbd className="nx-kbd">P</kbd>
+          Open Promise Keeper
+        </span>
+      </footer>
     </section>
   );
 }
