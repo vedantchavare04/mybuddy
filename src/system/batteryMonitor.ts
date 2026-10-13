@@ -29,7 +29,7 @@ export async function checkBattery(
       return;
     }
 
-    if (battery.percentage <= 100 && !batteryAlertSent) {
+    if (battery.percentage <= 18 && !batteryAlertSent) {
       const event: CompanionEvent = {
         id: `battery-${Date.now()}`,
         type: "notification",
