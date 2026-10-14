@@ -171,6 +171,18 @@
   transition: opacity 120ms ease;
 }
 
+.launcher-action-shortcut {
+  flex: none;
+  padding: 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #8c8c8c;
+  font-family: inherit;
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .launcher-action.is-selected .launcher-action-hint {
   opacity: 1;
 }

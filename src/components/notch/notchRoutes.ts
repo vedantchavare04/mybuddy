@@ -18,6 +18,8 @@ export type Route =
   |"tasks"
   | "context"
   | "promises"
+  | "flow-rescue"
+  | "explain-later"
   | "settings/ai";
 
 export const PARENT: Record<Route, Route | null> = {
@@ -30,6 +32,8 @@ export const PARENT: Record<Route, Route | null> = {
   calendar: "home",
   context: "launcher",
   promises: "launcher",
+  "flow-rescue": "launcher",
+  "explain-later": "launcher",
   "calendar/new": "calendar",
   reminders: "home",
   "reminders/new": "reminders",

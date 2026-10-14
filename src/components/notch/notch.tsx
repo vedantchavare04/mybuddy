@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence } from "framer-motion";
 import { listen } from "@tauri-apps/api/event";
@@ -44,6 +43,7 @@ import { AiSettingsView } from "./views/aiSettingsView";
 import LauncherView from "./views/launcherView";
 import ClipboardView from "./views/clipboardView";
 import PromiseKeeperView from "./views/promiseKeeperView";
+import { ExplainLaterView, FlowRescueView } from "./views/focusToolsView";
 
 type NotchProps = {
   event: CompanionEvent | null;
@@ -111,6 +111,38 @@ export default function Notch({
       disposed = true;
       unlisten?.();
     };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+    listen("flow-rescue://open", () => {
+      const current = launcherToggleRef.current;
+      current.go("flow-rescue");
+      current.onExpand();
+    })
+      .then((stopListening) => {
+        if (disposed) stopListening();
+        else unlisten = stopListening;
+      })
+      .catch((error) => console.error("Could not listen for Flow Rescue shortcut:", error));
+    return () => { disposed = true; unlisten?.(); };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+    listen("explain-later://open", () => {
+      const current = launcherToggleRef.current;
+      current.go("explain-later");
+      current.onExpand();
+    })
+      .then((stopListening) => {
+        if (disposed) stopListening();
+        else unlisten = stopListening;
+      })
+      .catch((error) => console.error("Could not listen for Explain This Later shortcut:", error));
+    return () => { disposed = true; unlisten?.(); };
   }, []);
 
   useEffect(() => {
@@ -271,6 +303,12 @@ export default function Notch({
             <PromiseKeeperView onBack={back} onCollapse={onCollapse} />,
           );
 
+        case "flow-rescue":
+          return expandedView("flow-rescue", SIZES.flowRescue, <FlowRescueView onBack={back} onCollapse={onCollapse} />);
+
+        case "explain-later":
+          return expandedView("explain-later", SIZES.explainLater, <ExplainLaterView onBack={back} onCollapse={onCollapse} />);
+
         case "music":
           return expandedView(
             "music",
@@ -314,6 +352,8 @@ export default function Notch({
               onOpenMemory={() => nav.go("memory")}
               onOpenContext={() => nav.go("context")}
               onOpenPromises={() => nav.go("promises")}
+              onOpenFlowRescue={() => nav.go("flow-rescue")}
+              onOpenExplainLater={() => nav.go("explain-later")}
               onOpenTasks={() => nav.go("tasks")}
               onLaunched={onCollapse}
             />,

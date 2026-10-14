@@ -44,6 +44,14 @@ pub fn promise_keeper_shortcut() -> Shortcut {
     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyP)
 }
 
+pub fn flow_rescue_shortcut() -> Shortcut {
+    Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyR)
+}
+
+pub fn explain_later_shortcut() -> Shortcut {
+    Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyE)
+}
+
 pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
     if event.state() != ShortcutState::Pressed {
         return;
@@ -66,6 +74,20 @@ pub fn on_shortcut(app: &AppHandle, shortcut: &Shortcut, event: ShortcutEvent) {
     if shortcut == &promise_keeper_shortcut() {
         if let Err(error) = app.emit("promise-keeper://open", ()) {
             eprintln!("[shortcut] Could not open Promise Keeper: {error}");
+        }
+        return;
+    }
+
+    if shortcut == &flow_rescue_shortcut() {
+        if let Err(error) = app.emit("flow-rescue://open", ()) {
+            eprintln!("[shortcut] Could not open Flow Rescue: {error}");
+        }
+        return;
+    }
+
+    if shortcut == &explain_later_shortcut() {
+        if let Err(error) = app.emit("explain-later://open", ()) {
+            eprintln!("[shortcut] Could not open Explain This Later: {error}");
         }
         return;
     }

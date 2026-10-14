@@ -10,6 +10,8 @@ import {
   Download,
   FileText,
   Handshake,
+  RotateCcw,
+  CircleHelp,
   Search,
   type LucideIcon,
 } from "lucide-react";
@@ -28,6 +30,7 @@ type LauncherAction = {
   description: string;
   keywords: string;
   icon: LucideIcon;
+  shortcut?: string;
   run: () => void;
 };
 
@@ -41,6 +44,8 @@ type LauncherViewProps = {
   onOpenTasks: () => void;
   onOpenContext: () => void;
   onOpenPromises: () => void;
+  onOpenFlowRescue: () => void;
+  onOpenExplainLater: () => void;
   onLaunched?: () => void;
 };
 
@@ -53,6 +58,8 @@ export default function LauncherView({
   onOpenTasks,
   onOpenContext,
   onOpenPromises,
+  onOpenFlowRescue,
+  onOpenExplainLater,
   onLaunched,
 }: LauncherViewProps) {
   const [query, setQuery] = useState("");
@@ -191,6 +198,24 @@ export default function LauncherView({
         icon: Handshake,
         run: onOpenPromises,
       },
+      {
+        id: "flow-rescue",
+        title: "Flow Rescue",
+        description: "Save your place and resume after an interruption",
+        keywords: "interruption resume progress next step checkpoint",
+        icon: RotateCcw,
+        shortcut: "Ctrl + Alt + R",
+        run: onOpenFlowRescue,
+      },
+      {
+        id: "explain-later",
+        title: "Explain This Later",
+        description: "Save a question without losing your work",
+        keywords: "question understand explain later learn",
+        icon: CircleHelp,
+        shortcut: "Ctrl + Alt + E",
+        run: onOpenExplainLater,
+      },
     ],
     [
       openApps,
@@ -200,6 +225,8 @@ export default function LauncherView({
       onOpenTasks,
       onOpenContext,
       onOpenPromises,
+      onOpenFlowRescue,
+      onOpenExplainLater,
     ],
   );
 
@@ -425,6 +452,12 @@ export default function LauncherView({
                     {action.description}
                   </span>
                 </span>
+
+                {action.shortcut && (
+                  <kbd className="launcher-action-shortcut" aria-label={`Shortcut ${action.shortcut}`}>
+                    {action.shortcut}
+                  </kbd>
+                )}
 
                 <span className="launcher-action-hint" aria-hidden="true">
                   <CornerDownLeft size={12} strokeWidth={2} />

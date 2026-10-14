@@ -4,6 +4,7 @@ mod clipboard;
 mod context_saver;
 mod cursor;
 mod dock;
+mod focus_tools;
 mod google;
 mod media;
 mod notifications;
@@ -58,9 +59,13 @@ pub fn run() {
                 selection::launcher_shortcut(),
                 selection::context_saver_shortcut(),
                 selection::promise_keeper_shortcut(),
+                selection::flow_rescue_shortcut(),
+                selection::explain_later_shortcut(),
             ] {
-                if let Err(error) = app.global_shortcut().register(shortcut) {
-                    eprintln!("[shortcut] could not register: {error}");
+                let name = format!("{shortcut:?}");
+                match app.global_shortcut().register(shortcut) {
+                    Ok(()) => eprintln!("[shortcut] registered {name}"),
+                    Err(error) => eprintln!("[shortcut] could not register {name}: {error}"),
                 }
             }
 
@@ -85,6 +90,12 @@ pub fn run() {
             promises::promise_complete,
             promises::promise_delete,
             promises::promise_presented,
+            focus_tools::flow_list,
+            focus_tools::flow_save,
+            focus_tools::flow_delete,
+            focus_tools::explain_list,
+            focus_tools::explain_save,
+            focus_tools::explain_delete,
             tasks::download_start,
             tasks::task_cancel,
             dock::dock_hold,
