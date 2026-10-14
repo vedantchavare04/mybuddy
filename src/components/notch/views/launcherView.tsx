@@ -188,6 +188,7 @@ export default function LauncherView({
         description: "Save your place and resume later",
         keywords: "checkpoint project progress resume work",
         icon: BookmarkCheck,
+        shortcut: "Ctrl + Shift + K",
         run: onOpenContext,
       },
       {
@@ -196,6 +197,7 @@ export default function LauncherView({
         description: "Keep track of promises and follow-ups",
         keywords: "promises commitments people follow up remember",
         icon: Handshake,
+        shortcut: "Ctrl + Alt + P",
         run: onOpenPromises,
       },
       {
