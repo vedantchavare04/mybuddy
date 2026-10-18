@@ -12,6 +12,7 @@ mod promises;
 mod reminders;
 mod selection;
 mod speech;
+mod startup;
 mod tasks;
 mod translate;
 
@@ -73,6 +74,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_battery_status,
+            startup::startup_is_enabled,
+            startup::startup_set_enabled,
             cursor::set_special_cursor_enabled,
             cursor::is_special_cursor_enabled,
             context_saver::context_open_target,

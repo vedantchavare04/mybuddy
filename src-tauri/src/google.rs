@@ -47,7 +47,6 @@ static CANCEL: LazyLock<Notify> = LazyLock::new(Notify::new);
 const PAGE_OK: &str = "<!doctype html><meta charset=utf-8><title>MyBuddy</title><body style=\"background:#050506;color:#fff;font:15px system-ui;display:grid;place-items:center;height:100vh;margin:0\"><div style=\"text-align:center\"><div style=\"font-size:18px;font-weight:600\">MyBuddy is connected</div><p style=\"color:#888\">You can close this tab.</p></div></body>";
 const PAGE_FAIL: &str = "<!doctype html><meta charset=utf-8><title>MyBuddy</title><body style=\"background:#050506;color:#fff;font:15px system-ui;display:grid;place-items:center;height:100vh;margin:0\"><div style=\"text-align:center\"><div style=\"font-size:18px;font-weight:600\">Sign-in didn't complete</div><p style=\"color:#888\">You can close this tab and try again in MyBuddy.</p></div></body>";
 
-/* ---------- config / storage helpers ---------- */
 
 fn client() -> Result<(String, String), String> {
     let id = std::env::var("MYBUDDY_GOOGLE_CLIENT_ID")
@@ -110,7 +109,6 @@ fn remember_access(t: &TokenResp) {
     ));
 }
 
-/* ---------- status / connect / disconnect ---------- */
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -277,7 +275,6 @@ pub async fn google_connect() -> Result<Status, String> {
     })
 }
 
-/* ---------- tokens ---------- */
 
 async fn access_token() -> Result<String, String> {
     if let Some((token, expires)) = ACCESS.lock().unwrap().clone() {
@@ -315,7 +312,6 @@ async fn access_token() -> Result<String, String> {
     Ok(token.access_token)
 }
 
-/* ---------- calendar ---------- */
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

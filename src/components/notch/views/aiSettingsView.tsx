@@ -12,7 +12,6 @@ import {
   ViewHeader,
   inputCls,
   scrollCls,
-  selectCls,
 } from "./parts";
 
 type Props = { onBack: () => void; onCollapse: () => void };

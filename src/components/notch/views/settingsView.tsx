@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { ChevronRight } from "lucide-react";
 import { PROVIDERS, useAiConfig } from "../../../services/ai/aiConfig";
 import {
@@ -54,6 +55,33 @@ function SettingRow({
 
 export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const { spiderEnabled, specialCursorEnabled, notchEnabled } = useSettings();
+  const [launchAtStartup, setLaunchAtStartup] = useState(false);
+  const [startupError, setStartupError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    invoke<boolean>("startup_is_enabled")
+      .then((enabled) => {
+        if (active) setLaunchAtStartup(enabled);
+      })
+      .catch(() => {
+        if (active)
+          setStartupError("Could not read the Windows startup setting.");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const setStartup = async (enabled: boolean) => {
+    setStartupError("");
+    try {
+      await invoke("startup_set_enabled", { enabled });
+      setLaunchAtStartup(enabled);
+    } catch {
+      setStartupError("Could not update the Windows startup setting.");
+    }
+  };
 
   const ai = useAiConfig();
 
@@ -76,6 +104,24 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
 
       <div className={`${scrollCls} mt-3.5 flex flex-col gap-4`}>
         <Section title="Appearance">
+          <SettingRow
+            title="Launch at startup"
+            description={
+              startupError ||
+              "Start MyBuddy automatically when you sign in to Windows"
+            }
+            control={
+              <ToggleSwitch
+                size="sm"
+                darkMode
+                className="shrink-0"
+                ariaLabel="Launch at startup"
+                isActive={launchAtStartup}
+                onChange={(on) => void setStartup(on)}
+              />
+            }
+          />
+
           <SettingRow
             title="Spider Companion"
             description="Show the MyBuddy spider on screen"

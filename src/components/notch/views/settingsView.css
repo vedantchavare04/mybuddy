@@ -1,0 +1,114 @@
+.appearance-picker {
+  position: relative;
+  z-index: 1;
+}
+
+.appearance-picker__trigger {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  cursor: pointer;
+  list-style: none;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.appearance-picker__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.appearance-picker__trigger:hover,
+.appearance-picker[open] .appearance-picker__trigger {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.appearance-picker__trigger:focus-visible,
+.appearance-picker__option:focus-visible {
+  outline: 2px solid rgba(203, 181, 255, 0.8);
+  outline-offset: 2px;
+}
+
+.appearance-picker__options {
+  display: grid;
+  gap: 2px;
+  margin-top: 5px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: #111114;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+}
+
+.appearance-picker__option {
+  display: flex;
+  width: 100%;
+  min-height: 54px;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 7px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 140ms ease;
+}
+
+.appearance-picker__option:hover,
+.appearance-picker__option[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.appearance-picker__preview {
+  display: grid;
+  width: 42px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: #09090c;
+}
+
+.appearance-picker__preview svg {
+  width: 34px;
+  height: 32px;
+  stroke: #cbb5ff;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.appearance-picker__preview--lurker svg {
+  stroke: #aaa6b3;
+  opacity: 0.65;
+}
+
+.appearance-picker__preview img {
+  width: 28px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.appearance-picker__selected {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #cbb5ff;
+  box-shadow: 0 0 8px rgba(203, 181, 255, 0.36);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appearance-picker__trigger,
+  .appearance-picker__option {
+    transition: none;
+  }
+}

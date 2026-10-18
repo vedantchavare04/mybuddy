@@ -1,0 +1,71 @@
+.nightcrawler-lights {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(90vw, 1120px);
+  height: 68px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.nightcrawler-lights__wire {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: rgba(242, 246, 255, 0.42);
+  box-shadow: 0 1px 4px rgba(235, 242, 255, 0.22);
+}
+
+.nightcrawler-lights__row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.nightcrawler-lights__row--lower {
+  top: 13px;
+  width: 92%;
+  left: 4%;
+}
+
+.nightcrawler-lights__drop {
+  position: relative;
+  display: block;
+  width: 1px;
+  flex: none;
+  background: rgba(241, 246, 255, 0.5);
+  box-shadow: 0 0 3px rgba(232, 241, 255, 0.2);
+}
+
+.nightcrawler-lights__drop i {
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f4f7ff;
+  box-shadow: 0 0 7px 2px rgba(233, 241, 255, 0.64);
+}
+
+.nightcrawler-lights--dim .nightcrawler-lights__drop {
+  opacity: 0.34;
+  box-shadow: none;
+}
+
+.nightcrawler-lights--dim .nightcrawler-lights__drop i {
+  background: #c7cbd4;
+  box-shadow: 0 0 2px rgba(233, 241, 255, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nightcrawler-lights,
+  .nightcrawler-lights * {
+    animation: none !important;
+  }
+}
+

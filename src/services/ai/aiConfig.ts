@@ -216,4 +216,6 @@ export const aiConfig = {
   },
 };
 
+export const aiConfigSnapshot = () => store.get();
+
 export const useAiConfig = () => useStore(store);

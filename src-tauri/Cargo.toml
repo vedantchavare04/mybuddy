@@ -38,6 +38,7 @@ arboard = "3"
 version = "0.62.2"
 features = [
   "Win32_System_Power",
+  "Win32_System_Registry",
   "Foundation",
   "Foundation_Collections",
   "Media_Control",

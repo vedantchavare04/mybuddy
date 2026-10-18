@@ -14,7 +14,6 @@ export type Reminder = {
 };
 
 const MAX_TITLE_LENGTH = 200;
-const MAX_REMINDERS = 10_000;
 const MAX_REMINDER_AHEAD_MS =
   365 * 24 * 60 * 60 * 1000;
 
