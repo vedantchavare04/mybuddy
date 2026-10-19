@@ -57,6 +57,9 @@ features = [
   "Win32_UI_WindowsAndMessaging",
 ]
 
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-updater = "2"
+
 [features]
 default = []
 win-notifications = []

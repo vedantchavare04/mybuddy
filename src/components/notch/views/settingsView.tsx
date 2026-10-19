@@ -1,13 +1,14 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { ChevronRight } from "lucide-react";
+import { check } from "@tauri-apps/plugin-updater";
 import { PROVIDERS, useAiConfig } from "../../../services/ai/aiConfig";
 import {
   settingsService,
   useSettings,
 } from "../../../services/settings/settingsStore";
 import ToggleSwitch from "../../ui/toggleSwitch";
-import { BackLabel, ViewHeader, scrollCls } from "./parts";
+import { BackLabel, Button, ViewHeader, scrollCls } from "./parts";
 
 type Props = {
   onBack: () => void;
@@ -57,6 +58,9 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const { spiderEnabled, specialCursorEnabled, notchEnabled } = useSettings();
   const [launchAtStartup, setLaunchAtStartup] = useState(false);
   const [startupError, setStartupError] = useState("");
+  const [updateAvailable, setUpdateAvailable] = useState<string | null>(null);
+  const [updateStatus, setUpdateStatus] = useState("Check whether a newer version is available");
+  const [updateBusy, setUpdateBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -80,6 +84,52 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
       setLaunchAtStartup(enabled);
     } catch {
       setStartupError("Could not update the Windows startup setting.");
+    }
+  };
+
+  const checkForUpdates = async () => {
+    setUpdateBusy(true);
+    setUpdateAvailable(null);
+    setUpdateStatus("Checking for updates…");
+    try {
+      const update = await check();
+      if (update) {
+        setUpdateAvailable(update.version);
+        setUpdateStatus(`MyBuddy ${update.version} is available`);
+        await update.close();
+      } else {
+        setUpdateStatus("You’re using the latest version");
+      }
+    } catch {
+      setUpdateStatus("Could not check right now. Try again later.");
+    } finally {
+      setUpdateBusy(false);
+    }
+  };
+
+  const installUpdate = async () => {
+    setUpdateBusy(true);
+    setUpdateStatus("Preparing the update…");
+    try {
+      const update = await check();
+      if (!update) {
+        setUpdateAvailable(null);
+        setUpdateStatus("You’re using the latest version");
+        return;
+      }
+      setUpdateStatus(`Downloading MyBuddy ${update.version}…`);
+      try {
+        await update.downloadAndInstall((event) => {
+          if (event.event === "Finished")
+            setUpdateStatus("Installing update…");
+        });
+      } finally {
+        await update.close().catch(() => undefined);
+      }
+    } catch {
+      setUpdateStatus("The update couldn’t be installed. Try again later.");
+    } finally {
+      setUpdateBusy(false);
     }
   };
 
@@ -166,6 +216,33 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
                   settingsService.set("specialCursorEnabled", on)
                 }
               />
+            }
+          />
+        </Section>
+
+        <Section title="Updates">
+          <SettingRow
+            title="MyBuddy updates"
+            description={updateStatus}
+            control={
+              <div className="flex shrink-0 items-center gap-2">
+                {updateAvailable && (
+                  <Button
+                    variant="primary"
+                    disabled={updateBusy}
+                    onClick={() => void installUpdate()}
+                  >
+                    Install {updateAvailable}
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  disabled={updateBusy}
+                  onClick={() => void checkForUpdates()}
+                >
+                  {updateBusy ? "Please wait…" : "Check"}
+                </Button>
+              </div>
             }
           />
         </Section>

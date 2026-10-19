@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090a0d" />
+    <meta
+      name="description"
+      content="Meet MyBuddy, a helpful desktop companion for Windows."
+    />
+    <title>MyBuddy — Your desktop companion</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #090a0d;
+        color: #f5f5f7;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background:
+          radial-gradient(ellipse at 50% 5%, rgba(72, 83, 147, .2), transparent 45%),
+          #090a0d;
+      }
+      main { width: min(100% - 40px, 980px); margin: auto; }
+      header { display: flex; align-items: center; gap: 12px; padding: 26px 0; }
+      .mark {
+        display: grid; width: 38px; height: 38px; place-items: center;
+        border: 1px solid rgba(255,255,255,.13); border-radius: 13px;
+        background: rgba(255,255,255,.07); font-size: 20px;
+      }
+      .brand { font-size: 16px; font-weight: 650; letter-spacing: -.03em; }
+      .hero { max-width: 720px; margin: clamp(70px, 13vh, 140px) auto 100px; text-align: center; }
+      .eyebrow { color: #a9b2ff; font-size: 12px; font-weight: 650; letter-spacing: .15em; text-transform: uppercase; }
+      h1 { margin: 18px 0; font-size: clamp(42px, 8vw, 76px); line-height: .99; letter-spacing: -.065em; }
+      .intro { max-width: 540px; margin: 0 auto; color: #a4a5ae; font-size: 17px; line-height: 1.65; }
+      .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+      a.button {
+        display: inline-flex; min-height: 48px; align-items: center; justify-content: center;
+        padding: 0 21px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px;
+        color: #f5f5f7; background: rgba(255,255,255,.07); font-size: 14px;
+        font-weight: 600; text-decoration: none; transition: background .18s ease, transform .18s ease;
+      }
+      a.button:hover { background: rgba(255,255,255,.13); transform: translateY(-1px); }
+      a.primary { border-color: transparent; background: #f5f5f7; color: #090a0d; }
+      a.primary:hover { background: #dfe1ff; }
+      a[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+      #release { min-height: 24px; margin-top: 16px; color: #777985; font-size: 12px; }
+      .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 auto 90px; }
+      .card { padding: 22px; border: 1px solid rgba(255,255,255,.08); border-radius: 18px; background: rgba(255,255,255,.025); }
+      .card h2 { margin: 0 0 8px; font-size: 14px; }
+      .card p { margin: 0; color: #92939d; font-size: 13px; line-height: 1.6; }
+      footer { display: flex; justify-content: space-between; gap: 16px; padding: 20px 0 30px; border-top: 1px solid rgba(255,255,255,.08); color: #777985; font-size: 12px; }
+      footer a { color: #b8bdff; text-decoration: none; }
+      @media (max-width: 680px) { .cards { grid-template-columns: 1fr; } footer { flex-direction: column; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header><span class="mark" aria-hidden="true">✦</span><span class="brand">MyBuddy</span></header>
+      <section class="hero">
+        <div class="eyebrow">A little more flow for your day</div>
+        <h1>Your desktop,<br />with a buddy.</h1>
+        <p class="intro">Quick tools, reminders, music controls, and a friendly companion—right where you work.</p>
+        <div class="actions">
+          <a class="button primary" id="download" aria-disabled="true" href="https://github.com/vedantchavare04/mybuddy/releases/latest">Loading latest release…</a>
+          <a class="button" href="https://github.com/vedantchavare04/mybuddy/releases/latest">Release notes</a>
+        </div>
+        <div id="release" role="status">Looking for the latest Windows release…</div>
+      </section>
+      <section class="cards" aria-label="MyBuddy features">
+        <article class="card"><h2>Stay in your flow</h2><p>Open useful tools and quick actions without losing your place.</p></article>
+        <article class="card"><h2>Keep small promises</h2><p>See reminders and calendar plans close to the work you’re doing.</p></article>
+        <article class="card"><h2>Made for Windows</h2><p>Install MyBuddy on Windows 10 or 11. Updates can be checked inside the app.</p></article>
+      </section>
+      <footer><span>© <span id="year"></span> MyBuddy</span><a href="https://github.com/vedantchavare04/mybuddy">View the project on GitHub</a></footer>
+    </main>
+    <script>
+      const repo = "vedantchavare04/mybuddy";
+      const button = document.querySelector("#download");
+      const releaseText = document.querySelector("#release");
+      document.querySelector("#year").textContent = new Date().getFullYear();
+      fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
+        headers: { Accept: "application/vnd.github+json" },
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("No published release yet");
+          return response.json();
+        })
+        .then((release) => {
+          const installer = release.assets.find((asset) => /-setup\.exe$/i.test(asset.name));
+          if (!installer) throw new Error("Windows installer not found in the latest release");
+          button.href = installer.browser_download_url;
+          button.textContent = `Download for Windows · ${release.tag_name}`;
+          button.removeAttribute("aria-disabled");
+          releaseText.textContent = "Windows 10 and 11 · x64 · NSIS installer";
+        })
+        .catch(() => {
+          button.textContent = "Download coming soon";
+          releaseText.textContent = "The first public Windows release will appear here.";
+        });
+    </script>
+  </body>
+</html>
