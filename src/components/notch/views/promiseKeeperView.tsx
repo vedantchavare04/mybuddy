@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { Check, Circle, Handshake, Pencil, Plus, Trash2, X } from "lucide-react";
 import { BackLabel, ViewHeader, inputCls, scrollCls } from "./parts";
+import { DateTimePicker } from "./dateTimePicker";
 import "./promiseKeeper.css";
 
 type PromiseRecord = {
@@ -165,7 +166,14 @@ export default function PromiseKeeperView({
         <input id="pk-title" className={inputCls} maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="What did you promise?" />
         <div className="pk-form-row">
           <input className={inputCls} maxLength={200} value={form.person} onChange={(event) => setForm({ ...form, person: event.target.value })} placeholder="For whom?" aria-label="Person" />
-          <input className={`${inputCls} pk-date`} type="datetime-local" value={form.due} onChange={(event) => setForm({ ...form, due: event.target.value })} aria-label="Due date" />
+          <DateTimePicker
+            date={form.due.split("T")[0] ?? ""}
+            time={form.due.split("T")[1] ?? ""}
+            onChange={(date, time) => setForm({ ...form, due: date && time ? `${date}T${time}` : "" })}
+            allowClear
+            ariaLabel="Promise due date and time"
+            className="pk-date"
+          />
         </div>
         <div className="pk-form-row">
           <input className={inputCls} maxLength={4000} value={form.note} onChange={(event) => setForm({ ...form, note: event.target.value })} placeholder="A note (optional)" aria-label="Note" />

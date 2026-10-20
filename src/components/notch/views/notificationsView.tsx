@@ -21,6 +21,11 @@ function ago(at: number): string {
 function AccessNote({ access }: { access: Access }) {
   if (access === "allowed" || access === "unknown") return null;
 
+  // Unpackaged development builds cannot access Windows' notification history.
+  // Keep the explanation useful during development, but don't show this warning
+  // in the shipped UI.
+  if (access === "unsupported" && !import.meta.env.DEV) return null;
+
   if (access === "unspecified") {
     return (
       <Button variant="ghost" onClick={() => void notificationService.requestAccess()}>

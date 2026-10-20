@@ -21,9 +21,10 @@ import {
   IconButton,
   ViewHeader,
   scrollCls,
-  selectCls,
   textareaCls,
 } from "./parts";
+import { PremiumSelect, type SelectOption } from "./premiumSelect";
+import { LanguageFlag } from "./selectMarks";
 
 type Props = { onBack: () => void; onCollapse: () => void };
 
@@ -38,38 +39,24 @@ function LangSelect({
   auto?: boolean;
   label: string;
 }) {
-  return (
-    <select
-      aria-label={label}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={selectCls}
-    >
-      {auto && (
-        <option
-          value="auto"
-          style={{
-            color: "#111827",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          Detect language
-        </option>
-      )}
+  const options: SelectOption[] = [
+    ...(auto ? [{ value: "auto", label: "Detect language" }] : []),
+    ...LANGUAGES.map((language) => ({
+      value: language.code,
+      label: language.name,
+      icon: <LanguageFlag code={language.code} />,
+    })),
+  ];
 
-      {LANGUAGES.map((l) => (
-        <option
-          key={l.code}
-          value={l.code}
-          style={{
-            color: "#111827",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          {l.name}
-        </option>
-      ))}
-    </select>
+  return (
+    <PremiumSelect
+      ariaLabel={label}
+      value={value}
+      options={options}
+      onChange={onChange}
+      placeholder={auto ? "Detect language" : "Choose language"}
+      className="!w-auto !flex-1"
+    />
   );
 }
 

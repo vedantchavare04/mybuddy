@@ -6,6 +6,8 @@ import {
   useAiConfig,
   type ProviderId,
 } from "../../../services/ai/aiConfig";
+import { PremiumSelect } from "./premiumSelect";
+import { ProviderMark } from "./selectMarks";
 import {
   BackLabel,
   Button,
@@ -67,42 +69,18 @@ export function AiSettingsView({ onBack, onCollapse }: Props) {
       />
 
       <div className={`${scrollCls} mt-3.5 flex flex-col gap-2`}>
-        <select
-          aria-label="Provider"
+        <PremiumSelect
+          ariaLabel="AI provider"
           value={id ?? ""}
-          onChange={(e) => aiConfig.select(e.target.value as ProviderId)}
-          className="w-full rounded-xl border border-white/10 px-3 text-[13px] outline-none"
-          style={{
-            height: "36px",
-            minHeight: "36px",
-            color: "#ffffff",
-            backgroundColor: "#171717",
-          }}
-        >
-          <option
-            value=""
-            disabled
-            style={{
-              color: "#111827",
-              backgroundColor: "#ffffff",
-            }}
-          >
-            Choose provider
-          </option>
-
-          {PROVIDERS.map((p) => (
-            <option
-              key={p.id}
-              value={p.id}
-              style={{
-                color: "#111827",
-                backgroundColor: "#ffffff",
-              }}
-            >
-              {p.name}
-            </option>
-          ))}
-        </select>
+          placeholder="Choose provider"
+          onChange={(provider) => aiConfig.select(provider as ProviderId)}
+          options={PROVIDERS.map((provider) => ({
+            value: provider.id,
+            label: provider.name,
+            detail: provider.local ? "Runs on this device" : "Connect your provider account",
+            icon: <ProviderMark provider={provider.id} className="h-5 w-5" />,
+          }))}
+        />
 
         {info?.endpoint && id && (
           <input
@@ -135,20 +113,37 @@ export function AiSettingsView({ onBack, onCollapse }: Props) {
 
         {showModel && id && (
           <>
-            <input
-              list="mybuddy-ai-models"
-              value={model}
-              onChange={(e) => aiConfig.setModel(id, e.target.value)}
-              placeholder="Model"
-              aria-label="Model"
-              spellCheck={false}
-              className={inputCls}
-            />
-            <datalist id="mybuddy-ai-models">
-              {cfg.suggestions.map((m) => (
-                <option key={m} value={m} />
-              ))}
-            </datalist>
+            {id !== "custom" && cfg.suggestions.length > 0 ? (
+              <PremiumSelect
+                ariaLabel="AI model"
+                value={model}
+                placeholder="Choose model"
+                onChange={(nextModel) => aiConfig.setModel(id, nextModel)}
+                options={[
+                  ...(model && !cfg.suggestions.includes(model)
+                    ? [{ value: model, label: model, detail: "Currently selected" }]
+                    : []),
+                  ...cfg.suggestions.map((suggestion) => ({
+                    value: suggestion,
+                    label: suggestion,
+                    detail: "Available model",
+                    icon: <ProviderMark provider={id} className="h-[18px] w-[18px]" />,
+                  })),
+                ]}
+              />
+            ) : (
+              <div className="flex h-8 items-center gap-2 rounded-[10px] bg-white/[0.05] px-2.5 ring-1 ring-inset ring-white/[0.06] focus-within:ring-white/20">
+                <ProviderMark provider={id} className="h-[17px] w-[17px] shrink-0 text-white/60" />
+                <input
+                  value={model}
+                  onChange={(e) => aiConfig.setModel(id, e.target.value)}
+                  placeholder="Model name"
+                  aria-label="Model"
+                  spellCheck={false}
+                  className={`${inputCls} h-full min-w-0 bg-transparent px-0 ring-0 focus:ring-0`}
+                />
+              </div>
+            )}
           </>
         )}
 

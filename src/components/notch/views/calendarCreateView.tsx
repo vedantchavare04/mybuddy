@@ -6,7 +6,10 @@ import {
   todayInput,
   useCalendar,
 } from "../../../services/calendar/calendarService";
-import { BackLabel, Button, ViewHeader, inputCls, selectCls } from "./parts";
+import { Clock3 } from "lucide-react";
+import { BackLabel, Button, ViewHeader, inputCls } from "./parts";
+import { DateTimePicker } from "./dateTimePicker";
+import { PremiumSelect } from "./premiumSelect";
 
 type Props = {
   onBack: () => void;
@@ -87,33 +90,25 @@ export function CalendarCreateView({ onBack, onCollapse, onDone }: Props) {
         />
 
         <div className="flex gap-2">
-          <input
-            type="date"
-            value={date}
-            min={todayInput()}
-            onChange={(e) => setDate(e.target.value)}
-            aria-label="Date"
-            className={`${inputCls} flex-1`}
+          <DateTimePicker
+            date={date}
+            time={time}
+            minDate={todayInput()}
+            onChange={(nextDate, nextTime) => { setDate(nextDate); setTime(nextTime); }}
+            ariaLabel="Event date and time"
+            className="!flex-1 !w-auto"
           />
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            aria-label="Time"
-            className={`${inputCls} !w-[104px]`}
+          <PremiumSelect
+            ariaLabel="Event duration"
+            value={String(duration)}
+            onChange={(value) => setDuration(Number(value))}
+            className="!flex-none !w-[98px]"
+            options={DURATIONS.map((item) => ({
+              value: String(item.min),
+              label: item.label,
+              icon: <Clock3 size={14} className="text-white/50" />,
+            }))}
           />
-          <select
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            aria-label="Duration"
-            className={`${selectCls} bg-white text-black !flex-none !w-[92px]`}
-          >
-            {DURATIONS.map((d) => (
-              <option key={d.min} value={d.min}>
-                {d.label}
-              </option>
-            ))}
-          </select>
         </div>
 
         <input

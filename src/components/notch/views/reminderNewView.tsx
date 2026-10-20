@@ -9,6 +9,7 @@ import {
   reminderService,
 } from "../../../services/reminders/reminderService";
 import { BackLabel, Button, ViewHeader, inputCls } from "./parts";
+import { DateTimePicker } from "./dateTimePicker";
 
 type Props = {
   onBack: () => void;
@@ -90,23 +91,13 @@ export function ReminderNewView({ onBack, onCollapse, onDone }: Props) {
         </div>
 
         {mode === "custom" ? (
-          <div className="flex gap-2">
-            <input
-              type="date"
-              value={date}
-              min={todayInput()}
-              onChange={(e) => setDate(e.target.value)}
-              aria-label="Date"
-              className={`${inputCls} flex-1`}
-            />
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              aria-label="Time"
-              className={`${inputCls} !w-[120px]`}
-            />
-          </div>
+          <DateTimePicker
+            date={date}
+            time={time}
+            minDate={todayInput()}
+            onChange={(nextDate, nextTime) => { setDate(nextDate); setTime(nextTime); }}
+            ariaLabel="Reminder date and time"
+          />
         ) : (
           <p className="flex h-8 items-center text-[12.5px] text-white/45">
             Reminds you at {formatDue(Date.now() + mode * 60_000)}

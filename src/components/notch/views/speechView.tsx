@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pause, Play, Square } from "lucide-react";
+import { AudioLines, Gauge, Pause, Play, Square } from "lucide-react";
 import {
   selectionMessage,
   selectionService,
@@ -11,7 +11,8 @@ import {
   speechService,
   useSpeech,
 } from "../../../services/speech/speechService";
-import { BackLabel, Button, ViewHeader, selectCls, textareaCls } from "./parts";
+import { BackLabel, Button, ViewHeader, textareaCls } from "./parts";
+import { PremiumSelect } from "./premiumSelect";
 
 type Props = { onBack: () => void; onCollapse: () => void };
 
@@ -101,45 +102,28 @@ export function SpeechView({ onBack, onCollapse }: Props) {
       </div>
 
       <div className="mt-auto flex shrink-0 items-center gap-2">
-        <select
-          aria-label="Voice"
+        <PremiumSelect
+          ariaLabel="Voice"
           value={sp.voiceId ?? ""}
-          disabled={sp.voices.length === 0}
-          onChange={(e) => speechService.setVoice(e.target.value)}
-          className={`${selectCls} bg-white text-black`}
-        >
-          {sp.voices.map((v) => (
-            <option
-              key={v.id}
-              value={v.id}
-              style={{
-                color: "#111827",
-                backgroundColor: "#ffffff",
-              }}
-            >
-              {v.name.replace(/^Microsoft /, "")}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="Speed"
-          value={sp.rate}
-          onChange={(e) => speechService.setRate(Number(e.target.value))}
-          className={`${selectCls} bg-white text-black !flex-none !w-[84px]`}
-        >
-          {SPEEDS.map((s) => (
-            <option
-              key={s}
-              value={s}
-              style={{
-                color: "#111827",
-                backgroundColor: "#ffffff",
-              }}
-            >
-              {s}x
-            </option>
-          ))}
-        </select>
+          onChange={(value) => speechService.setVoice(value)}
+          className="!w-auto !flex-1"
+          options={sp.voices.map((voice) => ({
+            value: voice.id,
+            label: voice.name.replace(/^Microsoft /, ""),
+            icon: <AudioLines size={15} className="text-white/55" />,
+          }))}
+        />
+        <PremiumSelect
+          ariaLabel="Speech speed"
+          value={String(sp.rate)}
+          onChange={(value) => speechService.setRate(Number(value))}
+          className="!w-[84px] !flex-none"
+          options={SPEEDS.map((speed) => ({
+            value: String(speed),
+            label: `${speed}x`,
+            icon: <Gauge size={15} className="text-white/55" />,
+          }))}
+        />
       </div>
     </div>
   );
