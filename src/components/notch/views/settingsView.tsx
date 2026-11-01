@@ -348,6 +348,7 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
                   spiderMood={spiderMood}
                   spiderColor={spiderColor}
                   showClock={notchShowClock}
+                  spiderVisible={notchSpiderEnabled}
                   customTextInteraction={{
                     ref: textHandleRef,
                     role: "button",
