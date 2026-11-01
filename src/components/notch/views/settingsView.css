@@ -106,6 +106,38 @@
   box-shadow: 0 0 8px rgba(203, 181, 255, 0.36);
 }
 
+.notch-zoom-slider {
+  height: 4px;
+  appearance: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
+.notch-zoom-slider::-webkit-slider-thumb {
+  width: 13px;
+  height: 13px;
+  appearance: none;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  background: #b08af3;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+}
+
+.notch-zoom-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  background: #b08af3;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+}
+
+.notch-zoom-slider:focus-visible {
+  outline: 2px solid rgba(203, 181, 255, 0.7);
+  outline-offset: 4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .appearance-picker__trigger,
   .appearance-picker__option {

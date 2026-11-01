@@ -18,6 +18,7 @@ import {
   useSelection,
 } from "../../services/selection/selectionService";
 import { speechService } from "../../services/speech/speechService";
+import { useSettings } from "../../services/settings/settingsStore";
 
 import NotchShell from "./notchShell";
 import { useNotchDismiss } from "./useNotchDismiss";
@@ -69,6 +70,7 @@ export default function Notch({
   const shellRef = useRef<HTMLDivElement>(null);
   const nav = useNotchNav(expanded, event !== null);
   const { pending } = useSelection();
+  const settings = useSettings();
 
   const launcherToggleRef = useRef({
     expanded,
@@ -506,7 +508,16 @@ export default function Notch({
       key: "idle-compact",
       size: SIZES.compact,
       radius: RADIUS.compact,
-      node: <IdleCompact />,
+      node: (
+        <IdleCompact
+          customText={settings.notchText}
+          textPosition={settings.notchTextPosition}
+          spiderMood={settings.spiderMood}
+          spiderColor={settings.spiderColor}
+          showClock={settings.notchShowClock}
+          spiderVisible={settings.notchSpiderEnabled}
+        />
+      ),
     };
   }
 
@@ -524,6 +535,9 @@ export default function Notch({
           label={expanded ? event?.title ?? "MyBuddy" : "Open MyBuddy"}
           onActivate={onExpand}
           onHoverChange={setHover}
+          wallpaper={mode === "compact" ? settings.notchWallpaper : null}
+          wallpaperLuminance={settings.notchWallpaperLuminance}
+          wallpaperZoom={settings.notchWallpaperZoom}
         >
           {view.node}
         </NotchShell>

@@ -6,6 +6,7 @@ import {
   type Ref,
 } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { wallpaperVeilOpacity } from "../../services/settings/notchWallpaper";
 import {
   EAR,
   RADIUS,
@@ -29,6 +30,9 @@ type Props = {
   label: string;
   onActivate: () => void;
   onHoverChange: (hover: boolean) => void;
+  wallpaper: string | null;
+  wallpaperLuminance: number;
+  wallpaperZoom: number;
   children: ReactNode;
 };
 
@@ -61,6 +65,9 @@ export default function NotchShell({
   label,
   onActivate,
   onHoverChange,
+  wallpaper,
+  wallpaperLuminance,
+  wallpaperZoom,
   children,
 }: Props) {
   const expanded = mode === "expanded";
@@ -135,6 +142,29 @@ export default function NotchShell({
             ${expanded ? "cursor-default" : "cursor-pointer"}
           `}
         >
+          {wallpaper && !expanded && (
+            <>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-[-8px] bg-cover bg-center"
+                style={{
+                  backgroundImage: `url("${wallpaper}")`,
+                  filter: "blur(10px) brightness(0.62)",
+                  transform: "scale(1.08)",
+                }}
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url("${wallpaper}")`, backgroundSize: `${wallpaperZoom * 100}% auto` }}
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-black"
+                style={{ opacity: wallpaperVeilOpacity(wallpaperLuminance) }}
+              />
+            </>
+          )}
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={layerKey}
