@@ -59,7 +59,7 @@ function SettingRow({
 export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const {
     spiderEnabled, specialCursorEnabled, notchEnabled,
-    notchWallpaper, notchWallpaperLuminance, notchText, notchTextPosition,
+    notchWallpaper, notchWallpaperLuminance, notchTextMode, notchText, notchTextPosition,
     spiderMood, spiderColor, notchWallpaperZoom, notchShowClock, notchSpiderEnabled,
   } = useSettings();
   const [launchAtStartup, setLaunchAtStartup] = useState(false);
@@ -70,9 +70,30 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const previewRef = useRef<HTMLDivElement>(null);
   const textHandleRef = useRef<HTMLSpanElement>(null);
   const dragPointerRef = useRef<number | null>(null);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
   const [draftPosition, setDraftPosition] = useState(notchTextPosition);
 
   useEffect(() => setDraftPosition(notchTextPosition), [notchTextPosition]);
+
+  useEffect(() => {
+    if (notchTextMode !== "custom") return;
+    const frame = window.requestAnimationFrame(() => {
+      const bounds = previewRef.current?.getBoundingClientRect();
+      const handle = textHandleRef.current?.getBoundingClientRect();
+      if (!bounds || !handle || bounds.width === 0 || bounds.height === 0) return;
+      const minX = handle.width / (2 * bounds.width);
+      const minY = handle.height / (2 * bounds.height);
+      const position = {
+        x: Math.min(1 - minX, Math.max(minX, draftPosition.x)),
+        y: Math.min(1 - minY, Math.max(minY, draftPosition.y)),
+      };
+      if (Math.abs(position.x - draftPosition.x) > 0.001 || Math.abs(position.y - draftPosition.y) > 0.001) {
+        setDraftPosition(position);
+        settingsService.set("notchTextPosition", position);
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [notchTextMode, notchText, draftPosition.x, draftPosition.y]);
 
   const placeText = (event: PointerEvent<HTMLSpanElement>) => {
     const preview = previewRef.current;
@@ -83,9 +104,10 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
     const maxX = 1 - minX;
     const minY = handle ? handle.height / (2 * bounds.height) : 0.2;
     const maxY = 1 - minY;
+    const offset = dragOffsetRef.current;
     const position = {
-      x: Math.min(maxX, Math.max(minX, (event.clientX - bounds.left) / bounds.width)),
-      y: Math.min(maxY, Math.max(minY, (event.clientY - bounds.top) / bounds.height)),
+      x: Math.min(maxX, Math.max(minX, (event.clientX - offset.x - bounds.left) / bounds.width)),
+      y: Math.min(maxY, Math.max(minY, (event.clientY - offset.y - bounds.top) / bounds.height)),
     };
     setDraftPosition(position);
     settingsService.set("notchTextPosition", position);
@@ -94,6 +116,11 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const onTextPointerDown = (event: PointerEvent<HTMLSpanElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    const handleBounds = event.currentTarget.getBoundingClientRect();
+    dragOffsetRef.current = {
+      x: event.clientX - (handleBounds.left + handleBounds.width / 2),
+      y: event.clientY - (handleBounds.top + handleBounds.height / 2),
+    };
     dragPointerRef.current = event.pointerId;
     event.currentTarget.setPointerCapture(event.pointerId);
     placeText(event);
@@ -152,6 +179,7 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
     settingsService.set("notchWallpaperLuminance", 0.2);
     settingsService.set("notchWallpaperZoom", 1);
     settingsService.set("notchText", "");
+    settingsService.set("notchTextMode", "default");
     const center = { x: 0.5, y: 0.5 };
     settingsService.set("notchTextPosition", center);
     setDraftPosition(center);
@@ -237,7 +265,7 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
 
           <SettingRow
             title="Show clock in Notch"
-            description="Display your local time beside the spider"
+            description={notchShowClock ? "Custom text is unavailable while the clock is on" : "Display your local time beside the spider"}
             control={
               <ToggleSwitch
                 size="sm"
@@ -245,7 +273,12 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
                 className="shrink-0"
                 ariaLabel="Show clock in Notch"
                 isActive={notchShowClock}
-                onChange={(on) => settingsService.set("notchShowClock", on)}
+                onChange={(on) => {
+                  settingsService.set("notchShowClock", on);
+                  if (on && notchTextMode === "custom") {
+                    settingsService.set("notchTextMode", "default");
+                  }
+                }}
               />
             }
           />
@@ -343,7 +376,8 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
                 style={{ transform: "translate(-50%, -50%) scale(2.4)", transformOrigin: "center" }}
               >
                 <IdleCompact
-                  customText={notchText || "Your text"}
+                  textMode={notchTextMode}
+                  customText={notchTextMode === "custom" ? notchText || "Your text" : notchText}
                   textPosition={draftPosition}
                   spiderMood={spiderMood}
                   spiderColor={spiderColor}
@@ -381,17 +415,42 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
                 <span className="w-9 text-right text-[10px] tabular-nums text-white/40">{Math.round(notchWallpaperZoom * 100)}%</span>
               </div>
             )}
-            <label className="mt-3 block text-[11px] font-medium text-white/45" htmlFor="notch-custom-text">Custom text</label>
-            <input
-              id="notch-custom-text"
-              value={notchText}
-              maxLength={48}
-              onChange={(event) => settingsService.set("notchText", event.currentTarget.value)}
-              placeholder="A little note, status, or phrase"
-              className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.1] bg-white/[0.045] px-3 text-[13px] text-white outline-none placeholder:text-white/30 focus:border-white/25"
-            />
+            <div className="mt-3" role="group" aria-label="Notch text style">
+              <div className="mb-1.5 text-[11px] font-medium text-white/45">Notch text</div>
+              <div className="grid grid-cols-3 gap-1 rounded-xl border border-white/[0.09] bg-white/[0.025] p-1">
+                {([
+                  ["default", "Default"],
+                  ["custom", "Custom"],
+                  ["hidden", "Off"],
+                ] as const).map(([mode, label]) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    disabled={mode === "custom" && notchShowClock}
+                    aria-pressed={notchTextMode === mode}
+                    onClick={() => settingsService.set("notchTextMode", mode)}
+                    className={`h-8 rounded-lg text-[11px] font-medium transition-colors ${notchTextMode === mode ? "bg-white/[0.12] text-white" : "text-white/50 hover:bg-white/[0.06] hover:text-white/80"} disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {notchTextMode === "custom" && (
+              <>
+                <label className="mt-3 block text-[11px] font-medium text-white/45" htmlFor="notch-custom-text">Your message</label>
+                <input
+                  id="notch-custom-text"
+                  value={notchText}
+                  maxLength={48}
+                  onChange={(event) => settingsService.set("notchText", event.currentTarget.value)}
+                  placeholder="Type a short message"
+                  className="mt-1.5 h-10 w-full rounded-xl border border-white/[0.1] bg-white/[0.045] px-3 text-[13px] text-white outline-none placeholder:text-white/30 focus:border-white/25"
+                />
+              </>
+            )}
             <div className="mt-1.5 flex items-center justify-between gap-2">
-              <span className="text-[10px] text-white/35">Drag the text in the preview to place it.</span>
+              <span className="text-[10px] text-white/35">{notchTextMode === "hidden" ? "Text is hidden from your Notch." : "Drag the text in the preview to place it."}</span>
               <button type="button" onClick={resetNotchStyle} className="inline-flex items-center gap-1 text-[10px] text-white/45 transition-colors hover:text-white/80">
                 <RotateCcw size={11} /> Reset
               </button>

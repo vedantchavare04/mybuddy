@@ -7,6 +7,7 @@ export type Settings = {
   dockX: number;
   notchWallpaper: string | null;
   notchWallpaperLuminance: number;
+  notchTextMode: "default" | "custom" | "hidden";
   notchText: string;
   notchTextPosition: { x: number; y: number };
   spiderMood: "chill" | "curious" | "sleepy" | "still";
@@ -25,6 +26,7 @@ const DEFAULTS: Settings = {
   specialCursorEnabled: true,
   notchWallpaper: null,
   notchWallpaperLuminance: 0.2,
+  notchTextMode: "default",
   notchText: "",
   notchTextPosition: { x: 0.5, y: 0.5 },
   spiderMood: "chill",
@@ -84,6 +86,12 @@ function load(): Settings {
         Number.isFinite(stored.notchWallpaperLuminance)
           ? clamp(stored.notchWallpaperLuminance, 0, 1)
           : DEFAULTS.notchWallpaperLuminance,
+      notchTextMode:
+        stored.notchTextMode === "default" || stored.notchTextMode === "custom" || stored.notchTextMode === "hidden"
+          ? stored.notchTextMode
+          : typeof stored.notchText === "string" && stored.notchText.trim().length > 0
+            ? "custom"
+            : DEFAULTS.notchTextMode,
       notchText: typeof stored.notchText === "string"
         ? stored.notchText.slice(0, 48)
         : DEFAULTS.notchText,

@@ -18,6 +18,7 @@ export function useNow() {
 
 export function IdleCompact({
   customText = "",
+  textMode = "default",
   textPosition = { x: 0.5, y: 0.5 },
   spiderMood = "chill",
   spiderColor = "lilac",
@@ -26,6 +27,7 @@ export function IdleCompact({
   customTextInteraction,
 }: {
   customText?: string;
+  textMode?: "default" | "custom" | "hidden";
   textPosition?: { x: number; y: number };
   spiderMood?: "chill" | "curious" | "sleepy" | "still";
   spiderColor?: "lilac" | "ocean" | "mint" | "coral";
@@ -54,7 +56,7 @@ export function IdleCompact({
   return (
     <div
       className={`idle-buddy idle-buddy--${spiderMood}${showClock ? " idle-buddy--clock" : ""}`}
-      aria-hidden={customText || showClock ? undefined : true}
+      aria-hidden={textMode === "hidden" && !showClock ? true : undefined}
       style={{
         "--spider-body": palette.body,
         "--spider-head": palette.head,
@@ -81,7 +83,7 @@ export function IdleCompact({
         </g>
         <path className="idle-buddy__twinkle" d="M40 8v5m-2.5-2.5h5M7 22v3m-1.5-1.5h3" />
       </svg>}
-      {customText ? (
+      {textMode === "custom" && customText && !showClock ? (
         <span
           className="idle-buddy__custom-text"
           {...(customTextInteraction ? {
@@ -99,11 +101,11 @@ export function IdleCompact({
         >
           {customText}
         </span>
-      ) : (
+      ) : textMode === "default" ? (
         <span className="idle-buddy__caption">
           just vibing<span className="idle-buddy__ellipsis" aria-hidden="true">...</span>
         </span>
-      )}
+      ) : null}
       </div>
       {showClock && <time className="idle-buddy__clock" dateTime={now.toISOString()}>{clockText}</time>}
     </div>

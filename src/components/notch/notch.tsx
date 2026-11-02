@@ -510,6 +510,7 @@ export default function Notch({
       radius: RADIUS.compact,
       node: (
         <IdleCompact
+          textMode={settings.notchTextMode}
           customText={settings.notchText}
           textPosition={settings.notchTextPosition}
           spiderMood={settings.spiderMood}
