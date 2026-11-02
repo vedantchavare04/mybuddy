@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { check, type Update } from "@tauri-apps/plugin-updater";
 import { ImagePlus, RotateCcw, Trash2, ChevronRight } from "lucide-react";
 import { PROVIDERS, useAiConfig } from "../../../services/ai/aiConfig";
 import {
@@ -10,7 +11,7 @@ import { prepareNotchWallpaper, wallpaperVeilOpacity } from "../../../services/s
 import { IdleCompact } from "./idleViews";
 import "./settingsView.css";
 import ToggleSwitch from "../../ui/toggleSwitch";
-import { BackLabel, ViewHeader, scrollCls } from "./parts";
+import { BackLabel, Button, ViewHeader, scrollCls } from "./parts";
 
 type Props = {
   onBack: () => void;
@@ -66,6 +67,9 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const [startupError, setStartupError] = useState("");
   const [wallpaperError, setWallpaperError] = useState("");
   const [wallpaperBusy, setWallpaperBusy] = useState(false);
+  const [update, setUpdate] = useState<Update | null>(null);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState("Check for a newer version of MyBuddy.");
   const wallpaperInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const textHandleRef = useRef<HTMLSpanElement>(null);
@@ -207,6 +211,48 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
       setLaunchAtStartup(enabled);
     } catch {
       setStartupError("Could not update the Windows startup setting.");
+    }
+  };
+
+  const checkForUpdates = async () => {
+    setUpdateBusy(true);
+    setUpdate(null);
+    setUpdateStatus("Checking for updates…");
+    try {
+      const available = await check();
+      if (available) {
+        setUpdate(available);
+        setUpdateStatus(`MyBuddy ${available.version} is ready to install.`);
+      } else {
+        setUpdateStatus("You’re up to date.");
+      }
+    } catch (error) {
+      console.error("MyBuddy update check failed:", error);
+      setUpdateStatus("Could not check right now. Try again later.");
+    } finally {
+      setUpdateBusy(false);
+    }
+  };
+
+  const installUpdate = async () => {
+    if (!update) return;
+    setUpdateBusy(true);
+    setUpdateStatus(`Downloading MyBuddy ${update.version}…`);
+    try {
+      await update.downloadAndInstall((event) => {
+        if (event.event === "Progress") {
+          setUpdateStatus(`Downloading MyBuddy ${update.version}…`);
+        } else if (event.event === "Finished") {
+          setUpdateStatus("Download complete. Finishing installation…");
+        }
+      });
+      setUpdate(null);
+      setUpdateStatus("Update installed. Restart MyBuddy to finish.");
+    } catch (error) {
+      console.error("MyBuddy update installation failed:", error);
+      setUpdateStatus("Could not install the update. Try again later.");
+    } finally {
+      setUpdateBusy(false);
     }
   };
 
@@ -511,6 +557,33 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
               </div>
             </div>
           </div>
+        </Section>
+
+        <Section title="Updates">
+          <SettingRow
+            title="MyBuddy updates"
+            description={updateStatus}
+            control={
+              <div className="flex shrink-0 items-center gap-2">
+                {update && (
+                  <Button
+                    variant="primary"
+                    disabled={updateBusy}
+                    onClick={() => void installUpdate()}
+                  >
+                    Install {update.version}
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  disabled={updateBusy}
+                  onClick={() => void checkForUpdates()}
+                >
+                  {updateBusy ? "Please wait…" : "Check"}
+                </Button>
+              </div>
+            }
+          />
         </Section>
 
         <Section title="AI">
