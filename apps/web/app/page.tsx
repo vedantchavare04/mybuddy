@@ -1,69 +1,164 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, Bell, CalendarDays, Check, ChevronLeft, ChevronRight, Command, Headphones, Heart, Layers3, LockKeyhole, Sparkles, WandSparkles } from "lucide-react";
+import NotchShell from "../../../src/components/notch/notchShell";
+import { IdleCompact } from "../../../src/components/notch/views/idleViews";
+import { HomeView } from "../../../src/components/notch/views/homeView";
+import { SettingsView } from "../../../src/components/notch/views/settingsView";
+import LauncherView from "../../../src/components/notch/views/launcherView";
+import { RemindersView } from "../../../src/components/notch/views/remindersView";
+import { useSettings } from "../../../src/services/settings/settingsStore";
+import { RADIUS, SIZES } from "../../../src/components/notch/notchTokens";
+import type { Route } from "../../../src/components/notch/notchRoutes";
+import type { CompanionEvent } from "../../../src/events/eventTypes";
+import styles from "./page.module.css";
+
+const DOWNLOAD_URL = "https://github.com/vedantchavare04/myBuddy-releases/releases/latest";
+
+const wallpaper = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 200"><rect width="1050" height="200" fill="#d6d9bd"/><circle cx="810" cy="45" r="46" fill="#f4d993"/><path d="M0 130 190 40l146 98 133-74 185 136H0Z" fill="#9cae8a"/><path d="m387 200 229-130 148 91 133-55 153 94H387Z" fill="#788e77"/><path d="M0 164q155-45 287 9t256-3q187-50 507 7v23H0Z" fill="#b8c2a0"/><path d="M84 149q36-61 72 0m-32-1q29-44 58 0" fill="none" stroke="#697f70" stroke-width="5" stroke-linecap="round"/><path d="M887 146q31-51 62 0m-26 0q28-42 56 0" fill="none" stroke="#667c6a" stroke-width="5" stroke-linecap="round"/></svg>`)}`;
+
+const previews = [
+  { route: "settings" as Route, title: "Make the Notch feel like yours.", detail: "Choose a photo, set your spider’s mood, and make it yours." },
+  { route: "launcher" as Route, title: "Quick actions, right on cue.", detail: "Your everyday tools without the extra window." },
+  { route: "reminders" as Route, title: "A gentle nudge at the right time.", detail: "Little reminders that help you keep your word." },
+];
+
+const featureCopy: Record<Route, { title: string; eyebrow: string; body: string; icon: typeof Sparkles; action: string }> = {
+  home: { title: "A little room to think.", eyebrow: "YOUR DAY, AT A GLANCE", body: "A calm home for the small things you want close by.", icon: Heart, action: "Explore MyBuddy" },
+  launcher: { title: "Your next move, closer.", eyebrow: "QUICK ACTIONS", body: "Find the tool you need and get back to what you were doing.", icon: Command, action: "Unlock quick actions" },
+  music: { title: "Keep the good part playing.", eyebrow: "NOW PLAYING", body: "A tiny music control lives right where you need it.", icon: Headphones, action: "Unlock music controls" },
+  calendar: { title: "A softer nudge for what’s next.", eyebrow: "COMING UP", body: "See the next thing on your calendar without opening another window.", icon: CalendarDays, action: "Unlock calendar" },
+  reminders: { title: "Remember the little things.", eyebrow: "REMINDER", body: "A friendly tap on the shoulder, right when it matters.", icon: Bell, action: "Unlock reminders" },
+  notifications: { title: "A quieter notification tray.", eyebrow: "NOTIFICATIONS", body: "Keep the useful updates within reach and the noise out of the way.", icon: Bell, action: "Unlock notifications" },
+  tools: { title: "Useful things, one click away.", eyebrow: "YOUR TOOLKIT", body: "Bring your everyday helpers together in one small place.", icon: WandSparkles, action: "Unlock the toolkit" },
+  settings: { title: "Make it feel like yours.", eyebrow: "PERSONAL DETAILS", body: "Your wallpaper and little face make the Notch your own.", icon: Layers3, action: "Personalize MyBuddy" },
+  "calendar/new": { title: "Plan a moment.", eyebrow: "CALENDAR", body: "Add a little shape to the day, without losing your focus.", icon: CalendarDays, action: "Unlock calendar" },
+  "reminders/new": { title: "Leave a note for later.", eyebrow: "REMINDERS", body: "Make room for the thought before it gets away.", icon: Bell, action: "Unlock reminders" },
+  "settings/ai": { title: "Your tools, your way.", eyebrow: "PREFERENCES", body: "Set up a companion that fits your own flow.", icon: Sparkles, action: "Explore MyBuddy" },
+  event: { title: "A little room to think.", eyebrow: "YOUR DAY, AT A GLANCE", body: "A calm home for the small things you want close by.", icon: Heart, action: "Explore MyBuddy" },
+  memory: { title: "Keep a thought close.", eyebrow: "MEMORY", body: "Save links and snippets before they disappear into another tab.", icon: Layers3, action: "Unlock Memory" },
+  clipboard: { title: "Your recent copy, remembered.", eyebrow: "CLIPBOARD", body: "Pick up where you left off with the things you copied.", icon: Layers3, action: "Unlock Clipboard" },
+  promises: { title: "Make a promise to yourself.", eyebrow: "PROMISE KEEPER", body: "Give an intention a gentle place to land.", icon: Heart, action: "Unlock Promise Keeper" },
+  tasks: { title: "A short list, a lighter mind.", eyebrow: "TASKS", body: "Keep the next few steps close and easy to see.", icon: Check, action: "Unlock tasks" },
+  context: { title: "Save this for later.", eyebrow: "CONTEXT SAVER", body: "Keep the important details attached to the moment.", icon: Layers3, action: "Unlock Context Saver" },
+  "flow-rescue": { title: "Find your way back in.", eyebrow: "FLOW RESCUE", body: "A quick reset can help you return to the thing that matters.", icon: Sparkles, action: "Unlock Flow Rescue" },
+  "explain-later": { title: "Leave the explanation for later.", eyebrow: "EXPLAIN THIS LATER", body: "Save a question for the moment you have room to explore it.", icon: Sparkles, action: "Unlock this tool" },
+  translate: { title: "Find the right words.", eyebrow: "TRANSLATE", body: "Translate selected text in a quick, focused panel.", icon: WandSparkles, action: "Unlock Translate" },
+  speech: { title: "Let the words come to you.", eyebrow: "TEXT TO SPEECH", body: "Listen back while you keep your hands on the work.", icon: Headphones, action: "Unlock text to speech" },
+  ai: { title: "A helping thought, close by.", eyebrow: "MYBUDDY AI", body: "A small space for quick questions and useful ideas.", icon: Sparkles, action: "Unlock AI tools" },
+};
+
+function FeaturePanel({ route, onBack, onClose }: { route: Route; onBack: () => void; onClose: () => void }) {
+  const item = featureCopy[route] ?? featureCopy.home;
+  const Icon = item.icon;
+  const [done, setDone] = useState(false);
+  return (
+    <div className={styles.panel}>
+      <div className={styles.panelTop}>
+        <button className={styles.panelBack} type="button" onClick={onBack} aria-label="Back to MyBuddy home"><ChevronLeft size={14} /> <span>MyBuddy</span></button>
+        <button className={styles.panelClose} type="button" onClick={onClose} aria-label="Close preview">×</button>
+      </div>
+      <div className={styles.panelContent}>
+        <span className={styles.panelIcon}><Icon size={17} strokeWidth={1.7} /></span>
+        <span className={styles.panelEyebrow}>{item.eyebrow}</span>
+        <strong>{item.title}</strong>
+        <p>{item.body}</p>
+        {route === "reminders" ? <button type="button" className={styles.completeButton} onClick={() => setDone(!done)}>{done ? <><Check size={13} /> All set</> : "Mark as done"}</button> : null}
+      </div>
+      <a className={styles.panelDownload} href={DOWNLOAD_URL} target="_blank" rel="noreferrer"><LockKeyhole size={13} /> Unlock all the amazing features<ArrowUpRight size={12} /></a>
+    </div>
+  );
+}
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(true);
+  const [route, setRoute] = useState<Route>("settings");
+  const [slide, setSlide] = useState(0);
+  const { notchWallpaper, notchWallpaperLuminance, notchWallpaperZoom, notchTextMode, notchText, notchTextPosition, notchShowClock, notchSpiderEnabled, spiderMood, spiderColor } = useSettings();
+  const shellRef = useRef<HTMLDivElement>(null);
+  const homeEvent: CompanionEvent | null = null;
+  const preview = previews[slide];
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setMounted(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const chooseSlide = (next: number) => {
+    const index = (next + previews.length) % previews.length;
+    setSlide(index);
+    setRoute(previews[index].route);
+    setOpen(true);
+  };
+
+  const openRoute = (next: Route) => {
+    setRoute(next);
+    setSlide(next === "reminders" || next === "calendar" ? 2 : next === "launcher" ? 1 : next === "settings" ? 0 : 0);
+    setOpen(true);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className={styles.page}>
+      {mounted && <NotchShell
+        wrapperClassName={styles.demoShell}
+        shellRef={shellRef}
+        mode={open ? "expanded" : "compact"}
+        size={open ? route === "settings" ? SIZES.settings : SIZES.home : SIZES.compact}
+        contentSize={open ? route === "settings" ? SIZES.settings : SIZES.home : SIZES.compact}
+        radius={open ? RADIUS.expanded : RADIUS.compact}
+        layerKey={open ? route : "idle-compact"}
+        direction={0}
+        label={open ? "MyBuddy preview" : "Open MyBuddy preview"}
+        onActivate={() => { setRoute("home"); setOpen(true); }}
+        onHoverChange={() => undefined}
+        wallpaper={open ? null : notchWallpaper ?? wallpaper}
+        wallpaperLuminance={notchWallpaper ? notchWallpaperLuminance : 0.55}
+        wallpaperZoom={notchWallpaper ? notchWallpaperZoom : 1}
+      >
+        {open ? route === "home"
+          ? <HomeView event={homeEvent} onOpen={openRoute} onSettings={() => openRoute("settings")} onCollapse={() => setOpen(false)} />
+          : route === "settings"
+            ? <SettingsView onBack={() => openRoute("home")} onCollapse={() => setOpen(false)} onOpenAi={() => openRoute("settings/ai")} initialSection="notch-personalization" demoWallpaper={{ dataUrl: wallpaper, luminance: 0.55 }} />
+            : route === "launcher"
+              ? <LauncherView onBack={() => openRoute("home")} onCollapse={() => setOpen(false)} onOpenPlanner={() => openRoute("calendar")} onOpenClipboard={() => openRoute("clipboard")} onOpenMemory={() => openRoute("memory")} onOpenTasks={() => openRoute("tasks")} onOpenContext={() => openRoute("context")} onOpenPromises={() => openRoute("promises")} onOpenFlowRescue={() => openRoute("flow-rescue")} onOpenExplainLater={() => openRoute("explain-later")} />
+              : route === "reminders"
+                ? <RemindersView onBack={() => openRoute("home")} onCollapse={() => setOpen(false)} onNew={() => openRoute("reminders/new")} />
+            : <FeaturePanel route={route} onBack={() => openRoute("home")} onClose={() => setOpen(false)} />
+          : <IdleCompact textMode={notchTextMode} customText={notchText} textPosition={notchTextPosition} spiderMood={spiderMood} spiderColor={spiderColor} showClock={notchShowClock} spiderVisible={notchSpiderEnabled} />}
+      </NotchShell>}
+
+      {open && <div className={styles.speechBubble} aria-live="polite">{preview.detail}</div>}
+
+      <header className={styles.nav}>
+        <a className={styles.brand} href="#top" aria-label="MyBuddy home">
+          <span className={styles.brandMark}><svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M18 5v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><path d="M15 15c-4-4-7-3-8-1m8 4c-5-2-8 0-9 2m11 0c-4 3-5 6-5 8m9-13c4-4 7-3 8-1m-8 5c5-2 8 0 9 2m-11 0c4 3 5 6 5 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><ellipse cx="18" cy="20" rx="4.3" ry="4.8" fill="currentColor"/><circle cx="18" cy="14" r="4.2" fill="currentColor"/><circle cx="16.6" cy="13.8" r=".65" fill="#536553"/><circle cx="19.4" cy="13.8" r=".65" fill="#536553"/><path d="M16.7 15.4q1.3 1 2.6 0" stroke="#536553" strokeWidth=".7" strokeLinecap="round"/></svg></span>
+          <span>mybuddy</span>
+          <span className={styles.beta}>DESKTOP COMPANION</span>
+        </a>
+        <a className={styles.navDownload} href={DOWNLOAD_URL} target="_blank" rel="noreferrer">Get MyBuddy <ArrowUpRight size={14} /></a>
+      </header>
+
+      <section className={styles.hero} id="top">
+        <div className={styles.heroCopy}>
+          <p className={styles.kicker}><i /> A LITTLE HOME IN YOUR WINDOWS</p>
+          <h1>Someone’s looking<br />out for <em>you.</em></h1>
+          <p className={styles.intro}>Gentle reminders. A familiar little spider. Right in your Notch.</p>
+          <div className={styles.heroActions}>
+            <a className={styles.primary} href={DOWNLOAD_URL} target="_blank" rel="noreferrer"><LockKeyhole size={14} /> Unlock all the amazing features <ArrowUpRight size={15} /></a>
+            <button className={styles.previewLink} type="button" onClick={() => openRoute("settings")}><span><ChevronRight size={13} /></span> Try Notch customization</button>
+          </div>
+          <div className={styles.demoControls} aria-label="Notch feature preview selector">
+            <button type="button" aria-label="Previous feature" onClick={() => chooseSlide(slide - 1)}><ChevronLeft size={16} /></button>
+            <span className={styles.slideCount}>0{slide + 1} <i>/</i> 03</span>
+            <div className={styles.slideCopy}><strong>{preview.title}</strong><small>{preview.detail}</small></div>
+            <button type="button" aria-label="Next feature" onClick={() => chooseSlide(slide + 1)}><ChevronRight size={16} /></button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      <footer className={styles.footer}><span><i /> A little buddy, always close by.</span><a href="https://github.com/vedantchavare04/mybuddy" target="_blank" rel="noreferrer">About MyBuddy <ArrowUpRight size={12} /></a></footer>
+    </main>
   );
 }
