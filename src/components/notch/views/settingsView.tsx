@@ -17,11 +17,13 @@ type Props = {
   onBack: () => void;
   onCollapse: () => void;
   onOpenAi: () => void;
+  initialSection?: "notch-personalization";
+  demoWallpaper?: { dataUrl: string; luminance: number };
 };
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, children, id }: { title: string; children: ReactNode; id?: string }) {
   return (
-    <section>
+    <section id={id}>
       <h3 className="text-[12px] font-medium text-white/40">{title}</h3>
 
       <div className="mt-2 divide-y divide-white/[0.07] border-y border-white/[0.07]">
@@ -57,7 +59,7 @@ function SettingRow({
   );
 }
 
-export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
+export function SettingsView({ onBack, onCollapse, onOpenAi, initialSection, demoWallpaper }: Props) {
   const {
     spiderEnabled, specialCursorEnabled, notchEnabled,
     notchWallpaper, notchWallpaperLuminance, notchTextMode, notchText, notchTextPosition,
@@ -71,11 +73,28 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
   const [updateBusy, setUpdateBusy] = useState(false);
   const [updateStatus, setUpdateStatus] = useState("Check for a newer version of MyBuddy.");
   const wallpaperInputRef = useRef<HTMLInputElement>(null);
+  const settingsScrollRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const textHandleRef = useRef<HTMLSpanElement>(null);
   const dragPointerRef = useRef<number | null>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const [draftPosition, setDraftPosition] = useState(notchTextPosition);
+  const previewWallpaper = notchWallpaper ?? demoWallpaper?.dataUrl ?? null;
+  const previewLuminance = notchWallpaper ? notchWallpaperLuminance : (demoWallpaper?.luminance ?? notchWallpaperLuminance);
+
+  useEffect(() => {
+    if (!initialSection) return;
+    const frame = window.requestAnimationFrame(() => {
+      const container = settingsScrollRef.current;
+      const section = container?.querySelector(`#${initialSection}`);
+      if (container && section instanceof HTMLElement) {
+        const containerTop = container.getBoundingClientRect().top;
+        const sectionTop = section.getBoundingClientRect().top;
+        container.scrollTop = Math.max(0, container.scrollTop + sectionTop - containerTop);
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [initialSection]);
 
   useEffect(() => setDraftPosition(notchTextPosition), [notchTextPosition]);
 
@@ -275,7 +294,7 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
         leading={<BackLabel title="Settings" onBack={onBack} />}
       />
 
-      <div className={`${scrollCls} mt-3.5 flex flex-col gap-4`}>
+      <div ref={settingsScrollRef} className={`${scrollCls} mt-3.5 flex flex-col gap-4`}>
 
 
         <Section title="Appearance">
@@ -362,7 +381,7 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
           />
         </Section>
 
-        <Section title="Notch personalization">
+        <Section id="notch-personalization" title="Notch personalization">
           <div className="py-3.5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -376,7 +395,7 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
                   disabled={wallpaperBusy}
                   className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.055] px-3 text-[12px] font-medium text-white/85 transition-colors hover:bg-white/[0.1] disabled:opacity-50"
                 >
-                  <ImagePlus size={15} /> {wallpaperBusy ? "Preparing…" : notchWallpaper ? "Change photo" : "Choose photo"}
+                  <ImagePlus size={15} /> {wallpaperBusy ? "Preparing…" : notchWallpaper ? "Change photo" : demoWallpaper ? "Try your photo" : "Choose photo"}
                 </button>
                 {notchWallpaper && (
                   <button
@@ -413,9 +432,9 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
               className="relative mt-3 h-[80px] overflow-hidden rounded-[24px] border border-white/[0.12] bg-[#08080a] shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
               data-notch-ignore
             >
-              {notchWallpaper && <div className="pointer-events-none absolute inset-[-8px] bg-cover bg-center" style={{ backgroundImage: `url("${notchWallpaper}")`, filter: "blur(10px) brightness(0.62)", transform: "scale(1.08)" }} />}
-              {notchWallpaper && <div className="pointer-events-none absolute inset-0 bg-center bg-no-repeat" style={{ backgroundImage: `url("${notchWallpaper}")`, backgroundSize: `${notchWallpaperZoom * 100}% auto` }} />}
-              {notchWallpaper && <div className="pointer-events-none absolute inset-0 bg-black" style={{ opacity: wallpaperVeilOpacity(notchWallpaperLuminance) }} />}
+              {previewWallpaper && <div className="pointer-events-none absolute inset-[-8px] bg-cover bg-center" style={{ backgroundImage: `url("${previewWallpaper}")`, filter: "blur(10px) brightness(0.62)", transform: "scale(1.08)" }} />}
+              {previewWallpaper && <div className="pointer-events-none absolute inset-0 bg-center bg-no-repeat" style={{ backgroundImage: `url("${previewWallpaper}")`, backgroundSize: `${notchWallpaperZoom * 100}% auto` }} />}
+              {previewWallpaper && <div className="pointer-events-none absolute inset-0 bg-black" style={{ opacity: wallpaperVeilOpacity(previewLuminance) }} />}
               <div
                 ref={previewRef}
                 className="absolute left-1/2 top-1/2 h-[32px] w-[168px] -translate-x-1/2 -translate-y-1/2"
@@ -444,7 +463,7 @@ export function SettingsView({ onBack, onCollapse, onOpenAi }: Props) {
               </div>
             </div>
 
-            {notchWallpaper && (
+            {previewWallpaper && (
               <div className="mt-3 flex items-center gap-3">
                 <label htmlFor="notch-wallpaper-zoom" className="shrink-0 text-[11px] font-medium text-white/55">Photo size</label>
                 <input

@@ -133,7 +133,7 @@ export default function Home() {
 
       <header className={styles.nav}>
         <a className={styles.brand} href="#top" aria-label="MyBuddy home">
-          <span className={styles.brandMark}><svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M18 5v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><path d="M15 15c-4-4-7-3-8-1m8 4c-5-2-8 0-9 2m11 0c-4 3-5 6-5 8m9-13c4-4 7-3 8-1m-8 5c5-2 8 0 9 2m-11 0c4 3 5 6 5 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><ellipse cx="18" cy="20" rx="4.3" ry="4.8" fill="currentColor"/><circle cx="18" cy="14" r="4.2" fill="currentColor"/><circle cx="16.6" cy="13.8" r=".65" fill="#536553"/><circle cx="19.4" cy="13.8" r=".65" fill="#536553"/><path d="M16.7 15.4q1.3 1 2.6 0" stroke="#536553" strokeWidth=".7" strokeLinecap="round"/></svg></span>
+          <img className={styles.brandMark} src="/mybuddy-mark.svg" alt="" width={34} height={34} />
           <span>mybuddy</span>
           <span className={styles.beta}>DESKTOP COMPANION</span>
         </a>

@@ -8,6 +8,8 @@
       name="description"
       content="Meet MyBuddy, a helpful desktop companion for Windows."
     />
+    <link rel="icon" href="./mybuddy-mark.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="./favicon.ico" />
     <title>MyBuddy — Your desktop companion</title>
     <style>
       :root {
@@ -28,11 +30,7 @@
       }
       main { width: min(100% - 40px, 980px); margin: auto; }
       header { display: flex; align-items: center; gap: 12px; padding: 26px 0; }
-      .mark {
-        display: grid; width: 38px; height: 38px; place-items: center;
-        border: 1px solid rgba(255,255,255,.13); border-radius: 13px;
-        background: rgba(255,255,255,.07); font-size: 20px;
-      }
+      .mark { display: block; width: 38px; height: 38px; border-radius: 9px; object-fit: cover; }
       .brand { font-size: 16px; font-weight: 650; letter-spacing: -.03em; }
       .hero { max-width: 720px; margin: clamp(70px, 13vh, 140px) auto 100px; text-align: center; }
       .eyebrow { color: #a9b2ff; font-size: 12px; font-weight: 650; letter-spacing: .15em; text-transform: uppercase; }
@@ -61,7 +59,7 @@
   </head>
   <body>
     <main>
-      <header><span class="mark" aria-hidden="true">✦</span><span class="brand">MyBuddy</span></header>
+      <header><img class="mark" src="./mybuddy-mark.svg" alt="" width="38" height="38" /><span class="brand">MyBuddy</span></header>
       <section class="hero">
         <div class="eyebrow">A little more flow for your day</div>
         <h1>Your desktop,<br />with a buddy.</h1>

@@ -19,6 +19,8 @@ import {
 } from "./notchTokens";
 
 type Props = {
+  wrapperPosition?: "fixed" | "absolute";
+  wrapperClassName?: string;
   shellRef: Ref<HTMLDivElement>;
   mode: NotchMode;
   size: NotchSize;
@@ -55,6 +57,8 @@ const layerVariants: Variants = {
 };
 
 export default function NotchShell({
+  wrapperPosition = "fixed",
+  wrapperClassName = "",
   shellRef,
   mode,
   size,
@@ -90,12 +94,24 @@ export default function NotchShell({
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex justify-center antialiased">
+    <div
+      className={wrapperClassName}
+      style={{
+        position: wrapperPosition,
+        insetInline: 0,
+        top: 0,
+        zIndex: 60,
+        display: "flex",
+        justifyContent: "center",
+        pointerEvents: "none",
+        WebkitFontSmoothing: "antialiased",
+      }}
+    >
       <motion.div
         ref={shellRef}
         data-mybuddy-notch="true"
         className="pointer-events-auto relative"
-        style={{ transformOrigin: "50% 0%" }}
+        style={{ position: "relative", pointerEvents: "auto", transformOrigin: "50% 0%" }}
         initial={{ width: SIZES.compact.width * 0.8, height: 0 }}
         animate={{ width: size.width, height: size.height }}
         exit={{
@@ -134,7 +150,13 @@ export default function NotchShell({
             borderBottomRightRadius: radius,
           }}
           transition={spring}
-          style={{ backgroundColor: SURFACE }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            overflow: "hidden",
+            outline: "none",
+            backgroundColor: SURFACE,
+          }}
           className={`
             absolute inset-0 overflow-hidden outline-none
             shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5),inset_1px_0_0_rgba(255,255,255,0.04),inset_-1px_0_0_rgba(255,255,255,0.04),inset_0_-1px_0_rgba(255,255,255,0.07)]
@@ -175,6 +197,8 @@ export default function NotchShell({
               exit="exit"
               className="absolute top-0"
               style={{
+                position: "absolute",
+                top: 0,
                 width: contentSize.width,
                 height: contentSize.height,
                 left: "50%",

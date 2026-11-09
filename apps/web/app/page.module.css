@@ -13,8 +13,7 @@
 
 .nav { position: relative; z-index: 4; min-height: 82px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .brand { display: inline-flex; align-items: center; gap: 9px; color: #151815; font-size: 17px; font-weight: 680; letter-spacing: -.055em; }
-.brandMark { display: grid; place-items: center; width: 34px; height: 34px; color: #fff; border-radius: 11px; background: var(--green); }
-.brandMark svg { width: 29px; height: 29px; }
+.brandMark { display: block; flex: none; width: 34px; height: 34px; object-fit: contain; }
 .beta { margin-left: 5px; padding-left: 13px; border-left: 1px solid #d8d9d4; color: #858b85; font-size: 8px; font-weight: 700; letter-spacing: .12em; }
 .navDownload { display: inline-flex; align-items: center; gap: 13px; min-height: 40px; padding: 0 16px; border: 1px solid #deded8; border-radius: 999px; color: #171a17; background: var(--paper); font-size: 11px; font-weight: 650; transition: .2s ease; }
 .navDownload:hover { border-color: #bfc8b9; background: #f2f4ef; transform: translateY(-1px); }
