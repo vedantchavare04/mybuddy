@@ -84,7 +84,7 @@ jobs:
           updaterJsonPreferNsis: true
           args: --bundles nsis,msi
 
-            - name: Add stable Windows installer download
+      - name: Add stable Windows installer download
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.MYBUDDY_RELEASES_TOKEN }}
