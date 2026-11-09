@@ -94,10 +94,10 @@ jobs:
 
           gh release download "$env:GITHUB_REF_NAME" `
             --repo "vedantchavare04/myBuddy-releases" `
-            --pattern "*-setup.exe" `
+            --pattern "MyBuddy_*_x64-setup.exe" `
             --dir $releaseDir
 
-          $installer = Get-ChildItem -Path $releaseDir -Filter "*-setup.exe" | Select-Object -First 1
+          $installer = Get-ChildItem -Path $releaseDir -Filter "MyBuddy_*_x64-setup.exe" | Select-Object -First 1
           if (-not $installer) {
             throw "Could not find the Windows setup .exe in the release."
           }
