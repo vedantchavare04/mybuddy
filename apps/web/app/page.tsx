@@ -14,7 +14,7 @@ import type { Route } from "../../../src/components/notch/notchRoutes";
 import type { CompanionEvent } from "../../../src/events/eventTypes";
 import styles from "./page.module.css";
 
-const DOWNLOAD_URL = "https://github.com/vedantchavare04/myBuddy-releases/releases/latest";
+const DOWNLOAD_URL = "https://github.com/vedantchavare04/myBuddy-releases/releases/latest/download/MyBuddy-Setup.exe";
 
 const wallpaper = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 200"><rect width="1050" height="200" fill="#d6d9bd"/><circle cx="810" cy="45" r="46" fill="#f4d993"/><path d="M0 130 190 40l146 98 133-74 185 136H0Z" fill="#9cae8a"/><path d="m387 200 229-130 148 91 133-55 153 94H387Z" fill="#788e77"/><path d="M0 164q155-45 287 9t256-3q187-50 507 7v23H0Z" fill="#b8c2a0"/><path d="M84 149q36-61 72 0m-32-1q29-44 58 0" fill="none" stroke="#697f70" stroke-width="5" stroke-linecap="round"/><path d="M887 146q31-51 62 0m-26 0q28-42 56 0" fill="none" stroke="#667c6a" stroke-width="5" stroke-linecap="round"/></svg>`)}`;
 
@@ -66,7 +66,7 @@ function FeaturePanel({ route, onBack, onClose }: { route: Route; onBack: () => 
         <p>{item.body}</p>
         {route === "reminders" ? <button type="button" className={styles.completeButton} onClick={() => setDone(!done)}>{done ? <><Check size={13} /> All set</> : "Mark as done"}</button> : null}
       </div>
-      <a className={styles.panelDownload} href={DOWNLOAD_URL} target="_blank" rel="noreferrer"><LockKeyhole size={13} /> Unlock all the amazing features<ArrowUpRight size={12} /></a>
+      <a className={styles.panelDownload} href={DOWNLOAD_URL}><LockKeyhole size={13} /> Unlock all the amazing features<ArrowUpRight size={12} /></a>
     </div>
   );
 }
@@ -137,7 +137,7 @@ export default function Home() {
           <span>mybuddy</span>
           <span className={styles.beta}>DESKTOP COMPANION</span>
         </a>
-        <a className={styles.navDownload} href={DOWNLOAD_URL} target="_blank" rel="noreferrer">Get MyBuddy <ArrowUpRight size={14} /></a>
+        <a className={styles.navDownload} href={DOWNLOAD_URL}>Get MyBuddy <ArrowUpRight size={14} /></a>
       </header>
 
       <section className={styles.hero} id="top">
@@ -146,7 +146,7 @@ export default function Home() {
           <h1>Someone’s looking<br />out for <em>you.</em></h1>
           <p className={styles.intro}>Gentle reminders. A familiar little spider. Right in your Notch.</p>
           <div className={styles.heroActions}>
-            <a className={styles.primary} href={DOWNLOAD_URL} target="_blank" rel="noreferrer"><LockKeyhole size={14} /> Unlock all the amazing features <ArrowUpRight size={15} /></a>
+            <a className={styles.primary} href={DOWNLOAD_URL}><LockKeyhole size={14} /> Unlock all the amazing features <ArrowUpRight size={15} /></a>
             <button className={styles.previewLink} type="button" onClick={() => openRoute("settings")}><span><ChevronRight size={13} /></span> Try Notch customization</button>
           </div>
           <div className={styles.demoControls} aria-label="Notch feature preview selector">

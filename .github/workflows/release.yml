@@ -84,5 +84,29 @@ jobs:
           updaterJsonPreferNsis: true
           args: --bundles nsis,msi
 
+            - name: Add stable Windows installer download
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.MYBUDDY_RELEASES_TOKEN }}
+        run: |
+          $releaseDir = Join-Path $env:RUNNER_TEMP "mybuddy-release"
+          New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
+
+          gh release download "$env:GITHUB_REF_NAME" `
+            --repo "vedantchavare04/myBuddy-releases" `
+            --pattern "*-setup.exe" `
+            --dir $releaseDir
+
+          $installer = Get-ChildItem -Path $releaseDir -Filter "*-setup.exe" | Select-Object -First 1
+          if (-not $installer) {
+            throw "Could not find the Windows setup .exe in the release."
+          }
+
+          $stableInstaller = Join-Path $releaseDir "MyBuddy-Setup.exe"
+          Copy-Item -LiteralPath $installer.FullName -Destination $stableInstaller -Force
+
+          gh release upload "$env:GITHUB_REF_NAME" "$stableInstaller" `
+            --repo "vedantchavare04/myBuddy-releases" `
+            --clobber
 
 
