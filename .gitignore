@@ -25,3 +25,10 @@ dist-ssr
 *.sln
 *.sw?
 .tauri\mybuddy.key
+
+
+.bun-tmp
+.bun-install
+.env
+.env.local
+.env.*
