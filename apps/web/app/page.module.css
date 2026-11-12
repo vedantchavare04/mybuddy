@@ -439,6 +439,10 @@
   font-size: 12px;
   cursor: pointer;
 }
+
+.page {
+  overflow: clip;
+}
 .panelClose {
   font-size: 20px;
   line-height: 1;

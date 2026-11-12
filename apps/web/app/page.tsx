@@ -30,6 +30,7 @@ import { RADIUS, SIZES } from "../../../src/components/notch/notchTokens";
 import type { Route } from "../../../src/components/notch/notchRoutes";
 import type { CompanionEvent } from "../../../src/events/eventTypes";
 import DownloadButton from "../components/DownloadButton"
+import FeaturesSection from "../components/FeaturesSection";
 import styles from "./page.module.css";
 
 const display = Instrument_Serif({
@@ -578,6 +579,8 @@ export default function Home() {
           </ul>
         </div>
       </section>
+
+      <FeaturesSection/>
 
       <footer className={styles.footer}>
         <span>A little buddy, always close by.</span>
