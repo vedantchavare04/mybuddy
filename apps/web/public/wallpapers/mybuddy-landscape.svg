@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" fill="none">
+  <defs>
+    <filter id="paper" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 .085"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <path fill="#A8D8F0" d="M0 0h1600v1000H0z"/>
+  <circle cx="1226" cy="236" r="119" fill="#F6D37A"/>
+  <circle cx="1226" cy="236" r="147" stroke="#FFF4CB" stroke-width="4" stroke-dasharray="3 15"/>
+  <path d="M0 592c151-104 266-104 410-28 112 59 223 53 346-34 108-77 234-76 363 11 164 110 307 88 481-10v469H0V592Z" fill="#B3CEB5"/>
+  <path d="M0 714c154-80 267-97 402-27 121 63 234 62 356-17 158-103 284-106 425-22 151 90 274 82 417-6v358H0V714Z" fill="#719A8C"/>
+  <path d="M0 826c169-91 302-88 447-16 120 60 249 73 375-7 160-102 306-90 425-31 124 61 241 58 353-8v236H0V826Z" fill="#316C78"/>
+  <path d="M0 921c150-72 274-64 396 1 155 83 306 73 451-11 142-83 253-87 384-29 135 60 247 45 369-17v135H0V921Z" fill="#24556B"/>
+  <g stroke="#F9F4D9" stroke-width="7" stroke-linecap="round" opacity=".84">
+    <path d="m391 339 47-31-15 47 48-12-47 31 15 45-34-35-31 40 13-49-45-2 46-17Z"/>
+    <path d="m1450 432 26-17-8 26 27-7-26 18 8 25-20-20-18 23 7-28-26-1 27-10Z"/>
+    <path d="M686 187v37m-18-18h37m-32-13 26 26m0-26-26 26"/>
+  </g>
+  <g fill="#F7F1D7">
+    <circle cx="561" cy="265" r="5"/><circle cx="617" cy="329" r="4"/><circle cx="910" cy="232" r="5"/>
+    <circle cx="1042" cy="298" r="3"/><circle cx="1347" cy="337" r="4"/><circle cx="244" cy="425" r="3"/>
+  </g>
+  <path d="M761 1000c27-77 62-116 111-137 17-70 53-112 98-135 37 31 56 76 53 136 41 28 67 72 72 136H761Z" fill="#476F68"/>
+  <path d="M952 775c-75-82-74-159-44-220 65 30 103 85 99 166 56-63 114-75 175-50-23 75-78 119-165 130l-65 101-39-13 39-114Z" fill="#638E74"/>
+  <path d="m1000 1000 2-170m-2 48-46-42m50 10 49-50" stroke="#F2D987" stroke-width="6" stroke-linecap="round"/>
+  <g fill="#F4DF9D">
+    <circle cx="253" cy="814" r="8"/><circle cx="271" cy="798" r="7"/><circle cx="286" cy="820" r="8"/>
+    <circle cx="1377" cy="752" r="7"/><circle cx="1392" cy="738" r="6"/><circle cx="1407" cy="756" r="7"/>
+  </g>
+  <path fill="#fff" opacity=".22" filter="url(#paper)" d="M0 0h1600v1000H0z"/>
+</svg>
