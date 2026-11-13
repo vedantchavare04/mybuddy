@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Figtree, Instrument_Serif } from "next/font/google";
+import FaqsSection from "../components/faqs";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -581,6 +582,7 @@ export default function Home() {
       </section>
 
       <FeaturesSection/>
+      <FaqsSection/>
 
       <footer className={styles.footer}>
         <span>A little buddy, always close by.</span>
