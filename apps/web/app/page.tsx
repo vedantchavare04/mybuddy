@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Figtree, Instrument_Serif } from "next/font/google";
 import FaqsSection from "../components/faqs";
+import Footer from "../components/footer"
 import {
   ArrowRight,
   ArrowUpRight,
@@ -584,16 +585,7 @@ export default function Home() {
       <FeaturesSection/>
       <FaqsSection/>
 
-      <footer className={styles.footer}>
-        <span>A little buddy, always close by.</span>
-        <a
-          href="https://github.com/vedantchavare04/mybuddy"
-          target="_blank"
-          rel="noreferrer"
-        >
-          About MyBuddy <ArrowUpRight size={12} />
-        </a>
-      </footer>
+      <Footer/>
     </main>
   );
 }

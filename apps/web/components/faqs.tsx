@@ -54,8 +54,8 @@ export default function FaqsSection() {
   return (
     <FaqDrawer
       label="A LITTLE HELP"
-      title="Frequently asked questions"
-      lead="Everything you might want to know about your little desktop companion."
+      title="Answers before you ask."
+      lead="The things you might want to know before bringing MyBuddy to your desktop."
       drawer="MyBuddy · FAQ"
       cards={FAQ_CARDS}
       count={7}
