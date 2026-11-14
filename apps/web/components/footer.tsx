@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion, type Variants } from "motion/react";
+import Feedback from "../components/feedback"
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -95,12 +96,7 @@ export default function Footer() {
             >
               GitHub
             </a>
-            <a
-              href="#feedback-form"
-              className="rounded-sm text-white/90 transition-colors hover:text-[#ffd24a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffd24a]"
-            >
-              Report a problem
-            </a>
+            <Feedback/>
           </motion.nav>
         </div>
 
