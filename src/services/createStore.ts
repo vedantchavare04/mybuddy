@@ -4,6 +4,7 @@ export type Store<T> = {
   get: () => T;
   set: (patch: Partial<T>) => void;
   subscribe: (fn: () => void) => () => void;
+  
 };
 
 export function createStore<T extends object>(initial: T): Store<T> {
@@ -26,5 +27,9 @@ export function createStore<T extends object>(initial: T): Store<T> {
 }
 
 export function useStore<T>(store: Store<T>): T {
-  return useSyncExternalStore(store.subscribe, store.get);
+  return useSyncExternalStore(
+    store.subscribe,
+    store.get,
+    store.get,
+  );
 }
