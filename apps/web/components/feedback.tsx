@@ -23,6 +23,7 @@ export default function Feedback() {
   const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,16 +46,30 @@ export default function Feedback() {
         }),
       });
 
-      if (!response.ok) {
-        setStatus("Could not send feedback. Please try again.");
+      const result: { error?: unknown; success?: unknown } = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok || result.success !== true) {
+        setStatus(
+          typeof result.error === "string"
+            ? result.error
+            : "Could not send feedback. Please try again.",
+        );
+        setTurnstileToken("");
+        setTurnstileKey((key) => key + 1);
         return;
       }
 
       setStatus("Thanks, your feedback was sent.");
       form.reset();
       setRating(0);
+      setTurnstileToken("");
+      setTurnstileKey((key) => key + 1);
     } catch {
       setStatus("Could not send feedback. Please try again.");
+      setTurnstileToken("");
+      setTurnstileKey((key) => key + 1);
     } finally {
       setSending(false);
     }
@@ -137,7 +152,7 @@ export default function Feedback() {
                 name="message"
                 required
                 minLength={5}
-                maxLength={3000}
+                maxLength={2000}
                 placeholder="Describe the problem or share your idea..."
                 className="min-h-32 border-white/25 bg-white text-slate-900 placeholder:text-slate-500"
               />
@@ -145,6 +160,7 @@ export default function Feedback() {
 
             <div className="flex justify-center">
               <Turnstile
+                key={turnstileKey}
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 onSuccess={(token) => setTurnstileToken(token)}
                 onExpire={() => setTurnstileToken("")}
