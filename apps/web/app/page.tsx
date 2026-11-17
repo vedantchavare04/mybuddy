@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Figtree, Instrument_Serif } from "next/font/google";
 import FaqsSection from "../components/faqs";
-import Footer from "../components/footer"
+import Footer from "../components/footer";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -31,13 +31,15 @@ import { useSettings } from "../../../src/services/settings/settingsStore";
 import { RADIUS, SIZES } from "../../../src/components/notch/notchTokens";
 import type { Route } from "../../../src/components/notch/notchRoutes";
 import type { CompanionEvent } from "../../../src/events/eventTypes";
-import DownloadButton from "../components/DownloadButton"
+import DownloadButton from "../components/DownloadButton";
 import FeaturesSection from "../components/FeaturesSection";
 import styles from "./page.module.css";
 
 const display = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
+  // Italic is used for the headline accent and the margin notes.
+  style: ["normal", "italic"],
   variable: "--font-display",
 });
 const body = Figtree({
@@ -303,22 +305,13 @@ function FeaturePanel({
   );
 }
 
-function Cloud({ className }: { className: string }) {
+function Sky() {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 320 120"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <g fill="currentColor">
-        <circle cx="76" cy="70" r="40" />
-        <circle cx="136" cy="50" r="48" />
-        <circle cx="206" cy="62" r="42" />
-        <circle cx="258" cy="78" r="32" />
-        <rect x="40" y="70" width="240" height="42" rx="21" />
-      </g>
-    </svg>
+    <div className={styles.sky} aria-hidden="true">
+      <span className={`${styles.cloud} ${styles.cloudA}`} />
+      <span className={`${styles.cloud} ${styles.cloudB}`} />
+      <span className={`${styles.cloud} ${styles.cloudC}`} />
+    </div>
   );
 }
 
@@ -371,221 +364,267 @@ export default function Home() {
 
   return (
     <main className={`${styles.page} ${display.variable} ${body.variable}`}>
-      <Cloud className={`${styles.cloud} ${styles.cloudA}`} />
-      <Cloud className={`${styles.cloud} ${styles.cloudB}`} />
-      <Cloud className={`${styles.cloud} ${styles.cloudC}`} />
+      {/* nav + hero share one positioned wrapper so the sky is sized to them */}
+      <div className={styles.top}>
+        <Sky />
 
-      <header className={styles.nav}>
-        <a className={styles.brand} href="#top" aria-label="MyBuddy home">
-          <img
-            className={styles.brandMark}
-            src="/mybuddy-mark.svg"
-            alt=""
-            width={32}
-            height={32}
-          />
-          <span>mybuddy</span>
-        </a>
+        <header className={styles.nav}>
+          <a className={styles.brand} href="#top" aria-label="MyBuddy home">
+            <img
+              className={styles.brandMark}
+              src="/mybuddy-mark.svg"
+              alt=""
+              width={32}
+              height={32}
+            />
+            <span>mybuddy</span>
+          </a>
 
-        <nav className={styles.navPill} aria-label="Feature preview">
-          {previews.map((p, i) => (
-            <button
-              key={p.route}
-              type="button"
-              className={i === slide ? styles.navActive : undefined}
-              aria-pressed={i === slide}
-              onClick={() => chooseSlide(i)}
-            >
-              {p.nav}
-            </button>
-          ))}
-        </nav>
+          <nav className={styles.navPill} aria-label="Feature preview">
+            {previews.map((p, i) => (
+              <button
+                key={p.route}
+                type="button"
+                className={i === slide ? styles.navActive : undefined}
+                aria-pressed={i === slide}
+                onClick={() => chooseSlide(i)}
+              >
+                {p.nav}
+              </button>
+            ))}
+          </nav>
 
-        <a className={styles.navCta} href={DOWNLOAD_URL}>
-          Get MyBuddy
-        </a>
-      </header>
+          <a className={styles.navCta} href={DOWNLOAD_URL}>
+            Get MyBuddy
+          </a>
+        </header>
 
-      <section className={styles.hero} id="top">
-        <div className={styles.heroCopy}>
-          <h1>
-            Your wallpaper,
-            <br />
-            right in your Notch.
-          </h1>
-          <p className={styles.intro}>
-            MyBuddy brings a notch to your Windows laptop. Pick any photo, add a
-            friendly spider, and keep gentle reminders one glance away.
-          </p>
-          <div className={styles.heroActions}>
-            <DownloadButton href={DOWNLOAD_URL} />
-            <button
-              className={styles.previewLink}
-              type="button"
-              onClick={() => openRoute("settings")}
-            >
-              Try wallpaper customization
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.scene}>
-          <div className={styles.stageOuter}>
-            <div className={styles.stageInner}>
-              <div className={styles.laptop}>
-                <div className={styles.lid}>
-                  <div className={styles.screen}>
-                    {mounted && (
-                      <div className={styles.notchSlot}>
-                      <NotchShell
-                        wrapperClassName={styles.demoShell}
-                        shellRef={shellRef}
-                        mode={open ? "expanded" : "compact"}
-                        size={
-                          open
-                            ? route === "settings"
-                              ? SIZES.settings
-                              : SIZES.home
-                            : SIZES.compact
-                        }
-                        contentSize={
-                          open
-                            ? route === "settings"
-                              ? SIZES.settings
-                              : SIZES.home
-                            : SIZES.compact
-                        }
-                        radius={open ? RADIUS.expanded : RADIUS.compact}
-                        layerKey={open ? route : "idle-compact"}
-                        direction={0}
-                        label={open ? "MyBuddy preview" : "Open MyBuddy preview"}
-                        onActivate={() => {
-                          setRoute("home");
-                          setOpen(true);
-                        }}
-                        onHoverChange={() => undefined}
-                        wallpaper={open ? null : (notchWallpaper ?? wallpaper)}
-                        wallpaperLuminance={
-                          notchWallpaper ? notchWallpaperLuminance : 0.55
-                        }
-                        wallpaperZoom={notchWallpaper ? notchWallpaperZoom : 1}
-                      >
-                        {open ? (
-                          route === "home" ? (
-                            <HomeView
-                              event={homeEvent}
-                              onOpen={openRoute}
-                              onSettings={() => openRoute("settings")}
-                              onCollapse={() => setOpen(false)}
-                            />
-                          ) : route === "settings" ? (
-                            <SettingsView
-                              onBack={() => openRoute("home")}
-                              onCollapse={() => setOpen(false)}
-                              onOpenAi={() => openRoute("settings/ai")}
-                              initialSection="notch-personalization"
-                              demoWallpaper={{
-                                dataUrl: wallpaper,
-                                luminance: 0.55,
-                              }}
-                            />
-                          ) : route === "launcher" ? (
-                            <LauncherView
-                              onBack={() => openRoute("home")}
-                              onCollapse={() => setOpen(false)}
-                              onOpenPlanner={() => openRoute("calendar")}
-                              onOpenClipboard={() => openRoute("clipboard")}
-                              onOpenMemory={() => openRoute("memory")}
-                              onOpenTasks={() => openRoute("tasks")}
-                              onOpenContext={() => openRoute("context")}
-                              onOpenPromises={() => openRoute("promises")}
-                              onOpenFlowRescue={() => openRoute("flow-rescue")}
-                              onOpenExplainLater={() =>
-                                openRoute("explain-later")
-                              }
-                            />
-                          ) : route === "reminders" ? (
-                            <RemindersView
-                              onBack={() => openRoute("home")}
-                              onCollapse={() => setOpen(false)}
-                              onNew={() => openRoute("reminders/new")}
-                            />
-                          ) : (
-                            <FeaturePanel
-                              route={route}
-                              onBack={() => openRoute("home")}
-                              onClose={() => setOpen(false)}
-                            />
-                          )
-                        ) : (
-                          <IdleCompact
-                            textMode={notchTextMode}
-                            customText={notchText}
-                            textPosition={notchTextPosition}
-                            spiderMood={spiderMood}
-                            spiderColor={spiderColor}
-                            showClock={notchShowClock}
-                            spiderVisible={notchSpiderEnabled}
-                          />
-                        )}
-                      </NotchShell>
-                      </div>
-                    )}
-
-                    {open && (
-                      <div className={styles.toast} aria-live="polite">
-                        {preview.detail}
-                      </div>
-                    )}
-
-                    <div className={styles.taskbar} aria-hidden="true">
-                      <i />
-                      <i />
-                      <i />
-                      <i />
-                      <i />
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.base} aria-hidden="true" />
-              </div>
+        <section className={styles.hero} id="top">
+          <div className={styles.heroCopy}>
+            <h1>
+              <span className={styles.hLead}>Your wallpaper,</span>
+              <span className={styles.hRow}>
+                <em className={styles.hItalic}>right in your</em>
+                <span className={styles.hBig}>
+                  Notch<i className={styles.hDot}>.</i>
+                </span>
+              </span>
+            </h1>
+            <p className={styles.intro}>
+              MyBuddy brings a notch to your Windows laptop. Pick any photo, add
+              a friendly spider, and keep gentle reminders one glance away.
+            </p>
+            <div className={styles.heroActions}>
+              <DownloadButton href={DOWNLOAD_URL} />
+              <button
+                className={styles.previewLink}
+                type="button"
+                onClick={() => openRoute("settings")}
+              >
+                Try wallpaper customization
+                <ChevronRight size={14} />
+              </button>
             </div>
           </div>
 
-          <ul className={styles.cards}>
-            {previews.map((p, i) => {
-              const Icon = p.icon;
-              return (
-                <li
-                  key={p.route}
-                  className={`${styles.card} ${styles[`card${i}`]}`}
-                >
-                  <button
-                    type="button"
-                    className={i === slide ? styles.cardActive : undefined}
-                    aria-pressed={i === slide}
-                    onClick={() => chooseSlide(i)}
+          {/* margin notes: decorative, shown on wide screens only */}
+          <aside className={styles.notes} aria-hidden="true">
+            <p>
+              pick any photo,
+              <br />
+              meet your spider,
+              <br />
+              keep it one glance away
+            </p>
+            <svg
+              className={styles.noteArrow}
+              viewBox="0 0 300 100"
+              focusable="false"
+            >
+              <path
+                d="M292 8C230 8 120 20 22 78"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="1 8"
+              />
+              <path
+                d="M36 77.4 22 78 29.3 66.1"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </aside>
+
+          <div className={styles.scene}>
+            <div className={styles.stageOuter}>
+              <div className={styles.stageInner}>
+                <div className={styles.laptop}>
+                  <div className={styles.lid}>
+                    <div className={styles.screen}>
+                      {mounted && (
+                        <div className={styles.notchSlot}>
+                          <NotchShell
+                            wrapperClassName={styles.demoShell}
+                            shellRef={shellRef}
+                            mode={open ? "expanded" : "compact"}
+                            size={
+                              open
+                                ? route === "settings"
+                                  ? SIZES.settings
+                                  : SIZES.home
+                                : SIZES.compact
+                            }
+                            contentSize={
+                              open
+                                ? route === "settings"
+                                  ? SIZES.settings
+                                  : SIZES.home
+                                : SIZES.compact
+                            }
+                            radius={open ? RADIUS.expanded : RADIUS.compact}
+                            layerKey={open ? route : "idle-compact"}
+                            direction={0}
+                            label={
+                              open ? "MyBuddy preview" : "Open MyBuddy preview"
+                            }
+                            onActivate={() => {
+                              setRoute("home");
+                              setOpen(true);
+                            }}
+                            onHoverChange={() => undefined}
+                            wallpaper={
+                              open ? null : (notchWallpaper ?? wallpaper)
+                            }
+                            wallpaperLuminance={
+                              notchWallpaper ? notchWallpaperLuminance : 0.55
+                            }
+                            wallpaperZoom={
+                              notchWallpaper ? notchWallpaperZoom : 1
+                            }
+                          >
+                            {open ? (
+                              route === "home" ? (
+                                <HomeView
+                                  event={homeEvent}
+                                  onOpen={openRoute}
+                                  onSettings={() => openRoute("settings")}
+                                  onCollapse={() => setOpen(false)}
+                                />
+                              ) : route === "settings" ? (
+                                <SettingsView
+                                  onBack={() => openRoute("home")}
+                                  onCollapse={() => setOpen(false)}
+                                  onOpenAi={() => openRoute("settings/ai")}
+                                  initialSection="notch-personalization"
+                                  demoWallpaper={{
+                                    dataUrl: wallpaper,
+                                    luminance: 0.55,
+                                  }}
+                                />
+                              ) : route === "launcher" ? (
+                                <LauncherView
+                                  onBack={() => openRoute("home")}
+                                  onCollapse={() => setOpen(false)}
+                                  onOpenPlanner={() => openRoute("calendar")}
+                                  onOpenClipboard={() => openRoute("clipboard")}
+                                  onOpenMemory={() => openRoute("memory")}
+                                  onOpenTasks={() => openRoute("tasks")}
+                                  onOpenContext={() => openRoute("context")}
+                                  onOpenPromises={() => openRoute("promises")}
+                                  onOpenFlowRescue={() =>
+                                    openRoute("flow-rescue")
+                                  }
+                                  onOpenExplainLater={() =>
+                                    openRoute("explain-later")
+                                  }
+                                />
+                              ) : route === "reminders" ? (
+                                <RemindersView
+                                  onBack={() => openRoute("home")}
+                                  onCollapse={() => setOpen(false)}
+                                  onNew={() => openRoute("reminders/new")}
+                                />
+                              ) : (
+                                <FeaturePanel
+                                  route={route}
+                                  onBack={() => openRoute("home")}
+                                  onClose={() => setOpen(false)}
+                                />
+                              )
+                            ) : (
+                              <IdleCompact
+                                textMode={notchTextMode}
+                                customText={notchText}
+                                textPosition={notchTextPosition}
+                                spiderMood={spiderMood}
+                                spiderColor={spiderColor}
+                                showClock={notchShowClock}
+                                spiderVisible={notchSpiderEnabled}
+                              />
+                            )}
+                          </NotchShell>
+                        </div>
+                      )}
+
+                      {open && (
+                        <div className={styles.toast} aria-live="polite">
+                          {preview.detail}
+                        </div>
+                      )}
+
+                      <div className={styles.taskbar} aria-hidden="true">
+                        <i />
+                        <i />
+                        <i />
+                        <i />
+                        <i />
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.base} aria-hidden="true" />
+                </div>
+              </div>
+            </div>
+
+            <ul className={styles.cards}>
+              {previews.map((p, i) => {
+                const Icon = p.icon;
+                return (
+                  <li
+                    key={p.route}
+                    className={`${styles.card} ${styles[`card${i}`]}`}
                   >
-                    <span className={styles.cardIcon}>
-                      <Icon size={18} strokeWidth={1.8} />
-                    </span>
-                    <span className={styles.cardText}>
-                      <strong>{p.title}</strong>
-                      <small>{p.detail}</small>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </section>
+                    <button
+                      type="button"
+                      className={i === slide ? styles.cardActive : undefined}
+                      aria-pressed={i === slide}
+                      onClick={() => chooseSlide(i)}
+                    >
+                      <span className={styles.cardIcon}>
+                        <Icon size={18} strokeWidth={1.8} />
+                      </span>
+                      <span className={styles.cardText}>
+                        <strong>{p.title}</strong>
+                        <small>{p.detail}</small>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      </div>
 
-      <FeaturesSection/>
-      <FaqsSection/>
+      <FeaturesSection />
+      <FaqsSection />
 
-      <Footer/>
+      <Footer />
     </main>
   );
 }

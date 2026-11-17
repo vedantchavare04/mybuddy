@@ -1,6 +1,7 @@
 .page {
   --sky: #3f6bdb;
   --sky-deep: #2f56bd;
+  --sky-high: #2a4bad;
   --ink: #0f1b3d;
   --paper: #ffffff;
   --mist: #eaf0ff;
@@ -31,29 +32,91 @@
 }
 
 
+/* ---------- Sky + clouds ----------
+   .top wraps nav + hero so the sky is sized to exactly that area.
+   Cloud artwork: /public/mybuddy-cloud-1.svg, -2.svg, -3.svg          */
+.top {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  overflow: clip;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* deep blue overhead, a little warmth up right, easing back to --sky at the
+     bottom so the hero meets the next section without a seam */
+  background:
+    radial-gradient(52% 34% at 82% 6%, rgba(255, 226, 160, 0.2), transparent 72%),
+    radial-gradient(70% 40% at 8% 34%, rgba(130, 170, 255, 0.28), transparent 72%),
+    linear-gradient(
+      180deg,
+      var(--sky-high) 0%,
+      #3862d1 34%,
+      #5380e4 70%,
+      var(--sky) 100%
+    );
+}
+/* restrained paper grain over the whole sky, clouds included */
+.sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 .cloud {
   position: absolute;
-  pointer-events: none;
-  z-index: 0;
+  display: block;
+  background-repeat: no-repeat;
+  will-change: transform;
 }
 .cloudA {
-  width: 320px;
-  top: 150px;
-  right: -70px;
-  color: var(--paper);
+  background-image: url("/mybuddy-cloud-1.svg");
+  background-size: 100% 100%;
+  width: clamp(460px, 56vw, 900px);
+  aspect-ratio: 1000 / 560;
+  top: 400px;
+  right: -14%;
+  opacity: 0.97;
+  animation: drift 70s ease-in-out infinite alternate;
 }
 .cloudB {
-  width: 240px;
-  top: 470px;
-  left: -80px;
-  color: var(--mist);
+  background-image: url("/mybuddy-cloud-2.svg");
+  background-size: 100% 100%;
+  width: clamp(320px, 38vw, 640px);
+  aspect-ratio: 800 / 440;
+  top: 700px;
+  left: -12%;
+  opacity: 0.92;
+  animation: drift 90s ease-in-out infinite alternate-reverse;
 }
 .cloudC {
-  width: 520px;
-  bottom: -90px;
-  left: 50%;
-  margin-left: -260px;
-  color: var(--paper);
+  background-image: url("/mybuddy-cloud-3.svg");
+  background-size: cover;
+  background-position: center bottom;
+  left: -8%;
+  right: -8%;
+  bottom: -30px;
+  height: clamp(220px, 30vw, 460px);
+  /* melt the bottom of the bank into the page colour */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-28px, 6px, 0);
+  }
 }
 
 
@@ -138,22 +201,58 @@
   padding: 40px 32px 64px;
 }
 
+/* ---------- Headline ----------
+   Three voices: a regular-weight lead, a small italic butter aside, and one
+   oversized "Notch." that carries the page. The aside and the copy below it
+   share --indent so the block reads as one staggered composition.       */
 .heroCopy {
-  max-width: 680px;
+  --indent: clamp(0px, 2.6vw, 36px);
+  position: relative;
+  max-width: none;
 }
 
 .heroCopy h1 {
   margin: 0;
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
-  font-size: clamp(48px, 7.4vw, 104px);
-  line-height: 0.96;
+  line-height: 0.9;
   letter-spacing: -0.02em;
-  text-wrap: balance;
+  text-shadow: 0 2px 30px rgba(20, 40, 120, 0.18);
+}
+.hLead {
+  display: block;
+  font-size: clamp(40px, 6.4vw, 92px);
+  line-height: 0.98;
+}
+.hRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.14em;
+  margin-top: -0.02em;
+}
+.hItalic {
+  padding-left: var(--indent);
+  font-style: italic;
+  font-size: clamp(34px, 5vw, 72px);
+  letter-spacing: -0.015em;
+  color: var(--butter);
+}
+.hBig {
+  font-size: clamp(96px, 17vw, 210px);
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+}
+.hDot {
+  font-style: normal;
+  color: var(--butter);
 }
 
 .intro {
-  margin: 28px 0 0;
+  margin: 30px 0 0;
+  margin-left: var(--indent);
   max-width: 46ch;
   font-size: clamp(16px, 1.5vw, 19px);
   line-height: 1.55;
@@ -162,10 +261,16 @@
 
 .heroActions {
   margin-top: 32px;
+  margin-left: var(--indent);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 16px 28px;
+}
+
+/* margin notes: small italic asides, wide screens only */
+.notes {
+  display: none;
 }
 
 .primary {
@@ -507,6 +612,36 @@
 }
 
 
+/* margin notes, only where there is clear room beside the headline */
+@media (min-width: 1100px) {
+  .notes {
+    display: block;
+    position: absolute;
+    top: 6px;
+    right: 32px;
+    width: 232px;
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-display), Georgia, serif;
+    font-style: italic;
+    font-size: 21px;
+    line-height: 1.22;
+    transform: rotate(2deg);
+    pointer-events: none;
+  }
+  .notes p {
+    margin: 0;
+  }
+  .noteArrow {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 62px;             
+    width: 300px;           
+    height: 100px;
+    overflow: visible;
+    color: var(--butter);
+  }
+}
+
 @media (min-width: 1240px) {
   .cards {
     display: block;
@@ -546,6 +681,12 @@
   .nav {
     grid-template-columns: 1fr auto;
   }
+  .cloudA {
+    top: 360px;
+  }
+  .cloudB {
+    top: 620px;
+  }
 }
 @media (max-width: 800px) {
   .page {
@@ -561,12 +702,15 @@
     grid-template-columns: 1fr;
   }
   .cloudA {
-    width: 200px;
-    top: 80px;
-    right: -60px;
+    width: 460px;
+    top: 300px;
+    right: -42%;
   }
   .cloudB {
     display: none;
+  }
+  .cloudC {
+    height: 240px;
   }
 }
 @media (max-width: 640px) {
@@ -579,15 +723,33 @@
   .heroActions {
     gap: 14px 20px;
   }
+  .hRow {
+    row-gap: 0.1em;
+  }
+  .hItalic {
+    padding-left: 0;
+  }
+  .cloudA {
+    width: 380px;
+    top: 330px;
+    right: -50%;
+  }
+  .cloudC {
+    height: 200px;
+  }
 }
 @media (max-width: 420px) {
   .page {
     --s: 0.38;
+  }
+  .hBig {
+    font-size: clamp(84px, 26vw, 110px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .page * {
     transition: none !important;
+    animation: none !important;
   }
 }
