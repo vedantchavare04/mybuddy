@@ -48,6 +48,21 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  --sky-edge-fade: clamp(120px, 16vw, 220px);
+  /* Fade the entire sky layer into .page's solid --sky background. The
+     Features section uses that same background, so the section edge blends. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - var(--sky-edge-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - var(--sky-edge-fade)),
+    transparent 100%
+  );
   /* deep blue overhead, a little warmth up right, easing back to --sky at the
      bottom so the hero meets the next section without a seam */
   background:

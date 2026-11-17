@@ -38,7 +38,7 @@ import styles from "./page.module.css";
 const display = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
-  // Italic is used for the headline accent and the margin notes.
+  // Italic is used for the headline accent.
   style: ["normal", "italic"],
   variable: "--font-display",
 });
@@ -426,39 +426,6 @@ export default function Home() {
               </button>
             </div>
           </div>
-
-          {/* margin notes: decorative, shown on wide screens only */}
-          <aside className={styles.notes} aria-hidden="true">
-            <p>
-              pick any photo,
-              <br />
-              meet your spider,
-              <br />
-              keep it one glance away
-            </p>
-            <svg
-              className={styles.noteArrow}
-              viewBox="0 0 300 100"
-              focusable="false"
-            >
-              <path
-                d="M292 8C230 8 120 20 22 78"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeDasharray="1 8"
-              />
-              <path
-                d="M36 77.4 22 78 29.3 66.1"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </aside>
 
           <div className={styles.scene}>
             <div className={styles.stageOuter}>
