@@ -1,29 +1,73 @@
 "use client";
 
 /**
- * MyBuddy · Features Section (Features 8 layout)
- * ───────────────────────────────────────────────
- * Top row:    Wallpaper · Spider · Quick actions   (3 cards, span 2 each)
- * Bottom row: Calendar · Reminders                 (2 wide cards, span 3 each)
+ * MyBuddy · Features Section (bento layout)
+ * ─────────────────────────────────────────
+ * Desktop (12-col grid, 3 rows):
  *
- * The spider card is a small interactive scene: the island sits at the top,
- * the spider drops from it on its thread when the card scrolls into view,
- * and a "Hanging spider" switch pulls it back up, like in the app.
+ *   ┌───────────────────────┬──────────────┐
+ *   │                       │  Spider      │
+ *   │  Wallpaper (tall)     ├──────────────┤
+ *   │                       │  Quick act.  │
+ *   ├──────────────┬────────┴──────────────┤
+ *   │  Calendar    │  Reminders (wide)     │
+ *   └──────────────┴───────────────────────┘
  *
- * Images go in  public/features/ :
- *   wallpaper.png, spider-circle.jpg, spider.png, quick-actions.png,
- *   calendar.png, reminders.png
+ * The first three cards "hang" from the top edge like the Notch does. The
+ * spider card keeps its small interactive scene: the island sits at the top,
+ * the spider drops on its thread when the card scrolls into view, and the
+ * "Hanging spider" switch pulls it back up, like in the app.
+ *
+ * Images (public/features/): wallpaper.png, spider-circle.jpg, spider.png,
+ * quick-actions.png, calendar.png, reminders.png
+ * Sky art (public/): mybuddy-cloud-2.svg  (from the hero)
  *
  * Usage (page.tsx, between the hero and the footer):
  *   <FeaturesSection />
  */
 
 import { useEffect, useRef, useState } from "react";
-import { CalendarDays, Bell } from "lucide-react";
+import { Bell, CalendarDays, Command, Image as ImageIcon } from "lucide-react";
 
 const NOISE = `data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .1 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>`,
 )}`;
+
+function SpiderIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="14" r="3" />
+      <circle cx="12" cy="9.6" r="1.5" />
+      <path d="M12 2v6M9.3 12.6 5 9.5M9 14l-5 .6M9.4 15.8 6 19.5M10.8 16.6 9.6 21M14.7 12.6 19 9.5M15 14l5 .6M14.6 15.8l3.4 3.7M13.2 16.6l1.2 4.4" />
+    </svg>
+  );
+}
+
+function Sparkle({ className }: { className: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M12 0c.8 7.5 4.5 11.2 12 12-7.5.8-11.2 4.5-12 12-.8-7.5-4.5-11.2-12-12C7.500 11.200 11.200 7.500 12 0Z"
+      />
+    </svg>
+  );
+}
 
 export default function FeaturesSection() {
   const deskRef = useRef<HTMLDivElement>(null);
@@ -53,120 +97,244 @@ export default function FeaturesSection() {
   return (
     <>
       <style>{`
-        .ft-section {
+        .ft-wrap {
+          position: relative;
           width: 100%;
-          max-width: 1040px;
+          overflow-x: clip;
+        }
+        .ft-section {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          max-width: 1120px;
           margin: 0 auto;
-          padding: 96px 24px 40px;
+          padding: 112px 24px 48px;
           font-family: var(--font-body), system-ui, sans-serif;
         }
+        /* a faint echo of the hero sky behind the heading */
+        .ft-sky {
+          position: absolute;
+          z-index: 0;
+          top: 40px;
+          right: -90px;
+          width: min(560px, 70vw);
+          aspect-ratio: 800 / 440;
+          background: url("/mybuddy-cloud-2.svg") center / 100% 100% no-repeat;
+          opacity: 0.5;
+          pointer-events: none;
+        }
 
-        /* heading */
-        .ft-head { text-align: center; margin-bottom: 48px; }
-        .ft-eyebrow {
-          display: inline-block;
-          margin-bottom: 14px;
-          color: rgba(255, 255, 255, 0.75);
-          font-size: 13px;
-          font-weight: 600;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
+        /* ---------- heading ---------- */
+        .ft-head {
+          position: relative;
+          display: grid;
+          grid-template-columns: 1fr auto;
+          align-items: end;
+          gap: 24px 56px;
+          margin-bottom: 56px;
         }
         .ft-title {
           margin: 0;
-          color: #ffffff;
-          font-family: var(--font-display), Georgia, serif;
-          font-size: clamp(36px, 5vw, 56px);
-          font-weight: 400;
-          line-height: 1.05;
-          letter-spacing: -0.01em;
-        }
-        .ft-sub {
-          margin: 16px auto 0;
-          max-width: 460px;
-          color: rgba(255, 255, 255, 0.85);
-          font-size: 17px;
-          line-height: 1.5;
-        }
-
-        /* grid */
-        .ft-grid {
-          display: grid;
-          grid-template-columns: repeat(6, 1fr);
-          gap: 16px;
-        }
-
-        .ft-card {
-          position: relative;
-          grid-column: span 2;
           display: flex;
           flex-direction: column;
-          overflow: hidden;
-          background: #ffffff;
-          border: 1px solid rgba(20, 36, 107, 0.08);
-          border-radius: 24px;
-          box-shadow: 0 16px 36px rgba(10, 20, 80, 0.2);
-          color: #14246b;
+          color: #ffffff;
+          font-family: var(--font-display), Georgia, serif;
+          font-weight: 400;
+          font-size: clamp(52px, 9vw, 124px);
+          line-height: 0.9;
+          letter-spacing: -0.03em;
+          text-shadow: 0 2px 30px rgba(20, 40, 120, 0.18);
         }
-        .ft-card.wide { grid-column: span 3; }
+        .ft-title-2 {
+          padding-left: clamp(0px, 6vw, 88px);
+          font-style: italic;
+          font-size: 0.82em;
+          letter-spacing: -0.025em;
+          color: #ffd24a;
+        }
+        .ft-title-2 i { font-style: normal; }
+        .ft-sub {
+          margin: 0;
+          max-width: 28ch;
+          padding-bottom: 10px;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: clamp(16px, 1.5vw, 19px);
+          line-height: 1.5;
+        }
+        .ft-star {
+          position: absolute;
+          pointer-events: none;
+        }
+        .ft-star.a { top: -26px; right: 36%; width: 26px; color: #ffd24a; }
+        .ft-star.b { top: 34px; right: 31%; width: 13px; color: rgba(255, 255, 255, 0.85); }
 
+        /* ---------- bento grid ---------- */
+        .ft-grid {
+          display: grid;
+          grid-template-columns: repeat(12, 1fr);
+          grid-template-rows: 320px 320px 340px;
+          gap: 16px;
+        }
+        .c-wall { grid-column: 1 / 8; grid-row: 1 / 3; }
+        .c-spider { grid-column: 8 / 13; grid-row: 1; }
+        .c-quick { grid-column: 8 / 13; grid-row: 2; }
+        .c-cal { grid-column: 1 / 6; grid-row: 3; }
+        .c-rem { grid-column: 6 / 13; grid-row: 3; }
+
+        .ft-card {
+          --line: rgba(20, 36, 107, 0.18);
+          --line-2: rgba(20, 36, 107, 0.09);
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+          overflow: hidden;
+          border-radius: 28px;
+          background: #ffffff;
+          color: #14246b;
+          box-shadow: 0 18px 40px rgba(10, 20, 80, 0.22);
+          transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 0.4s ease;
+        }
         .ft-card h3 {
           margin: 0;
           font-size: 19px;
           font-weight: 600;
           letter-spacing: -0.2px;
+          line-height: 1.2;
         }
         .ft-card p {
-          margin: 8px 0 0;
+          margin: 6px 0 0;
           color: #4a5578;
           font-size: 15px;
-          line-height: 1.5;
+          line-height: 1.45;
+        }
+        @media (hover: hover) {
+          .ft-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 26px 48px rgba(10, 20, 80, 0.28);
+          }
         }
 
-        /* ringed icon */
+        /* card surfaces: one distinct colour each */
+        .c-quick { background: #ffd24a; --line: rgba(15, 27, 61, 0.28); --line-2: rgba(15, 27, 61, 0.14); color: #0f1b3d; }
+        .c-quick p { color: rgba(15, 27, 61, 0.75); }
+        .c-spider { background: #181a21; --line: rgba(255, 255, 255, 0.28); --line-2: rgba(255, 255, 255, 0.12); color: #ffffff; }
+        .c-spider p { color: rgba(255, 255, 255, 0.72); }
+        .c-rem {
+          background: linear-gradient(160deg, #1d3aa3 0%, #14246b 100%);
+          --line: rgba(255, 255, 255, 0.3);
+          --line-2: rgba(255, 255, 255, 0.14);
+          color: #ffffff;
+        }
+        .c-rem p { color: rgba(255, 255, 255, 0.78); }
+        .c-cal { background: #ffffff; }
+
+        /* copy block: ringed icon + text */
+        .ft-copy {
+          display: flex;
+          align-items: flex-start;
+          gap: 18px;
+          padding: 22px 26px 26px;
+        }
         .ft-ring {
           position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
+          flex: none;
+          width: 46px;
+          height: 46px;
+          margin: 4px 4px 0 4px;
           border-radius: 999px;
-          border: 1px solid rgba(20, 36, 107, 0.16);
-          flex-shrink: 0;
+          border: 1px solid var(--line);
         }
         .ft-ring::before {
           content: "";
           position: absolute;
-          inset: -8px;
+          inset: -7px;
           border-radius: 999px;
-          border: 1px solid rgba(20, 36, 107, 0.08);
+          border: 1px solid var(--line-2);
         }
-        .ft-ring.sm { width: 48px; height: 48px; }
 
-        /* A · screenshot hangs from the top edge, like the Notch */
+        /* ---------- hanging cards (wallpaper, quick actions) ---------- */
         .ft-hang-vis {
+          position: relative;
+          flex: 1 1 auto;
+          min-height: 190px;
           display: flex;
           align-items: flex-start;
           justify-content: center;
-          height: 216px;
           padding: 0 24px;
-          background: #eef2ff;
           overflow: hidden;
         }
         .ft-hang-vis img {
+          position: relative;
+          z-index: 2;
           display: block;
           width: 100%;
           max-width: 300px;
           height: auto;
-          filter: drop-shadow(0 12px 18px rgba(10, 20, 80, 0.26));
+          filter: drop-shadow(0 12px 18px rgba(10, 20, 80, 0.3));
           transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .ft-card:hover .ft-hang-vis img { transform: translateY(6px); }
-        .ft-hang-copy { padding: 22px 26px 28px; }
 
-        /* B · spider scene */
+        /* wallpaper: a small sky of its own, echoing the hero */
+        .c-wall .ft-hang-vis {
+          min-height: 340px;
+          background: linear-gradient(180deg, #3f6bdb 0%, #7ea1f0 58%, #c4d6fb 100%);
+        }
+        .c-wall .ft-hang-vis img { max-width: 520px; }
+        .ft-sun {
+          position: absolute;
+          z-index: 1;
+          right: 9%;
+          bottom: 22%;
+          width: 108px;
+          height: 108px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 38% 34%, #ffe892, #ffd24a 70%);
+          box-shadow: 0 0 0 14px rgba(255, 210, 74, 0.22), 0 0 0 30px rgba(255, 210, 74, 0.1);
+        }
+        .ft-wall-cloud {
+          position: absolute;
+          z-index: 1;
+          left: -60px;
+          bottom: -46px;
+          width: 440px;
+          aspect-ratio: 800 / 440;
+          background: url("/mybuddy-cloud-2.svg") center / 100% 100% no-repeat;
+        }
+        .ft-wall-cloud.two {
+          left: auto;
+          right: -80px;
+          bottom: -70px;
+          width: 380px;
+          opacity: 0.9;
+        }
+
+        /* quick actions: soft light behind the hanging panel */
+        .c-quick .ft-hang-vis {
+          background:
+            radial-gradient(60% 70% at 50% 0%, rgba(255, 255, 255, 0.6), transparent 70%);
+        }
+        .ft-dash {
+          position: absolute;
+          z-index: 1;
+          right: 18px;
+          bottom: 10px;
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          border: 1.5px dashed rgba(15, 27, 61, 0.28);
+        }
+
+        /* ---------- spider scene ---------- */
         .ft-desk {
           position: relative;
-          height: 216px;
+          flex: 1 1 auto;
+          min-height: 214px;
           overflow: hidden;
           isolation: isolate;
         }
@@ -264,7 +432,7 @@ export default function FeaturesSection() {
           -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
         }
-        .ft-toggle:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+        .ft-toggle:focus-visible { outline: 2px solid #ffd24a; outline-offset: 2px; }
         .ft-switch {
           position: relative;
           width: 30px;
@@ -287,29 +455,29 @@ export default function FeaturesSection() {
         .ft-toggle[aria-checked="true"] .ft-switch { background: #8b6df0; }
         .ft-toggle[aria-checked="true"] .ft-switch::after { transform: translateX(12px); }
 
-        /* C · wide card: icon + text on top, framed screenshot bleeding off the edge */
+        /* ---------- framed screenshots (calendar, reminders) ---------- */
         .ft-split {
           flex: 1;
           display: flex;
           flex-direction: column;
-          padding: 24px 0 0 24px;
+          min-height: 0;
         }
-        .ft-split-copy {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          margin-bottom: 26px;
-          padding-right: 24px;
-        }
+        .ft-split .ft-copy { padding-bottom: 0; }
         .ft-frame {
           position: relative;
-          margin-top: auto;
+          flex: 1;
+          min-height: 0;
+          margin: 22px 0 0 24px;
           padding: 30px 0 0 16px;
           border-left: 1px solid rgba(20, 36, 107, 0.16);
           border-top: 1px solid rgba(20, 36, 107, 0.16);
           border-top-left-radius: 16px;
           background: #eef2ff;
           overflow: hidden;
+        }
+        .c-rem .ft-frame {
+          border-color: rgba(255, 255, 255, 0.22);
+          background: rgba(255, 255, 255, 0.08);
         }
         .ft-dots {
           position: absolute;
@@ -325,6 +493,7 @@ export default function FeaturesSection() {
           border-radius: 999px;
           border: 1px solid rgba(20, 36, 107, 0.2);
         }
+        .c-rem .ft-dots i { border-color: rgba(255, 255, 255, 0.35); }
         .ft-frame img {
           display: block;
           width: 100%;
@@ -334,169 +503,232 @@ export default function FeaturesSection() {
           box-shadow: 0 10px 24px rgba(10, 20, 80, 0.25);
           transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
+        .c-cal .ft-frame img { width: 122%; }
         .ft-card:hover .ft-frame img { transform: translateY(-3px); }
 
-        /* responsive */
-        @media (max-width: 900px) {
-          .ft-section { padding-top: 72px; }
-          .ft-grid { grid-template-columns: 1fr; }
-          .ft-card, .ft-card.wide { grid-column: auto; }
-          .ft-frame img { width: 160%; }
+        /* ---------- tablet: two columns, hero card on top ---------- */
+        @media (max-width: 960px) {
+          .ft-section { padding-top: 88px; }
+          .ft-head { grid-template-columns: 1fr; margin-bottom: 40px; }
+          .ft-sub { max-width: 36ch; padding-bottom: 0; }
+          .ft-star.a { right: 12%; }
+          .ft-star.b { right: 8%; }
+          .ft-grid {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: none;
+            grid-auto-rows: auto;
+          }
+          .c-wall, .c-cal, .c-rem { grid-column: 1 / -1; grid-row: auto; }
+          .c-spider, .c-quick { grid-column: auto; grid-row: auto; }
+          .c-wall .ft-hang-vis { min-height: 380px; }
+          .ft-desk { flex: none; height: 226px; }
+          .ft-hang-vis { min-height: 220px; }
+          .ft-frame { flex: none; }
+        }
+
+        /* ---------- mobile: single column ---------- */
+        @media (max-width: 640px) {
+          .ft-section { padding: 72px 18px 32px; }
+          .ft-grid { grid-template-columns: 1fr; gap: 14px; }
+          .c-spider, .c-quick { grid-column: auto; }
+          .ft-card { border-radius: 24px; }
+          .ft-copy { padding: 20px 20px 24px; gap: 14px; }
+          .c-wall .ft-hang-vis { min-height: 300px; padding: 0 16px; }
+          .ft-sun { width: 76px; height: 76px; right: 6%; bottom: 20%; }
+          .ft-wall-cloud { width: 320px; }
+          .ft-wall-cloud.two { width: 280px; }
+          .ft-frame { margin-left: 18px; padding-left: 12px; }
+          .c-cal .ft-frame img { width: 150%; }
+          .ft-star.a { right: 6%; top: -30px; }
+          .ft-star.b { display: none; }
         }
 
         @media (prefers-reduced-motion: reduce) {
+          .ft-card,
           .ft-hang-vis img,
           .ft-frame img,
           .ft-drop,
           .ft-switch,
           .ft-switch::after { transition: none !important; }
+          .ft-card:hover,
           .ft-card:hover .ft-hang-vis img,
           .ft-card:hover .ft-frame img { transform: none; }
           .ft-card:hover .ft-drop.out .ft-spider { animation: none; }
         }
       `}</style>
 
-      <section className="ft-section" id="features" aria-labelledby="ft-title">
-        <header className="ft-head">
-          <span className="ft-eyebrow">What’s inside</span>
-          <h2 className="ft-title" id="ft-title">
-            Your desktop, made yours.
-          </h2>
-          <p className="ft-sub">
-            A friendly Notch with a few everyday tools, always one glance away.
-          </p>
-        </header>
+      <div className="ft-wrap">
+        <div className="ft-sky" aria-hidden="true" />
+        <section className="ft-section" id="features" aria-labelledby="ft-title">
+          <header className="ft-head">
+            <Sparkle className="ft-star a" />
+            <Sparkle className="ft-star b" />
+            <h2 className="ft-title" id="ft-title">
+              <span>Your desktop,</span>
+              <span className="ft-title-2">
+                made yours<i>.</i>
+              </span>
+            </h2>
+            <p className="ft-sub">
+              A friendly Notch with a few everyday tools, always one glance away.
+            </p>
+          </header>
 
-        <div className="ft-grid">
-          <article className="ft-card">
-            <div className="ft-hang-vis">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/features/wallpaper.png"
-                alt="MyBuddy settings panel with a Change photo button and a wallpaper preview"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <div className="ft-hang-copy">
-              <h3>Your wallpaper, in your Notch</h3>
-              <p>Pick a photo and make your desktop feel like your own.</p>
-            </div>
-          </article>
+          <div className="ft-grid">
+            {/* Wallpaper: tall hero card */}
+            <article className="ft-card c-wall">
+              <div className="ft-hang-vis">
+                <span className="ft-sun" aria-hidden="true" />
+                <span className="ft-wall-cloud" aria-hidden="true" />
+                <span className="ft-wall-cloud two" aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/features/wallpaper.png"
+                  alt="MyBuddy settings panel with a Change photo button and a wallpaper preview"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="ft-copy">
+                <div className="ft-ring">
+                  <ImageIcon size={20} strokeWidth={1.4} aria-hidden="true" />
+                </div>
+                <div>
+                  <h3>Your wallpaper, in your Notch</h3>
+                  <p>Pick a photo and make your desktop feel like your own.</p>
+                </div>
+              </div>
+            </article>
 
-          <article className="ft-card">
-            <div
-              className="ft-desk"
-              ref={deskRef}
-              style={{
-                backgroundColor: "#2a2d34",
-                backgroundImage: `url("${NOISE}")`,
-              }}
-            >
+            {/* Spider: interactive scene */}
+            <article className="ft-card c-spider">
               <div
-                className="ft-island"
-                style={{ backgroundImage: 'url("/features/spider-circle.jpg")' }}
-              />
-              <div className={`ft-drop${seen && hang ? " out" : ""}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className="ft-spider"
-                  src="/features/spider.png"
-                  alt="A small spider hanging from the MyBuddy Notch"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={hang}
-                className="ft-toggle"
-                onClick={() => setHang((v) => !v)}
+                className="ft-desk"
+                ref={deskRef}
+                style={{
+                  backgroundColor: "#2a2d34",
+                  backgroundImage: `url("${NOISE}")`,
+                }}
               >
-                Hanging spider
-                <span className="ft-switch" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="ft-hang-copy">
-              <h3>A friendly spider</h3>
-              <p>A little companion that hangs from your Notch, in a mood that suits you.</p>
-            </div>
-          </article>
-
-          <article className="ft-card">
-            <div className="ft-hang-vis">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/features/quick-actions.png"
-                alt="MyBuddy Quick Actions panel with a search box and a list of actions"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <div className="ft-hang-copy">
-              <h3>Quick actions</h3>
-              <p>Open what you need without leaving what you’re doing.</p>
-            </div>
-          </article>
-
-          <article className="ft-card wide">
-            <div className="ft-split">
-              <div className="ft-split-copy">
-                <div className="ft-ring sm">
-                  <CalendarDays size={20} strokeWidth={1.4} aria-hidden="true" />
+                <div
+                  className="ft-island"
+                  style={{ backgroundImage: 'url("/features/spider-circle.jpg")' }}
+                />
+                <div className={`ft-drop${seen && hang ? " out" : ""}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className="ft-spider"
+                    src="/features/spider.png"
+                    alt="A small spider hanging from the MyBuddy Notch"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={hang}
+                  className="ft-toggle"
+                  onClick={() => setHang((v) => !v)}
+                >
+                  Hanging spider
+                  <span className="ft-switch" aria-hidden="true" />
+                </button>
+              </div>
+              <div className="ft-copy">
+                <div className="ft-ring">
+                  <SpiderIcon />
                 </div>
                 <div>
-                  <h3>Calendar</h3>
-                  <p>See what’s coming up, right from the Notch.</p>
+                  <h3>A friendly spider</h3>
+                  <p>Hangs from your Notch, in a mood that suits you.</p>
                 </div>
               </div>
-              <div className="ft-frame">
-                <span className="ft-dots" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
+            </article>
+
+            {/* Quick actions */}
+            <article className="ft-card c-quick">
+              <div className="ft-hang-vis">
+                <span className="ft-dash" aria-hidden="true" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/features/calendar.png"
-                  alt="MyBuddy Calendar panel showing an upcoming event"
+                  src="/features/quick-actions.png"
+                  alt="MyBuddy Quick Actions panel with a search box and a list of actions"
                   loading="lazy"
                   decoding="async"
                 />
               </div>
-            </div>
-          </article>
-
-          <article className="ft-card wide">
-            <div className="ft-split">
-              <div className="ft-split-copy">
-                <div className="ft-ring sm">
-                  <Bell size={20} strokeWidth={1.4} aria-hidden="true" />
+              <div className="ft-copy">
+                <div className="ft-ring">
+                  <Command size={20} strokeWidth={1.4} aria-hidden="true" />
                 </div>
                 <div>
-                  <h3>Reminders</h3>
-                  <p>Gentle nudges for the things you want to remember.</p>
+                  <h3>Quick actions</h3>
+                  <p>Open what you need without leaving what you’re doing.</p>
                 </div>
               </div>
-              <div className="ft-frame">
-                <span className="ft-dots" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/features/reminders.png"
-                  alt="MyBuddy Reminders panel showing a reminder for today"
-                  loading="lazy"
-                  decoding="async"
-                />
+            </article>
+
+            {/* Calendar */}
+            <article className="ft-card c-cal">
+              <div className="ft-split">
+                <div className="ft-copy">
+                  <div className="ft-ring">
+                    <CalendarDays size={20} strokeWidth={1.4} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3>Calendar</h3>
+                    <p>See what’s coming up, right from the Notch.</p>
+                  </div>
+                </div>
+                <div className="ft-frame">
+                  <span className="ft-dots" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/features/calendar.png"
+                    alt="MyBuddy Calendar panel showing an upcoming event"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
               </div>
-            </div>
-          </article>
-        </div>
-      </section>
+            </article>
+
+            {/* Reminders */}
+            <article className="ft-card c-rem">
+              <div className="ft-split">
+                <div className="ft-copy">
+                  <div className="ft-ring">
+                    <Bell size={20} strokeWidth={1.4} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3>Reminders</h3>
+                    <p>Gentle nudges for the things you want to remember.</p>
+                  </div>
+                </div>
+                <div className="ft-frame">
+                  <span className="ft-dots" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/features/reminders.png"
+                    alt="MyBuddy Reminders panel showing a reminder for today"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
     </>
   );
 }

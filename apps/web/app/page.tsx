@@ -38,7 +38,6 @@ import styles from "./page.module.css";
 const display = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
-  // Italic is used for the headline accent.
   style: ["normal", "italic"],
   variable: "--font-display",
 });
@@ -364,7 +363,6 @@ export default function Home() {
 
   return (
     <main className={`${styles.page} ${display.variable} ${body.variable}`}>
-      {/* nav + hero share one positioned wrapper so the sky is sized to them */}
       <div className={styles.top}>
         <Sky />
 
@@ -395,7 +393,10 @@ export default function Home() {
           </nav>
 
           <a className={styles.navCta} href={DOWNLOAD_URL}>
-            Get MyBuddy
+            <span>Get MyBuddy</span>
+            <i aria-hidden="true">
+              <ArrowUpRight size={16} strokeWidth={2} />
+            </i>
           </a>
         </header>
 

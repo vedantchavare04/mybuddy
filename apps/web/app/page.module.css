@@ -192,17 +192,47 @@
 
 .navCta {
   justify-self: end;
-  padding: 10px 20px;
-  border: 1.5px solid var(--paper);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 5px 5px 20px;
+  background: var(--butter);
+  color: var(--ink);
   border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
+  box-shadow: 0 8px 20px rgba(10, 20, 80, 0.28);
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.navCta i {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
   transition: background-color 0.2s, color 0.2s;
 }
+.navCta i svg {
+  transition: transform 0.2s;
+}
 .navCta:hover {
-  background: var(--paper);
-  color: var(--sky);
+  background: #ffdb6b;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(10, 20, 80, 0.32);
+}
+.navCta:hover i {
+  background: var(--ink);
+  color: var(--paper);
+}
+.navCta:hover i svg {
+  transform: translate(2px, -2px);
+}
+/* the global focus ring is yellow, so use white on the yellow button */
+.page .navCta:focus-visible {
+  outline-color: var(--paper);
 }
 
 
