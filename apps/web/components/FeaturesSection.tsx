@@ -1,31 +1,5 @@
 "use client";
 
-/**
- * MyBuddy · Features Section (bento layout)
- * ─────────────────────────────────────────
- * Desktop (12-col grid, 3 rows):
- *
- *   ┌───────────────────────┬──────────────┐
- *   │                       │  Spider      │
- *   │  Wallpaper (tall)     ├──────────────┤
- *   │                       │  Quick act.  │
- *   ├──────────────┬────────┴──────────────┤
- *   │  Calendar    │  Reminders (wide)     │
- *   └──────────────┴───────────────────────┘
- *
- * The first three cards "hang" from the top edge like the Notch does. The
- * spider card keeps its small interactive scene: the island sits at the top,
- * the spider drops on its thread when the card scrolls into view, and the
- * "Hanging spider" switch pulls it back up, like in the app.
- *
- * Images (public/features/): wallpaper.png, spider-circle.jpg, spider.png,
- * quick-actions.png, calendar.png, reminders.png
- * Sky art (public/): mybuddy-cloud-2.svg  (from the hero)
- *
- * Usage (page.tsx, between the hero and the footer):
- *   <FeaturesSection />
- */
-
 import { useEffect, useRef, useState } from "react";
 import { Bell, CalendarDays, Command, Image as ImageIcon } from "lucide-react";
 
@@ -111,7 +85,6 @@ export default function FeaturesSection() {
           padding: 112px 24px 48px;
           font-family: var(--font-body), system-ui, sans-serif;
         }
-        /* a faint echo of the hero sky behind the heading */
         .ft-sky {
           position: absolute;
           z-index: 0;
@@ -124,7 +97,6 @@ export default function FeaturesSection() {
           pointer-events: none;
         }
 
-        /* ---------- heading ---------- */
         .ft-head {
           position: relative;
           display: grid;
@@ -168,11 +140,10 @@ export default function FeaturesSection() {
         .ft-star.a { top: -26px; right: 36%; width: 26px; color: #ffd24a; }
         .ft-star.b { top: 34px; right: 31%; width: 13px; color: rgba(255, 255, 255, 0.85); }
 
-        /* ---------- bento grid ---------- */
         .ft-grid {
           display: grid;
           grid-template-columns: repeat(12, 1fr);
-          grid-template-rows: 320px 320px 340px;
+          grid-template-rows: 320px 320px 316px;
           gap: 16px;
         }
         .c-wall { grid-column: 1 / 8; grid-row: 1 / 3; }
@@ -196,6 +167,14 @@ export default function FeaturesSection() {
           transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
             box-shadow 0.4s ease;
         }
+        .ft-card::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+        }
         .ft-card h3 {
           margin: 0;
           font-size: 19px;
@@ -208,6 +187,7 @@ export default function FeaturesSection() {
           color: #4a5578;
           font-size: 15px;
           line-height: 1.45;
+          text-wrap: balance;
         }
         @media (hover: hover) {
           .ft-card:hover {
@@ -216,11 +196,11 @@ export default function FeaturesSection() {
           }
         }
 
-        /* card surfaces: one distinct colour each */
         .c-quick { background: #ffd24a; --line: rgba(15, 27, 61, 0.28); --line-2: rgba(15, 27, 61, 0.14); color: #0f1b3d; }
         .c-quick p { color: rgba(15, 27, 61, 0.75); }
         .c-spider { background: #181a21; --line: rgba(255, 255, 255, 0.28); --line-2: rgba(255, 255, 255, 0.12); color: #ffffff; }
         .c-spider p { color: rgba(255, 255, 255, 0.72); }
+        .c-spider::after { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14); }
         .c-rem {
           background: linear-gradient(160deg, #1d3aa3 0%, #14246b 100%);
           --line: rgba(255, 255, 255, 0.3);
@@ -230,7 +210,6 @@ export default function FeaturesSection() {
         .c-rem p { color: rgba(255, 255, 255, 0.78); }
         .c-cal { background: #ffffff; }
 
-        /* copy block: ringed icon + text */
         .ft-copy {
           display: flex;
           align-items: flex-start;
@@ -257,7 +236,6 @@ export default function FeaturesSection() {
           border: 1px solid var(--line-2);
         }
 
-        /* ---------- hanging cards (wallpaper, quick actions) ---------- */
         .ft-hang-vis {
           position: relative;
           flex: 1 1 auto;
@@ -278,12 +256,13 @@ export default function FeaturesSection() {
           filter: drop-shadow(0 12px 18px rgba(10, 20, 80, 0.3));
           transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .ft-card:hover .ft-hang-vis img { transform: translateY(6px); }
+        .ft-hang-vis img { transform-origin: 50% 0; }
+        .ft-card:hover .ft-hang-vis img { transform: scale(1.035); }
 
-        /* wallpaper: a small sky of its own, echoing the hero */
         .c-wall .ft-hang-vis {
           min-height: 340px;
-          background: linear-gradient(180deg, #3f6bdb 0%, #7ea1f0 58%, #c4d6fb 100%);
+          background: linear-gradient(180deg, #7298ee 0%, #8fb0f3 58%, #c4d6fb 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
         }
         .c-wall .ft-hang-vis img { max-width: 520px; }
         .ft-sun {
@@ -295,7 +274,10 @@ export default function FeaturesSection() {
           height: 108px;
           border-radius: 50%;
           background: radial-gradient(circle at 38% 34%, #ffe892, #ffd24a 70%);
-          box-shadow: 0 0 0 14px rgba(255, 210, 74, 0.22), 0 0 0 30px rgba(255, 210, 74, 0.1);
+          box-shadow:
+            0 0 0 14px rgba(255, 255, 255, 0.22),
+            0 0 0 30px rgba(255, 255, 255, 0.1),
+            0 0 44px rgba(255, 226, 140, 0.65);
         }
         .ft-wall-cloud {
           position: absolute;
@@ -314,7 +296,6 @@ export default function FeaturesSection() {
           opacity: 0.9;
         }
 
-        /* quick actions: soft light behind the hanging panel */
         .c-quick .ft-hang-vis {
           background:
             radial-gradient(60% 70% at 50% 0%, rgba(255, 255, 255, 0.6), transparent 70%);
@@ -330,7 +311,6 @@ export default function FeaturesSection() {
           border: 1.5px dashed rgba(15, 27, 61, 0.28);
         }
 
-        /* ---------- spider scene ---------- */
         .ft-desk {
           position: relative;
           flex: 1 1 auto;
@@ -455,7 +435,6 @@ export default function FeaturesSection() {
         .ft-toggle[aria-checked="true"] .ft-switch { background: #8b6df0; }
         .ft-toggle[aria-checked="true"] .ft-switch::after { transform: translateX(12px); }
 
-        /* ---------- framed screenshots (calendar, reminders) ---------- */
         .ft-split {
           flex: 1;
           display: flex;
@@ -503,10 +482,9 @@ export default function FeaturesSection() {
           box-shadow: 0 10px 24px rgba(10, 20, 80, 0.25);
           transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .c-cal .ft-frame img { width: 122%; }
+        .c-cal .ft-frame img { width: 100%; }
         .ft-card:hover .ft-frame img { transform: translateY(-3px); }
 
-        /* ---------- tablet: two columns, hero card on top ---------- */
         @media (max-width: 960px) {
           .ft-section { padding-top: 88px; }
           .ft-head { grid-template-columns: 1fr; margin-bottom: 40px; }
@@ -526,7 +504,6 @@ export default function FeaturesSection() {
           .ft-frame { flex: none; }
         }
 
-        /* ---------- mobile: single column ---------- */
         @media (max-width: 640px) {
           .ft-section { padding: 72px 18px 32px; }
           .ft-grid { grid-template-columns: 1fr; gap: 14px; }
@@ -538,7 +515,6 @@ export default function FeaturesSection() {
           .ft-wall-cloud { width: 320px; }
           .ft-wall-cloud.two { width: 280px; }
           .ft-frame { margin-left: 18px; padding-left: 12px; }
-          .c-cal .ft-frame img { width: 150%; }
           .ft-star.a { right: 6%; top: -30px; }
           .ft-star.b { display: none; }
         }
@@ -575,7 +551,6 @@ export default function FeaturesSection() {
           </header>
 
           <div className="ft-grid">
-            {/* Wallpaper: tall hero card */}
             <article className="ft-card c-wall">
               <div className="ft-hang-vis">
                 <span className="ft-sun" aria-hidden="true" />
@@ -600,7 +575,6 @@ export default function FeaturesSection() {
               </div>
             </article>
 
-            {/* Spider: interactive scene */}
             <article className="ft-card c-spider">
               <div
                 className="ft-desk"
@@ -646,7 +620,6 @@ export default function FeaturesSection() {
               </div>
             </article>
 
-            {/* Quick actions */}
             <article className="ft-card c-quick">
               <div className="ft-hang-vis">
                 <span className="ft-dash" aria-hidden="true" />
@@ -669,7 +642,6 @@ export default function FeaturesSection() {
               </div>
             </article>
 
-            {/* Calendar */}
             <article className="ft-card c-cal">
               <div className="ft-split">
                 <div className="ft-copy">
@@ -698,7 +670,6 @@ export default function FeaturesSection() {
               </div>
             </article>
 
-            {/* Reminders */}
             <article className="ft-card c-rem">
               <div className="ft-split">
                 <div className="ft-copy">
