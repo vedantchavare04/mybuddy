@@ -368,14 +368,16 @@ export default function Home() {
 
         <header className={styles.nav}>
           <a className={styles.brand} href="#top" aria-label="MyBuddy home">
-            <img
-              className={styles.brandMark}
-              src="/mybuddy-mark.svg"
-              alt=""
-              width={32}
-              height={32}
-            />
-            <span>mybuddy</span>
+            <span className={styles.brandTile}>
+              <img
+                className={styles.brandMark}
+                src="/mybuddy-mark.svg"
+                alt=""
+                width={32}
+                height={32}
+              />
+            </span>
+            <span>myBuddy</span>
           </a>
 
           <nav className={styles.navPill} aria-label="Feature preview">
@@ -395,7 +397,7 @@ export default function Home() {
           <a className={styles.navCta} href={DOWNLOAD_URL}>
             <span>Get MyBuddy</span>
             <i aria-hidden="true">
-              <ArrowUpRight size={16} strokeWidth={2} />
+              <ArrowRight size={16} strokeWidth={2.4} />
             </i>
           </a>
         </header>
@@ -540,8 +542,13 @@ export default function Home() {
                       )}
 
                       {open && (
-                        <div className={styles.toast} aria-live="polite">
-                          {preview.detail}
+                        <div
+                          className={styles.toast}
+                          aria-live="polite"
+                          key={slide}
+                        >
+                          <i className={styles.toastDot} aria-hidden="true" />
+                          <span>{preview.detail}</span>
                         </div>
                       )}
 
@@ -562,6 +569,7 @@ export default function Home() {
             <ul className={styles.cards}>
               {previews.map((p, i) => {
                 const Icon = p.icon;
+                const active = i === slide;
                 return (
                   <li
                     key={p.route}
@@ -569,16 +577,27 @@ export default function Home() {
                   >
                     <button
                       type="button"
-                      className={i === slide ? styles.cardActive : undefined}
-                      aria-pressed={i === slide}
+                      className={active ? styles.cardActive : undefined}
+                      aria-pressed={active}
                       onClick={() => chooseSlide(i)}
                     >
                       <span className={styles.cardIcon}>
-                        <Icon size={18} strokeWidth={1.8} />
+                        <Icon size={18} strokeWidth={1.9} />
                       </span>
-                      <span className={styles.cardText}>
+                      <span className={styles.cardBody}>
                         <strong>{p.title}</strong>
                         <small>{p.detail}</small>
+                        <span className={styles.cardPill}>
+                          {active ? (
+                            <>
+                              <Check size={12} strokeWidth={2.8} /> Viewing
+                            </>
+                          ) : (
+                            <>
+                              Preview <ArrowRight size={12} strokeWidth={2.6} />
+                            </>
+                          )}
+                        </span>
                       </span>
                     </button>
                   </li>

@@ -76,6 +76,28 @@
       var(--sky) 100%
     );
 }
+
+/* ---------- Sky gloss (replaces the earlier .sky::before) ---------- */
+.sky::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    /* thin light line along the very top, like a glass edge */
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0, rgba(255, 255, 255, 0) 90px),
+    /* soft specular glow, upper right, away from the headline */
+    radial-gradient(38% 30% at 78% 14%, rgba(255, 255, 255, 0.14), transparent 70%),
+    /* wide diagonal glass sweep, kept to the right half */
+    linear-gradient(
+      115deg,
+      transparent 42%,
+      rgba(255, 255, 255, 0.07) 54%,
+      rgba(255, 255, 255, 0.02) 66%,
+      transparent 76%
+    );
+}
+
 /* restrained paper grain over the whole sky, clouds included */
 .sky::after {
   content: "";
@@ -158,9 +180,61 @@
   letter-spacing: 0.01em;
   text-decoration: none;
 }
+/* ---------- Glossy logo ---------- */
+.brandTile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: linear-gradient(150deg, #8fb0ff 0%, var(--sky) 55%, var(--sky-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -5px 8px rgba(20, 40, 140, 0.25),
+    0 6px 14px rgba(10, 20, 80, 0.3);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* soft sheen across the top half */
+.brandTile::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 1px 3px 50% 3px;
+  border-radius: 8px 8px 12px 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
 .brandMark {
-  width: 32px;
-  height: 32px;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: block;
+  object-fit: contain;
+}
+
+.brand:hover .brandTile {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -5px 8px rgba(20, 40, 140, 0.25),
+    0 10px 18px rgba(10, 20, 80, 0.36);
+}
+
+/* wordmark: a hint of depth, nothing more */
+.brand > span:last-child {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18), 0 2px 10px rgba(10, 20, 80, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand:hover .brandTile {
+    transform: none;
+  }
 }
 
 .navPill {
@@ -185,55 +259,123 @@
 .navPill button:hover {
   background: var(--mist);
 }
-.navPill button.navActive {
-  background: var(--sky);
-  color: var(--paper);
+.navPill button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: background-color 0.2s, box-shadow 0.25s ease, color 0.2s;
 }
 
+.navPill button.navActive {
+  color: var(--paper);
+  background: linear-gradient(180deg, #6f9bff 0%, var(--sky) 50%, var(--sky-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -6px 10px rgba(20, 40, 140, 0.28),
+    0 4px 12px rgba(63, 107, 219, 0.4);
+  text-shadow: 0 1px 1px rgba(10, 20, 80, 0.25);
+}
+
+/* soft sheen across the top half of the active tab */
+.navPill button.navActive::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 1px 8px 50% 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+/* inactive tabs: a faint glass wash on hover instead of flat grey-blue */
+.navPill button:not(.navActive):hover {
+  background: linear-gradient(180deg, #ffffff, var(--mist));
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+/* ---------- Glass CTA ---------- */
 .navCta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   justify-self: end;
   display: inline-flex;
   align-items: center;
   gap: 12px;
   padding: 5px 5px 5px 20px;
-  background: var(--butter);
   color: var(--ink);
-  border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 8px 20px rgba(10, 20, 80, 0.28);
-  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(234, 240, 255, 0.72) 100%
+  );
+  -webkit-backdrop-filter: blur(6px) saturate(1.15);
+  backdrop-filter: blur(6px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -8px 14px rgba(63, 107, 219, 0.14),
+    0 10px 24px rgba(10, 20, 80, 0.28);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
+.navCta::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 1px 10px 52% 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
 .navCta i {
   display: grid;
   place-items: center;
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--paper);
-  color: var(--ink);
-  transition: background-color 0.2s, color 0.2s;
+  color: var(--paper);
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.55), transparent 45%),
+    linear-gradient(150deg, #6f9bff 0%, var(--sky) 55%, var(--sky-deep) 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 0 0 2px var(--butter),
+    0 0 14px rgba(255, 210, 74, 0.65);
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 .navCta i svg {
-  transition: transform 0.2s;
+  transition: transform 0.25s ease;
 }
 .navCta:hover {
-  background: #ffdb6b;
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(10, 20, 80, 0.32);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -8px 14px rgba(63, 107, 219, 0.14),
+    0 16px 30px rgba(10, 20, 80, 0.34);
 }
 .navCta:hover i {
-  background: var(--ink);
-  color: var(--paper);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.7), transparent 45%),
+    linear-gradient(150deg, #ffe27a, var(--butter));
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    0 0 0 2px #fff,
+    0 0 18px rgba(255, 210, 74, 0.85);
 }
 .navCta:hover i svg {
-  transform: translate(2px, -2px);
+  transform: translateX(2px);
 }
-/* the global focus ring is yellow, so use white on the yellow button */
-.page .navCta:focus-visible {
-  outline-color: var(--paper);
+.navCta:active {
+  transform: translateY(0);
 }
+/* butter outline from the global rule stays visible: the pill sits on blue sky */
 
 
 .hero {
@@ -403,13 +545,30 @@
   background-position: center center;
   background-repeat: no-repeat;
 }
+
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 28%,
+    transparent 46%
+  );
+}
+
 .base {
   position: relative;
   height: 24px;
   margin: 0 -26px;
-  background: #c7ccd6;
+  background: linear-gradient(180deg, #e3e7ef 0%, #c7ccd6 60%, #b4bac6 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 18px rgba(10, 20, 80, 0.18);
   border-radius: 2px 2px 26px 26px;
 }
+
 .base::after {
   content: "";
   position: absolute;
@@ -451,13 +610,62 @@
   right: 18px;
   bottom: 58px;
   z-index: 2;
-  max-width: 260px;
-  padding: 12px 14px;
-  background: var(--ink);
+  max-width: 270px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px 12px 14px;
   color: var(--paper);
-  border-radius: 12px;
   font-size: 13px;
+  font-weight: 500;
   line-height: 1.4;
+  letter-spacing: -0.01em;
+  border-radius: 18px;
+  border: 1px solid rgba(160, 190, 255, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(32, 52, 128, 0.92) 0%,
+    rgba(15, 27, 61, 0.94) 100%
+  );
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -8px 14px rgba(63, 107, 219, 0.14),
+    0 12px 24px rgba(10, 20, 80, 0.32);
+  animation: toastIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* soft sheen across the top half */
+.toast::before {
+  content: "";
+  position: absolute;
+  inset: 1px 14px 55% 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+/* small glowing butter dot, echoing the arrow orbs */
+.toastDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b8, var(--butter));
+  box-shadow: 0 0 0 2px rgba(255, 210, 74, 0.25), 0 0 10px rgba(255, 210, 74, 0.7);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .taskbar {
@@ -475,72 +683,153 @@
   height: 22px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .taskbar i:first-child {
   background: #6aa9ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 
-.cards {
-  list-style: none;
-  margin: 28px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+/* ---------- Feature cards (ticket style) ---------- */
+.card {
+  --tint-a: #cfe2ff;
+  --tint-b: #eef5ff;
 }
+.card0 {
+  --tint-a: #ffe39a;
+  --tint-b: #fff7de;
+}
+.card1 {
+  --tint-a: #c9dcff;
+  --tint-b: #eef4ff;
+}
+.card2 {
+  --tint-a: #d8dcff;
+  --tint-b: #f1f2ff;
+}
+
 .card button {
   appearance: none;
+  position: relative;
+  overflow: hidden;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: stretch;
+  padding: 4px 4px 4px 0;
   text-align: left;
-  background: var(--paper);
   color: var(--ink);
-  border: 2px solid transparent;
-  border-radius: 20px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  background: linear-gradient(135deg, var(--tint-a) 0%, var(--tint-b) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  /* real half-circle cut on the left edge, vertically centred */
+  -webkit-mask: radial-gradient(circle 7px at 0 50%, transparent 97%, #000 100%);
+  mask: radial-gradient(circle 7px at 0 50%, transparent 97%, #000 100%);
 }
 .card button:hover {
-  border-color: var(--butter);
+  transform: translateY(-2px);
 }
 .card button.cardActive {
-  border-color: var(--ink);
+  box-shadow:
+    inset 0 0 0 2px var(--ink),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
+/* ticket notch on the left edge */
+.card {
+  filter: drop-shadow(0 14px 18px rgba(10, 20, 80, 0.22));
+  transition: filter 0.25s ease;
+}
+.card:hover {
+  filter: drop-shadow(0 18px 22px rgba(10, 20, 80, 0.28));
+}
+
+
+/* round icon on the tinted strip */
 .cardIcon {
-  flex: none;
+  align-self: start;
+  justify-self: center;
+  margin-top: 14px;
   display: grid;
   place-items: center;
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: var(--mist);
+  border-radius: 50%;
+  background: linear-gradient(150deg, #ffe27a, var(--butter));
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    0 3px 8px rgba(10, 20, 80, 0.18);
+}
+.card1 .cardIcon {
+  background: linear-gradient(150deg, #6f9bff, var(--sky-deep));
+  color: var(--paper);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 3px 8px rgba(10, 20, 80, 0.22);
+}
+.card2 .cardIcon {
+  background: #fff;
   color: var(--sky-deep);
 }
-.cardActive .cardIcon {
-  background: var(--butter);
-  color: var(--ink);
-}
-.cardText {
+
+/* white inner panel */
+.cardBody {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+  padding: 14px 14px 14px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #fff 0%, #fff 55%, var(--tint-b) 135%);
+  box-shadow: 0 0 0 1px rgba(15, 27, 61, 0.04);
 }
-.cardText strong {
-  font-size: 16px;
+.cardBody strong {
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
-.cardText small {
-  font-size: 13.5px;
+.cardBody small {
+  font-size: 12px;
   line-height: 1.4;
-  color: #4a5578;
+  letter-spacing: -0.01em;
+  color: #6b7390;
 }
 
+/* black pill */
+.cardPill {
+  align-self: flex-start;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #0a0a10;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: background-color 0.2s, color 0.2s;
+}
+.cardActive .cardPill {
+  background: var(--butter);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card button:hover {
+    transform: none;
+  }
+}
 
 .footer {
   position: relative;
@@ -654,6 +943,12 @@
   font-size: 12px;
   font-weight: 500;
   text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary:hover {
+    transform: none;
+  }
 }
 
 
