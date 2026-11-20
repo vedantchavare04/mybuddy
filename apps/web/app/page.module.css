@@ -1,7 +1,7 @@
-
 .page {
   --sky: #3f6bdb;
   --sky-deep: #2f56bd;
+  --sky-high: #2a4bad;
   --ink: #0f1b3d;
   --paper: #ffffff;
   --mist: #eaf0ff;
@@ -32,29 +32,128 @@
 }
 
 
+/* ---------- Sky + clouds ----------
+   .top wraps nav + hero so the sky is sized to exactly that area.
+   Cloud artwork: /public/mybuddy-cloud-1.svg, -2.svg, -3.svg          */
+.top {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  overflow: clip;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  --sky-edge-fade: clamp(120px, 16vw, 220px);
+  /* Fade the entire sky layer into .page's solid --sky background. The
+     Features section uses that same background, so the section edge blends. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - var(--sky-edge-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - var(--sky-edge-fade)),
+    transparent 100%
+  );
+  /* deep blue overhead, a little warmth up right, easing back to --sky at the
+     bottom so the hero meets the next section without a seam */
+  background:
+    radial-gradient(52% 34% at 82% 6%, rgba(255, 226, 160, 0.2), transparent 72%),
+    radial-gradient(70% 40% at 8% 34%, rgba(130, 170, 255, 0.28), transparent 72%),
+    linear-gradient(
+      180deg,
+      var(--sky-high) 0%,
+      #3862d1 34%,
+      #5380e4 70%,
+      var(--sky) 100%
+    );
+}
+
+/* ---------- Sky gloss (replaces the earlier .sky::before) ---------- */
+.sky::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    /* thin light line along the very top, like a glass edge */
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0, rgba(255, 255, 255, 0) 90px),
+    /* soft specular glow, upper right, away from the headline */
+    radial-gradient(38% 30% at 78% 14%, rgba(255, 255, 255, 0.14), transparent 70%),
+    /* wide diagonal glass sweep, kept to the right half */
+    linear-gradient(
+      115deg,
+      transparent 42%,
+      rgba(255, 255, 255, 0.07) 54%,
+      rgba(255, 255, 255, 0.02) 66%,
+      transparent 76%
+    );
+}
+
+/* restrained paper grain over the whole sky, clouds included */
+.sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 .cloud {
   position: absolute;
-  pointer-events: none;
-  z-index: 0;
+  display: block;
+  background-repeat: no-repeat;
+  will-change: transform;
 }
 .cloudA {
-  width: 320px;
-  top: 150px;
-  right: -70px;
-  color: var(--paper);
+  background-image: url("/mybuddy-cloud-1.svg");
+  background-size: 100% 100%;
+  width: clamp(460px, 56vw, 900px);
+  aspect-ratio: 1000 / 560;
+  top: 400px;
+  right: -14%;
+  opacity: 0.97;
+  animation: drift 70s ease-in-out infinite alternate;
 }
 .cloudB {
-  width: 240px;
-  top: 470px;
-  left: -80px;
-  color: var(--mist);
+  background-image: url("/mybuddy-cloud-2.svg");
+  background-size: 100% 100%;
+  width: clamp(320px, 38vw, 640px);
+  aspect-ratio: 800 / 440;
+  top: 700px;
+  left: -12%;
+  opacity: 0.92;
+  animation: drift 90s ease-in-out infinite alternate-reverse;
 }
 .cloudC {
-  width: 520px;
-  bottom: -90px;
-  left: 50%;
-  margin-left: -260px;
-  color: var(--paper);
+  background-image: url("/mybuddy-cloud-3.svg");
+  background-size: cover;
+  background-position: center bottom;
+  left: -8%;
+  right: -8%;
+  bottom: -30px;
+  height: clamp(220px, 30vw, 460px);
+  /* melt the bottom of the bank into the page colour */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-28px, 6px, 0);
+  }
 }
 
 
@@ -81,9 +180,61 @@
   letter-spacing: 0.01em;
   text-decoration: none;
 }
+/* ---------- Glossy logo ---------- */
+.brandTile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: linear-gradient(150deg, #8fb0ff 0%, var(--sky) 55%, var(--sky-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -5px 8px rgba(20, 40, 140, 0.25),
+    0 6px 14px rgba(10, 20, 80, 0.3);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* soft sheen across the top half */
+.brandTile::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 1px 3px 50% 3px;
+  border-radius: 8px 8px 12px 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
 .brandMark {
-  width: 32px;
-  height: 32px;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: block;
+  object-fit: contain;
+}
+
+.brand:hover .brandTile {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -5px 8px rgba(20, 40, 140, 0.25),
+    0 10px 18px rgba(10, 20, 80, 0.36);
+}
+
+/* wordmark: a hint of depth, nothing more */
+.brand > span:last-child {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18), 0 2px 10px rgba(10, 20, 80, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand:hover .brandTile {
+    transform: none;
+  }
 }
 
 .navPill {
@@ -108,25 +259,123 @@
 .navPill button:hover {
   background: var(--mist);
 }
-.navPill button.navActive {
-  background: var(--sky);
-  color: var(--paper);
+.navPill button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: background-color 0.2s, box-shadow 0.25s ease, color 0.2s;
 }
 
-.navCta {
-  justify-self: end;
-  padding: 10px 20px;
-  border: 1.5px solid var(--paper);
+.navPill button.navActive {
+  color: var(--paper);
+  background: linear-gradient(180deg, #6f9bff 0%, var(--sky) 50%, var(--sky-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -6px 10px rgba(20, 40, 140, 0.28),
+    0 4px 12px rgba(63, 107, 219, 0.4);
+  text-shadow: 0 1px 1px rgba(10, 20, 80, 0.25);
+}
+
+/* soft sheen across the top half of the active tab */
+.navPill button.navActive::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 1px 8px 50% 8px;
   border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+/* inactive tabs: a faint glass wash on hover instead of flat grey-blue */
+.navPill button:not(.navActive):hover {
+  background: linear-gradient(180deg, #ffffff, var(--mist));
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+/* ---------- Glass CTA ---------- */
+.navCta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 5px 5px 20px;
+  color: var(--ink);
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 0.2s, color 0.2s;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(234, 240, 255, 0.72) 100%
+  );
+  -webkit-backdrop-filter: blur(6px) saturate(1.15);
+  backdrop-filter: blur(6px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -8px 14px rgba(63, 107, 219, 0.14),
+    0 10px 24px rgba(10, 20, 80, 0.28);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.navCta::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 1px 10px 52% 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.navCta i {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--paper);
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.55), transparent 45%),
+    linear-gradient(150deg, #6f9bff 0%, var(--sky) 55%, var(--sky-deep) 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 0 0 2px var(--butter),
+    0 0 14px rgba(255, 210, 74, 0.65);
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.navCta i svg {
+  transition: transform 0.25s ease;
 }
 .navCta:hover {
-  background: var(--paper);
-  color: var(--sky);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -8px 14px rgba(63, 107, 219, 0.14),
+    0 16px 30px rgba(10, 20, 80, 0.34);
 }
+.navCta:hover i {
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.7), transparent 45%),
+    linear-gradient(150deg, #ffe27a, var(--butter));
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    0 0 0 2px #fff,
+    0 0 18px rgba(255, 210, 74, 0.85);
+}
+.navCta:hover i svg {
+  transform: translateX(2px);
+}
+.navCta:active {
+  transform: translateY(0);
+}
+/* butter outline from the global rule stays visible: the pill sits on blue sky */
 
 
 .hero {
@@ -139,22 +388,58 @@
   padding: 40px 32px 64px;
 }
 
+/* ---------- Headline ----------
+   Three voices: a regular-weight lead, a small italic butter aside, and one
+   oversized "Notch." that carries the page. The aside and the copy below it
+   share --indent so the block reads as one staggered composition.       */
 .heroCopy {
-  max-width: 680px;
+  --indent: clamp(0px, 2.6vw, 36px);
+  position: relative;
+  max-width: none;
 }
 
 .heroCopy h1 {
   margin: 0;
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
-  font-size: clamp(48px, 7.4vw, 104px);
-  line-height: 0.96;
+  line-height: 0.9;
   letter-spacing: -0.02em;
-  text-wrap: balance;
+  text-shadow: 0 2px 30px rgba(20, 40, 120, 0.18);
+}
+.hLead {
+  display: block;
+  font-size: clamp(40px, 6.4vw, 92px);
+  line-height: 0.98;
+}
+.hRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.14em;
+  margin-top: -0.02em;
+}
+.hItalic {
+  padding-left: var(--indent);
+  font-style: italic;
+  font-size: clamp(34px, 5vw, 72px);
+  letter-spacing: -0.015em;
+  color: var(--butter);
+}
+.hBig {
+  font-size: clamp(96px, 17vw, 210px);
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+}
+.hDot {
+  font-style: normal;
+  color: var(--butter);
 }
 
 .intro {
-  margin: 28px 0 0;
+  margin: 30px 0 0;
+  margin-left: var(--indent);
   max-width: 46ch;
   font-size: clamp(16px, 1.5vw, 19px);
   line-height: 1.55;
@@ -163,10 +448,16 @@
 
 .heroActions {
   margin-top: 32px;
+  margin-left: var(--indent);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 16px 28px;
+}
+
+/* margin notes: small italic asides, wide screens only */
+.notes {
+  display: none;
 }
 
 .primary {
@@ -248,18 +539,36 @@
   height: 100%;
   overflow: hidden;
   border-radius: 8px;
-  background-color: #d6d9bd;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1050 200'%3E%3Crect width='1050' height='200' fill='%23d6d9bd'/%3E%3Ccircle cx='810' cy='45' r='46' fill='%23f4d993'/%3E%3Cpath d='M0 130 190 40l146 98 133-74 185 136H0Z' fill='%239cae8a'/%3E%3Cpath d='m387 200 229-130 148 91 133-55 153 94H387Z' fill='%23788e77'/%3E%3Cpath d='M0 164q155-45 287 9t256-3q187-50 507 7v23H0Z' fill='%23b8c2a0'/%3E%3C/svg%3E");
+  background-color: #dfe3f5;
+  background-image: url("/mybuddy-wallpaper-desktop.svg");
   background-size: cover;
-  background-position: center bottom;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
+
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 28%,
+    transparent 46%
+  );
+}
+
 .base {
   position: relative;
   height: 24px;
   margin: 0 -26px;
-  background: #c7ccd6;
+  background: linear-gradient(180deg, #e3e7ef 0%, #c7ccd6 60%, #b4bac6 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 18px rgba(10, 20, 80, 0.18);
   border-radius: 2px 2px 26px 26px;
 }
+
 .base::after {
   content: "";
   position: absolute;
@@ -301,13 +610,62 @@
   right: 18px;
   bottom: 58px;
   z-index: 2;
-  max-width: 260px;
-  padding: 12px 14px;
-  background: var(--ink);
+  max-width: 270px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px 12px 14px;
   color: var(--paper);
-  border-radius: 12px;
   font-size: 13px;
+  font-weight: 500;
   line-height: 1.4;
+  letter-spacing: -0.01em;
+  border-radius: 18px;
+  border: 1px solid rgba(160, 190, 255, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(32, 52, 128, 0.92) 0%,
+    rgba(15, 27, 61, 0.94) 100%
+  );
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -8px 14px rgba(63, 107, 219, 0.14),
+    0 12px 24px rgba(10, 20, 80, 0.32);
+  animation: toastIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* soft sheen across the top half */
+.toast::before {
+  content: "";
+  position: absolute;
+  inset: 1px 14px 55% 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+/* small glowing butter dot, echoing the arrow orbs */
+.toastDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b8, var(--butter));
+  box-shadow: 0 0 0 2px rgba(255, 210, 74, 0.25), 0 0 10px rgba(255, 210, 74, 0.7);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .taskbar {
@@ -325,72 +683,153 @@
   height: 22px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .taskbar i:first-child {
   background: #6aa9ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 
-.cards {
-  list-style: none;
-  margin: 28px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+/* ---------- Feature cards (ticket style) ---------- */
+.card {
+  --tint-a: #cfe2ff;
+  --tint-b: #eef5ff;
 }
+.card0 {
+  --tint-a: #ffe39a;
+  --tint-b: #fff7de;
+}
+.card1 {
+  --tint-a: #c9dcff;
+  --tint-b: #eef4ff;
+}
+.card2 {
+  --tint-a: #d8dcff;
+  --tint-b: #f1f2ff;
+}
+
 .card button {
   appearance: none;
+  position: relative;
+  overflow: hidden;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: stretch;
+  padding: 4px 4px 4px 0;
   text-align: left;
-  background: var(--paper);
   color: var(--ink);
-  border: 2px solid transparent;
-  border-radius: 20px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  background: linear-gradient(135deg, var(--tint-a) 0%, var(--tint-b) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  /* real half-circle cut on the left edge, vertically centred */
+  -webkit-mask: radial-gradient(circle 7px at 0 50%, transparent 97%, #000 100%);
+  mask: radial-gradient(circle 7px at 0 50%, transparent 97%, #000 100%);
 }
 .card button:hover {
-  border-color: var(--butter);
+  transform: translateY(-2px);
 }
 .card button.cardActive {
-  border-color: var(--ink);
+  box-shadow:
+    inset 0 0 0 2px var(--ink),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
+/* ticket notch on the left edge */
+.card {
+  filter: drop-shadow(0 14px 18px rgba(10, 20, 80, 0.22));
+  transition: filter 0.25s ease;
+}
+.card:hover {
+  filter: drop-shadow(0 18px 22px rgba(10, 20, 80, 0.28));
+}
+
+
+/* round icon on the tinted strip */
 .cardIcon {
-  flex: none;
+  align-self: start;
+  justify-self: center;
+  margin-top: 14px;
   display: grid;
   place-items: center;
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: var(--mist);
+  border-radius: 50%;
+  background: linear-gradient(150deg, #ffe27a, var(--butter));
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    0 3px 8px rgba(10, 20, 80, 0.18);
+}
+.card1 .cardIcon {
+  background: linear-gradient(150deg, #6f9bff, var(--sky-deep));
+  color: var(--paper);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 3px 8px rgba(10, 20, 80, 0.22);
+}
+.card2 .cardIcon {
+  background: #fff;
   color: var(--sky-deep);
 }
-.cardActive .cardIcon {
-  background: var(--butter);
-  color: var(--ink);
-}
-.cardText {
+
+/* white inner panel */
+.cardBody {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+  padding: 14px 14px 14px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #fff 0%, #fff 55%, var(--tint-b) 135%);
+  box-shadow: 0 0 0 1px rgba(15, 27, 61, 0.04);
 }
-.cardText strong {
-  font-size: 16px;
+.cardBody strong {
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
-.cardText small {
-  font-size: 13.5px;
+.cardBody small {
+  font-size: 12px;
   line-height: 1.4;
-  color: #4a5578;
+  letter-spacing: -0.01em;
+  color: #6b7390;
 }
 
+/* black pill */
+.cardPill {
+  align-self: flex-start;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #0a0a10;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: background-color 0.2s, color 0.2s;
+}
+.cardActive .cardPill {
+  background: var(--butter);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card button:hover {
+    transform: none;
+  }
+}
 
 .footer {
   position: relative;
@@ -506,6 +945,42 @@
   text-decoration: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .primary:hover {
+    transform: none;
+  }
+}
+
+
+/* margin notes, only where there is clear room beside the headline */
+@media (min-width: 1100px) {
+  .notes {
+    display: block;
+    position: absolute;
+    top: 6px;
+    right: 32px;
+    width: 232px;
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-display), Georgia, serif;
+    font-style: italic;
+    font-size: 21px;
+    line-height: 1.22;
+    transform: rotate(2deg);
+    pointer-events: none;
+  }
+  .notes p {
+    margin: 0;
+  }
+  .noteArrow {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 62px;             
+    width: 300px;           
+    height: 100px;
+    overflow: visible;
+    color: var(--butter);
+  }
+}
 
 @media (min-width: 1240px) {
   .cards {
@@ -546,6 +1021,12 @@
   .nav {
     grid-template-columns: 1fr auto;
   }
+  .cloudA {
+    top: 360px;
+  }
+  .cloudB {
+    top: 620px;
+  }
 }
 @media (max-width: 800px) {
   .page {
@@ -561,12 +1042,15 @@
     grid-template-columns: 1fr;
   }
   .cloudA {
-    width: 200px;
-    top: 80px;
-    right: -60px;
+    width: 460px;
+    top: 300px;
+    right: -42%;
   }
   .cloudB {
     display: none;
+  }
+  .cloudC {
+    height: 240px;
   }
 }
 @media (max-width: 640px) {
@@ -579,15 +1063,33 @@
   .heroActions {
     gap: 14px 20px;
   }
+  .hRow {
+    row-gap: 0.1em;
+  }
+  .hItalic {
+    padding-left: 0;
+  }
+  .cloudA {
+    width: 380px;
+    top: 330px;
+    right: -50%;
+  }
+  .cloudC {
+    height: 200px;
+  }
 }
 @media (max-width: 420px) {
   .page {
     --s: 0.38;
+  }
+  .hBig {
+    font-size: clamp(84px, 26vw, 110px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .page * {
     transition: none !important;
+    animation: none !important;
   }
 }
