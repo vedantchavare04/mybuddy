@@ -25,7 +25,7 @@ tauri-plugin-global-shortcut = "2"
 reqwest = { version = "0.13", features = ["json", "form", "query"] }
 tokio = { version = "1", features = ["net", "io-util", "time", "sync", "macros", "rt-multi-thread", "fs"] }
 futures-util = "0.3"
-base64 = "0.22"
+base64 = "0.23"
 sha2 = "0.10"
 rand = "0.8"
 url = "2"
