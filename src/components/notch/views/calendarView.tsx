@@ -16,6 +16,7 @@ import {
   ViewHeader,
   scrollCls,
 } from "./parts";
+import { GoogleButton } from "./googlebutton";
 
 type Props = {
   onBack: () => void;
@@ -65,9 +66,7 @@ export function CalendarView({ onBack, onCollapse, onSchedule }: Props) {
     let title = "Connect Google Calendar";
     let body = "See what's next and schedule events without leaving your desktop.";
     let action: React.ReactNode = (
-      <Button variant="primary" onClick={() => void calendarService.connect()}>
-        Connect
-      </Button>
+      <GoogleButton onClick={() => void calendarService.connect()} />
     );
 
     if (cal.status === "loading") {
